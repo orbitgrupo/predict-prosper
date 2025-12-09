@@ -11,39 +11,40 @@ interface BettingPanelProps {
   market: Market;
 }
 
+type OptionLike = { id: string; option_name: string; total_amount: number };
+
 export function BettingPanel({ market }: BettingPanelProps) {
-  const [selectedOption, setSelectedOption] = useState<'yes' | 'no' | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
   const { user, profile, refreshProfile } = useAuth();
   const placeBet = usePlaceBet();
   const navigate = useNavigate();
 
-  const totalVolume = Number(market.total_yes_amount) + Number(market.total_no_amount);
-  const yesPercentage = totalVolume > 0 
-    ? (Number(market.total_yes_amount) / totalVolume) * 100 
-    : 50;
-  const noPercentage = 100 - yesPercentage;
+  const hasOptions = market.options && market.options.length > 0;
+  const options: OptionLike[] = hasOptions 
+    ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
+    : [
+        { id: 'yes', option_name: 'Sí', total_amount: Number(market.total_yes_amount) },
+        { id: 'no', option_name: 'No', total_amount: Number(market.total_no_amount) }
+      ];
+
+  const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
 
   const betAmount = parseFloat(amount) || 0;
   const potentialPayout = selectedOption 
-    ? calculatePotentialPayout(betAmount, selectedOption, market)
+    ? calculatePotentialPayout(betAmount, selectedOption, options)
     : 0;
 
-  function calculatePotentialPayout(amount: number, option: 'yes' | 'no', market: Market) {
-    const yesTotal = Number(market.total_yes_amount);
-    const noTotal = Number(market.total_no_amount);
+  function calculatePotentialPayout(amount: number, optionName: string, opts: OptionLike[]) {
+    const selectedOpt = opts.find(o => o.option_name === optionName);
+    if (!selectedOpt) return 0;
     
-    if (option === 'yes') {
-      const newYesTotal = yesTotal + amount;
-      const loserPool = noTotal;
-      const winShare = amount / newYesTotal;
-      return amount + (loserPool * winShare);
-    } else {
-      const newNoTotal = noTotal + amount;
-      const loserPool = yesTotal;
-      const winShare = amount / newNoTotal;
-      return amount + (loserPool * winShare);
-    }
+    const currentTotal = selectedOpt.total_amount;
+    const newTotal = currentTotal + amount;
+    const loserPool = totalVolume - currentTotal;
+    const winShare = newTotal > 0 ? amount / newTotal : 0;
+    
+    return amount + (loserPool * winShare);
   }
 
   const handlePlaceBet = async () => {
@@ -102,31 +103,38 @@ export function BettingPanel({ market }: BettingPanelProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Option buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            variant={selectedOption === 'yes' ? 'default' : 'outline'}
-            className={`h-16 flex-col gap-1 ${
-              selectedOption === 'yes' 
-                ? 'bg-yes hover:bg-yes/90 text-yes-foreground' 
-                : 'hover:border-yes hover:text-yes'
-            }`}
-            onClick={() => setSelectedOption('yes')}
-          >
-            <span className="text-lg font-bold">Sí</span>
-            <span className="text-xs opacity-80">{yesPercentage.toFixed(1)}%</span>
-          </Button>
-          <Button
-            variant={selectedOption === 'no' ? 'default' : 'outline'}
-            className={`h-16 flex-col gap-1 ${
-              selectedOption === 'no' 
-                ? 'bg-no hover:bg-no/90 text-no-foreground' 
-                : 'hover:border-no hover:text-no'
-            }`}
-            onClick={() => setSelectedOption('no')}
-          >
-            <span className="text-lg font-bold">No</span>
-            <span className="text-xs opacity-80">{noPercentage.toFixed(1)}%</span>
-          </Button>
+        <div className={`grid gap-3 ${options.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {options.map((option) => {
+            const percentage = totalVolume > 0 
+              ? (option.total_amount / totalVolume) * 100 
+              : 100 / options.length;
+            const isYes = option.option_name.toLowerCase() === 'sí' || option.option_name.toLowerCase() === 'yes';
+            const isNo = option.option_name.toLowerCase() === 'no';
+            
+            return (
+              <Button
+                key={option.id}
+                variant={selectedOption === option.option_name ? 'default' : 'outline'}
+                className={`h-16 flex-col gap-1 ${
+                  selectedOption === option.option_name
+                    ? isYes
+                      ? 'bg-yes hover:bg-yes/90 text-yes-foreground'
+                      : isNo
+                      ? 'bg-no hover:bg-no/90 text-no-foreground'
+                      : ''
+                    : isYes
+                    ? 'hover:border-yes hover:text-yes'
+                    : isNo
+                    ? 'hover:border-no hover:text-no'
+                    : ''
+                }`}
+                onClick={() => setSelectedOption(option.option_name)}
+              >
+                <span className="text-lg font-bold">{option.option_name}</span>
+                <span className="text-xs opacity-80">{percentage.toFixed(1)}%</span>
+              </Button>
+            );
+          })}
         </div>
 
         {/* Amount input */}
@@ -176,7 +184,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
               </span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Si gana "{selectedOption === 'yes' ? 'Sí' : 'No'}"</span>
+              <span>Si gana "{selectedOption}"</span>
               <span>+{((potentialPayout / betAmount - 1) * 100).toFixed(0)}%</span>
             </div>
           </div>

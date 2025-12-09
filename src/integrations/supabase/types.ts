@@ -58,6 +58,38 @@ export type Database = {
           },
         ]
       }
+      market_options: {
+        Row: {
+          created_at: string
+          id: string
+          market_id: string
+          option_name: string
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          market_id: string
+          option_name: string
+          total_amount?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          market_id?: string
+          option_name?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_options_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markets: {
         Row: {
           category: string | null

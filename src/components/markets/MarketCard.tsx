@@ -10,12 +10,30 @@ interface MarketCardProps {
   market: Market;
 }
 
+type OptionLike = { id: string; option_name: string; total_amount: number };
+
 export function MarketCard({ market }: MarketCardProps) {
-  const totalVolume = Number(market.total_yes_amount) + Number(market.total_no_amount);
-  const yesPercentage = totalVolume > 0 
-    ? (Number(market.total_yes_amount) / totalVolume) * 100 
+  const hasOptions = market.options && market.options.length > 0;
+  const options: OptionLike[] = hasOptions 
+    ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
+    : [
+        { id: 'yes', option_name: 'Sí', total_amount: Number(market.total_yes_amount) },
+        { id: 'no', option_name: 'No', total_amount: Number(market.total_no_amount) }
+      ];
+  
+  const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
+  const topTwoOptions = [...options]
+    .sort((a, b) => b.total_amount - a.total_amount)
+    .slice(0, 2);
+  
+  const option1 = topTwoOptions[0];
+  const option2 = topTwoOptions[1];
+  const option1Percentage = totalVolume > 0 
+    ? (option1?.total_amount || 0) / totalVolume * 100 
     : 50;
-  const noPercentage = 100 - yesPercentage;
+  const option2Percentage = totalVolume > 0 
+    ? (option2?.total_amount || 0) / totalVolume * 100 
+    : 50;
 
   const isExpired = new Date(market.closes_at) < new Date();
   const statusLabel = market.status === 'resolved' 
@@ -71,17 +89,29 @@ export function MarketCard({ market }: MarketCardProps) {
           {/* Probability bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm font-medium">
-              <span className="text-yes">Sí {yesPercentage.toFixed(0)}%</span>
-              <span className="text-no">No {noPercentage.toFixed(0)}%</span>
+              <span className={option1?.option_name.toLowerCase() === 'sí' || option1?.option_name.toLowerCase() === 'yes' ? 'text-yes' : ''}>
+                {option1?.option_name} {option1Percentage.toFixed(0)}%
+              </span>
+              <span className={option2?.option_name.toLowerCase() === 'no' ? 'text-no' : ''}>
+                {option2?.option_name} {option2Percentage.toFixed(0)}%
+              </span>
             </div>
             <div className="flex h-3 overflow-hidden rounded-full bg-secondary">
               <div 
-                className="bg-yes transition-all duration-500"
-                style={{ width: `${yesPercentage}%` }}
+                className={`transition-all duration-500 ${
+                  option1?.option_name.toLowerCase() === 'sí' || option1?.option_name.toLowerCase() === 'yes'
+                    ? 'bg-yes'
+                    : 'bg-primary'
+                }`}
+                style={{ width: `${option1Percentage}%` }}
               />
               <div 
-                className="bg-no transition-all duration-500"
-                style={{ width: `${noPercentage}%` }}
+                className={`transition-all duration-500 ${
+                  option2?.option_name.toLowerCase() === 'no'
+                    ? 'bg-no'
+                    : 'bg-secondary-foreground'
+                }`}
+                style={{ width: `${option2Percentage}%` }}
               />
             </div>
           </div>
