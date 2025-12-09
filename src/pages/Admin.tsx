@@ -57,6 +57,7 @@ export default function Admin() {
     description: '',
     category: '',
     closes_at: '',
+    image_url: '',
   });
 
   // Resolve market
@@ -119,6 +120,7 @@ export default function Admin() {
         category: newMarket.category || null,
         closes_at: new Date(newMarket.closes_at).toISOString(),
         created_by: user?.id,
+        image_url: newMarket.image_url || null,
       });
 
       if (error) throw error;
@@ -129,7 +131,7 @@ export default function Admin() {
       });
       
       setCreateDialogOpen(false);
-      setNewMarket({ title: '', description: '', category: '', closes_at: '' });
+      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '' });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({
@@ -320,7 +322,17 @@ export default function Admin() {
                     onChange={(e) => setNewMarket({ ...newMarket, closes_at: e.target.value })}
                   />
                 </div>
-                <Button 
+                <div className="space-y-2">
+                  <Label htmlFor="image_url">URL de imagen</Label>
+                  <Input
+                    id="image_url"
+                    type="url"
+                    value={newMarket.image_url}
+                    onChange={(e) => setNewMarket({ ...newMarket, image_url: e.target.value })}
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                  />
+                </div>
+                <Button
                   className="w-full" 
                   onClick={handleCreateMarket}
                   disabled={creating}

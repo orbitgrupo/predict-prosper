@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, TrendingUp, Users } from 'lucide-react';
+import { Clock, TrendingUp, ImageIcon } from 'lucide-react';
 import { Market } from '@/hooks/useMarkets';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -28,7 +28,21 @@ export function MarketCard({ market }: MarketCardProps) {
 
   return (
     <Link to={`/market/${market.id}`}>
-      <Card className="group h-full transition-all hover:shadow-lg hover:border-primary/20">
+      <Card className="group h-full transition-all hover:shadow-lg hover:border-primary/20 overflow-hidden">
+        {/* Market image */}
+        {market.image_url ? (
+          <div className="aspect-[16/9] w-full overflow-hidden">
+            <img 
+              src={market.image_url} 
+              alt={market.title}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+        ) : (
+          <div className="aspect-[16/9] w-full bg-muted flex items-center justify-center">
+            <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
+          </div>
+        )}
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-display text-lg font-semibold leading-tight group-hover:text-primary transition-colors">
