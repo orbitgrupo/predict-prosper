@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, TrendingUp, Users, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, Users, Loader2, ImageIcon } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -66,6 +66,21 @@ export default function MarketDetail() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Market image */}
+            {market.image_url ? (
+              <div className="aspect-[16/9] w-full overflow-hidden rounded-xl">
+                <img 
+                  src={market.image_url} 
+                  alt={market.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="aspect-[16/9] w-full bg-muted rounded-xl flex items-center justify-center">
+                <ImageIcon className="h-16 w-16 text-muted-foreground/40" />
+              </div>
+            )}
+
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 {market.category && (
