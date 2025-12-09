@@ -46,11 +46,23 @@ export default function MarketDetail() {
     );
   }
 
-  const totalVolume = Number(market.total_yes_amount) + Number(market.total_no_amount);
-  const yesPercentage = totalVolume > 0 
-    ? (Number(market.total_yes_amount) / totalVolume) * 100 
-    : 50;
-  const noPercentage = 100 - yesPercentage;
+  type OptionLike = { id: string; option_name: string; total_amount: number };
+  
+  const hasOptions = market.options && market.options.length > 0;
+  const options: OptionLike[] = hasOptions 
+    ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
+    : [
+        { id: 'yes', option_name: 'Sí', total_amount: Number(market.total_yes_amount) },
+        { id: 'no', option_name: 'No', total_amount: Number(market.total_no_amount) }
+      ];
+  
+  const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
+  const topOption = options.reduce((max, opt) => 
+    opt.total_amount > max.total_amount ? opt : max, options[0]);
+  const topPercentage = totalVolume > 0 
+    ? (topOption?.total_amount || 0) / totalVolume * 100 
+    : 0;
+  
   const isExpired = new Date(market.closes_at) < new Date();
 
   return (
@@ -116,23 +128,33 @@ export default function MarketDetail() {
                 <CardTitle className="text-lg">Probabilidad actual</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between text-lg font-bold">
-                  <span className="text-yes">Sí {yesPercentage.toFixed(1)}%</span>
-                  <span className="text-no">No {noPercentage.toFixed(1)}%</span>
-                </div>
-                <div className="flex h-6 overflow-hidden rounded-full bg-secondary">
-                  <div 
-                    className="bg-yes transition-all duration-500 flex items-center justify-center text-xs font-medium text-yes-foreground"
-                    style={{ width: `${yesPercentage}%` }}
-                  >
-                    {yesPercentage > 15 && `${yesPercentage.toFixed(0)}%`}
-                  </div>
-                  <div 
-                    className="bg-no transition-all duration-500 flex items-center justify-center text-xs font-medium text-no-foreground"
-                    style={{ width: `${noPercentage}%` }}
-                  >
-                    {noPercentage > 15 && `${noPercentage.toFixed(0)}%`}
-                  </div>
+                <div className="space-y-2">
+                  {options.map((option) => {
+                    const percentage = totalVolume > 0 
+                      ? (option.total_amount / totalVolume) * 100 
+                      : 100 / options.length;
+                    const isYes = option.option_name.toLowerCase() === 'sí' || option.option_name.toLowerCase() === 'yes';
+                    const isNo = option.option_name.toLowerCase() === 'no';
+                    
+                    return (
+                      <div key={option.id} className="space-y-1">
+                        <div className="flex justify-between text-sm font-medium">
+                          <span className={isYes ? 'text-yes' : isNo ? 'text-no' : ''}>
+                            {option.option_name}
+                          </span>
+                          <span className="font-bold">{percentage.toFixed(1)}%</span>
+                        </div>
+                        <div className="h-3 overflow-hidden rounded-full bg-secondary">
+                          <div 
+                            className={`h-full transition-all duration-500 ${
+                              isYes ? 'bg-yes' : isNo ? 'bg-no' : 'bg-primary'
+                            }`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -158,13 +180,13 @@ export default function MarketDetail() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yes/10">
-                      <Users className="h-5 w-5 text-yes" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Users className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Apuestas "Sí"</p>
+                      <p className="text-sm text-muted-foreground">Líder</p>
                       <p className="font-display text-xl font-bold">
-                        ${Number(market.total_yes_amount).toLocaleString('es-ES')}
+                        {topOption?.option_name} ({topPercentage.toFixed(0)}%)
                       </p>
                     </div>
                   </div>
@@ -174,13 +196,13 @@ export default function MarketDetail() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-no/10">
-                      <Users className="h-5 w-5 text-no" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                      <TrendingUp className="h-5 w-5 text-success" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Apuestas "No"</p>
+                      <p className="text-sm text-muted-foreground">Opciones</p>
                       <p className="font-display text-xl font-bold">
-                        ${Number(market.total_no_amount).toLocaleString('es-ES')}
+                        {options.length}
                       </p>
                     </div>
                   </div>
@@ -203,9 +225,15 @@ export default function MarketDetail() {
                       >
                         <div className="flex items-center gap-3">
                           <Badge 
-                            className={bet.option === 'yes' ? 'bg-yes' : 'bg-no'}
+                            className={
+                              bet.option.toLowerCase() === 'yes' || bet.option.toLowerCase() === 'sí'
+                                ? 'bg-yes'
+                                : bet.option.toLowerCase() === 'no'
+                                ? 'bg-no'
+                                : ''
+                            }
                           >
-                            {bet.option === 'yes' ? 'Sí' : 'No'}
+                            {bet.option}
                           </Badge>
                           <div>
                             <p className="font-medium">${Number(bet.amount).toFixed(2)}</p>

@@ -58,13 +58,14 @@ export default function Admin() {
     category: '',
     closes_at: '',
     image_url: '',
+    options: ['', ''],
   });
 
   // Resolve market
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [marketToResolve, setMarketToResolve] = useState<Market | null>(null);
-  const [resolveOption, setResolveOption] = useState<'yes' | 'no' | null>(null);
+  const [resolveOption, setResolveOption] = useState<string | null>(null);
 
   // Stats
   const [stats, setStats] = useState({
@@ -112,18 +113,44 @@ export default function Admin() {
       return;
     }
 
+    const validOptions = newMarket.options.filter(opt => opt.trim() !== '');
+    if (validOptions.length < 2) {
+      toast({
+        title: 'Error',
+        description: 'Debes agregar al menos 2 opciones.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setCreating(true);
     try {
-      const { error } = await supabase.from('markets').insert({
-        title: newMarket.title,
-        description: newMarket.description || null,
-        category: newMarket.category || null,
-        closes_at: new Date(newMarket.closes_at).toISOString(),
-        created_by: user?.id,
-        image_url: newMarket.image_url || null,
-      });
+      const { data: marketData, error: marketError } = await supabase
+        .from('markets')
+        .insert({
+          title: newMarket.title,
+          description: newMarket.description || null,
+          category: newMarket.category || null,
+          closes_at: new Date(newMarket.closes_at).toISOString(),
+          created_by: user?.id,
+          image_url: newMarket.image_url || null,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (marketError) throw marketError;
+
+      // Insert options
+      const optionsToInsert = validOptions.map(option => ({
+        market_id: marketData.id,
+        option_name: option.trim(),
+      }));
+
+      const { error: optionsError } = await supabase
+        .from('market_options')
+        .insert(optionsToInsert);
+
+      if (optionsError) throw optionsError;
 
       toast({
         title: 'Mercado creado',
@@ -131,7 +158,7 @@ export default function Admin() {
       });
       
       setCreateDialogOpen(false);
-      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '' });
+      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''] });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({
@@ -168,8 +195,8 @@ export default function Admin() {
 
       if (betsError) throw betsError;
 
-      const winningBets = bets?.filter(b => b.option === resolveOption) || [];
-      const losingBets = bets?.filter(b => b.option !== resolveOption) || [];
+      const winningBets = bets?.filter(b => b.option.toLowerCase() === resolveOption.toLowerCase()) || [];
+      const losingBets = bets?.filter(b => b.option.toLowerCase() !== resolveOption.toLowerCase()) || [];
       
       const totalWinning = winningBets.reduce((acc, b) => acc + Number(b.amount), 0);
       const totalLosing = losingBets.reduce((acc, b) => acc + Number(b.amount), 0);
@@ -220,7 +247,7 @@ export default function Admin() {
 
       toast({
         title: 'Mercado resuelto',
-        description: `El mercado se ha resuelto como "${resolveOption === 'yes' ? 'Sí' : 'No'}".`,
+        description: `El mercado se ha resuelto como "${resolveOption}".`,
       });
 
       setResolveDialogOpen(false);
@@ -331,6 +358,46 @@ export default function Admin() {
                     onChange={(e) => setNewMarket({ ...newMarket, image_url: e.target.value })}
                     placeholder="https://ejemplo.com/imagen.jpg"
                   />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Opciones de respuesta *</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setNewMarket({ ...newMarket, options: [...newMarket.options, ''] })}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Agregar opción
+                    </Button>
+                  </div>
+                  {newMarket.options.map((option, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={option}
+                        onChange={(e) => {
+                          const newOptions = [...newMarket.options];
+                          newOptions[index] = e.target.value;
+                          setNewMarket({ ...newMarket, options: newOptions });
+                        }}
+                        placeholder={`Opción ${index + 1}`}
+                      />
+                      {newMarket.options.length > 2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            const newOptions = newMarket.options.filter((_, i) => i !== index);
+                            setNewMarket({ ...newMarket, options: newOptions });
+                          }}
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
                 </div>
                 <Button
                   className="w-full" 
@@ -507,30 +574,46 @@ export default function Admin() {
                 </p>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant={resolveOption === 'yes' ? 'default' : 'outline'}
-                    className={`h-16 flex-col gap-1 ${
-                      resolveOption === 'yes' 
-                        ? 'bg-yes hover:bg-yes/90' 
-                        : 'hover:border-yes hover:text-yes'
-                    }`}
-                    onClick={() => setResolveOption('yes')}
-                  >
-                    <CheckCircle className="h-5 w-5" />
-                    <span>Sí</span>
-                  </Button>
-                  <Button
-                    variant={resolveOption === 'no' ? 'default' : 'outline'}
-                    className={`h-16 flex-col gap-1 ${
-                      resolveOption === 'no' 
-                        ? 'bg-no hover:bg-no/90' 
-                        : 'hover:border-no hover:text-no'
-                    }`}
-                    onClick={() => setResolveOption('no')}
-                  >
-                    <XCircle className="h-5 w-5" />
-                    <span>No</span>
-                  </Button>
+                  {marketToResolve.options && marketToResolve.options.length > 0 ? (
+                    marketToResolve.options.map((option) => (
+                      <Button
+                        key={option.id}
+                        variant={resolveOption === option.option_name ? 'default' : 'outline'}
+                        className="h-16 flex-col gap-1"
+                        onClick={() => setResolveOption(option.option_name)}
+                      >
+                        <CheckCircle className="h-5 w-5" />
+                        <span>{option.option_name}</span>
+                      </Button>
+                    ))
+                  ) : (
+                    <>
+                      <Button
+                        variant={resolveOption === 'yes' ? 'default' : 'outline'}
+                        className={`h-16 flex-col gap-1 ${
+                          resolveOption === 'yes' 
+                            ? 'bg-yes hover:bg-yes/90' 
+                            : 'hover:border-yes hover:text-yes'
+                        }`}
+                        onClick={() => setResolveOption('yes')}
+                      >
+                        <CheckCircle className="h-5 w-5" />
+                        <span>Sí</span>
+                      </Button>
+                      <Button
+                        variant={resolveOption === 'no' ? 'default' : 'outline'}
+                        className={`h-16 flex-col gap-1 ${
+                          resolveOption === 'no' 
+                            ? 'bg-no hover:bg-no/90' 
+                            : 'hover:border-no hover:text-no'
+                        }`}
+                        onClick={() => setResolveOption('no')}
+                      >
+                        <XCircle className="h-5 w-5" />
+                        <span>No</span>
+                      </Button>
+                    </>
+                  )}
                 </div>
 
                 <Button 

@@ -2,6 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+export interface MarketOption {
+  id: string;
+  market_id: string;
+  option_name: string;
+  total_amount: number;
+  created_at: string;
+}
+
 export interface Market {
   id: string;
   title: string;
@@ -16,13 +24,14 @@ export interface Market {
   created_at: string;
   updated_at: string;
   image_url: string | null;
+  options?: MarketOption[];
 }
 
 export interface Bet {
   id: string;
   user_id: string;
   market_id: string;
-  option: 'yes' | 'no';
+  option: string;
   amount: number;
   potential_payout: number | null;
   is_winner: boolean | null;
@@ -36,9 +45,12 @@ export function useMarkets() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('markets')
-        .select('*')
+        .select(`
+          *,
+          options:market_options(*)
+        `)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Market[];
     },
@@ -51,7 +63,10 @@ export function useMarket(id: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('markets')
-        .select('*')
+        .select(`
+          *,
+          options:market_options(*)
+        `)
         .eq('id', id)
         .maybeSingle();
       
@@ -94,7 +109,7 @@ export function usePlaceBet() {
     }: { 
       marketId: string; 
       userId: string; 
-      option: 'yes' | 'no'; 
+      option: string; 
       amount: number;
     }) => {
       // Get current profile balance
