@@ -35,7 +35,8 @@ import {
   DollarSign,
   CheckCircle,
   XCircle,
-  Settings
+  Settings,
+  Pencil
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -59,6 +60,19 @@ export default function Admin() {
     closes_at: '',
     image_url: '',
     options: ['', ''],
+  });
+
+  // Edit market form
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [marketToEdit, setMarketToEdit] = useState<Market | null>(null);
+  const [editMarket, setEditMarket] = useState({
+    title: '',
+    description: '',
+    category: '',
+    closes_at: '',
+    image_url: '',
+    options: [] as { id?: string; option_name: string }[],
   });
 
   // Resolve market
@@ -168,6 +182,107 @@ export default function Admin() {
       });
     } finally {
       setCreating(false);
+    }
+  };
+
+  const openEditDialog = (market: Market) => {
+    setMarketToEdit(market);
+    setEditMarket({
+      title: market.title,
+      description: market.description || '',
+      category: market.category || '',
+      closes_at: market.closes_at ? new Date(market.closes_at).toISOString().slice(0, 16) : '',
+      image_url: market.image_url || '',
+      options: market.options?.map(o => ({ id: o.id, option_name: o.option_name })) || [],
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditMarket = async () => {
+    if (!marketToEdit || !editMarket.title || !editMarket.closes_at) {
+      toast({
+        title: 'Error',
+        description: 'Título y fecha de cierre son requeridos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const validOptions = editMarket.options.filter(opt => opt.option_name.trim() !== '');
+    if (validOptions.length < 2) {
+      toast({
+        title: 'Error',
+        description: 'Debes tener al menos 2 opciones.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setEditing(true);
+    try {
+      // Update market
+      const { error: marketError } = await supabase
+        .from('markets')
+        .update({
+          title: editMarket.title,
+          description: editMarket.description || null,
+          category: editMarket.category || null,
+          closes_at: new Date(editMarket.closes_at).toISOString(),
+          image_url: editMarket.image_url || null,
+        })
+        .eq('id', marketToEdit.id);
+
+      if (marketError) throw marketError;
+
+      // Get existing option IDs
+      const existingOptionIds = marketToEdit.options?.map(o => o.id) || [];
+      const updatedOptionIds = validOptions.filter(o => o.id).map(o => o.id!);
+      
+      // Delete removed options
+      const optionsToDelete = existingOptionIds.filter(id => !updatedOptionIds.includes(id));
+      if (optionsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('market_options')
+          .delete()
+          .in('id', optionsToDelete);
+        if (deleteError) throw deleteError;
+      }
+
+      // Update existing options and insert new ones
+      for (const option of validOptions) {
+        if (option.id) {
+          // Update existing
+          await supabase
+            .from('market_options')
+            .update({ option_name: option.option_name.trim() })
+            .eq('id', option.id);
+        } else {
+          // Insert new
+          await supabase
+            .from('market_options')
+            .insert({
+              market_id: marketToEdit.id,
+              option_name: option.option_name.trim(),
+            });
+        }
+      }
+
+      toast({
+        title: 'Mercado actualizado',
+        description: 'El mercado se ha actualizado correctamente.',
+      });
+      
+      setEditDialogOpen(false);
+      setMarketToEdit(null);
+      queryClient.invalidateQueries({ queryKey: ['markets'] });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setEditing(false);
     }
   };
 
@@ -299,11 +414,11 @@ export default function Admin() {
                 Crear mercado
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[85vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Crear nuevo mercado</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 pt-4">
+              <div className="space-y-4 pt-4 overflow-y-auto flex-1 pr-2">
                 <div className="space-y-2">
                   <Label htmlFor="title">Título *</Label>
                   <Input
@@ -497,15 +612,24 @@ export default function Admin() {
                           Volumen: ${(Number(market.total_yes_amount) + Number(market.total_no_amount)).toLocaleString('es-ES')}
                         </p>
                       </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setMarketToResolve(market);
-                          setResolveDialogOpen(true);
-                        }}
-                      >
-                        Resolver
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => openEditDialog(market)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setMarketToResolve(market);
+                            setResolveDialogOpen(true);
+                          }}
+                        >
+                          Resolver
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -632,6 +756,126 @@ export default function Admin() {
                 </Button>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Editar mercado</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4 overflow-y-auto flex-1 pr-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Título *</Label>
+                <Input
+                  id="edit-title"
+                  value={editMarket.title}
+                  onChange={(e) => setEditMarket({ ...editMarket, title: e.target.value })}
+                  placeholder="¿Ganará el equipo X el campeonato?"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Descripción</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editMarket.description}
+                  onChange={(e) => setEditMarket({ ...editMarket, description: e.target.value })}
+                  placeholder="Detalles adicionales sobre el evento..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Categoría</Label>
+                <Select
+                  value={editMarket.category}
+                  onValueChange={(value) => setEditMarket({ ...editMarket, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-closes_at">Fecha de cierre *</Label>
+                <Input
+                  id="edit-closes_at"
+                  type="datetime-local"
+                  value={editMarket.closes_at}
+                  onChange={(e) => setEditMarket({ ...editMarket, closes_at: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-image_url">URL de imagen</Label>
+                <Input
+                  id="edit-image_url"
+                  type="url"
+                  value={editMarket.image_url}
+                  onChange={(e) => setEditMarket({ ...editMarket, image_url: e.target.value })}
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Opciones de respuesta *</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditMarket({ ...editMarket, options: [...editMarket.options, { option_name: '' }] })}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Agregar opción
+                  </Button>
+                </div>
+                {editMarket.options.map((option, index) => (
+                  <div key={option.id || `new-${index}`} className="flex gap-2">
+                    <Input
+                      value={option.option_name}
+                      onChange={(e) => {
+                        const newOptions = [...editMarket.options];
+                        newOptions[index] = { ...newOptions[index], option_name: e.target.value };
+                        setEditMarket({ ...editMarket, options: newOptions });
+                      }}
+                      placeholder={`Opción ${index + 1}`}
+                    />
+                    {editMarket.options.length > 2 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          const newOptions = editMarket.options.filter((_, i) => i !== index);
+                          setEditMarket({ ...editMarket, options: newOptions });
+                        }}
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button
+                className="w-full" 
+                onClick={handleEditMarket}
+                disabled={editing}
+              >
+                {editing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  'Guardar cambios'
+                )}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </main>
