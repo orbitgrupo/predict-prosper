@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserManagement } from '@/components/admin/UserManagement';
 import {
   Dialog,
   DialogContent,
@@ -580,11 +581,18 @@ export default function Admin() {
           </Card>
         </div>
 
-        {/* Markets tabs */}
-        <Tabs defaultValue="active">
+        {/* Main tabs */}
+        <Tabs defaultValue="markets">
           <TabsList>
-            <TabsTrigger value="active">Activos ({activeMarkets.length})</TabsTrigger>
-            <TabsTrigger value="resolved">Resueltos ({resolvedMarkets.length})</TabsTrigger>
+            <TabsTrigger value="markets">Mercados</TabsTrigger>
+            <TabsTrigger value="users">Usuarios</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="markets" className="mt-6">
+            <Tabs defaultValue="active">
+              <TabsList>
+                <TabsTrigger value="active">Activos ({activeMarkets.length})</TabsTrigger>
+                <TabsTrigger value="resolved">Resueltos ({resolvedMarkets.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="mt-6">
@@ -680,8 +688,14 @@ export default function Admin() {
                 </h3>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        <TabsContent value="users" className="mt-6">
+          <UserManagement />
+        </TabsContent>
+      </Tabs>
 
         {/* Resolve dialog */}
         <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
