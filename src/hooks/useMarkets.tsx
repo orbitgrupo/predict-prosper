@@ -112,77 +112,21 @@ export function usePlaceBet() {
       option: string; 
       amount: number;
     }) => {
-      // Get current profile balance
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('balance')
-        .eq('id', userId)
-        .single();
+      // Use atomic server-side function for betting
+      const { data, error } = await supabase.rpc('place_bet', {
+        p_user_id: userId,
+        p_market_id: marketId,
+        p_option: option,
+        p_amount: amount,
+      });
 
-      if (profileError) throw profileError;
+      if (error) throw error;
       
-      const currentBalance = Number(profile.balance);
-      if (currentBalance < amount) {
-        throw new Error('Saldo insuficiente');
+      const result = data as { success: boolean; error?: string; bet_id?: string };
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al realizar la apuesta');
       }
-
-      // Get current market totals
-      const { data: market, error: marketError } = await supabase
-        .from('markets')
-        .select('total_yes_amount, total_no_amount, status')
-        .eq('id', marketId)
-        .single();
-
-      if (marketError) throw marketError;
-      if (market.status !== 'active') {
-        throw new Error('Este mercado ya no está activo');
-      }
-
-      // Place the bet
-      const { error: betError } = await supabase
-        .from('bets')
-        .insert({
-          user_id: userId,
-          market_id: marketId,
-          option,
-          amount,
-        });
-
-      if (betError) throw betError;
-
-      // Update user balance
-      const { error: balanceError } = await supabase
-        .from('profiles')
-        .update({ balance: currentBalance - amount })
-        .eq('id', userId);
-
-      if (balanceError) throw balanceError;
-
-      // Update market totals
-      const updateField = option === 'yes' ? 'total_yes_amount' : 'total_no_amount';
-      const currentTotal = option === 'yes' 
-        ? Number(market.total_yes_amount) 
-        : Number(market.total_no_amount);
-
-      const { error: marketUpdateError } = await supabase
-        .from('markets')
-        .update({ [updateField]: currentTotal + amount })
-        .eq('id', marketId);
-
-      if (marketUpdateError) throw marketUpdateError;
-
-      // Record transaction
-      const { error: txError } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: userId,
-          type: 'bet',
-          amount: -amount,
-          description: `Apuesta en mercado: ${option.toUpperCase()}`,
-          market_id: marketId,
-        });
-
-      if (txError) throw txError;
 
       return true;
     },
