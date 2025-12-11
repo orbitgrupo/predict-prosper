@@ -19,6 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Loader2, 
@@ -62,11 +70,15 @@ interface Bet {
   } | null;
 }
 
+const USERS_PER_PAGE = 10;
+
 export function UserManagement() {
   const { toast } = useToast();
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   
   // Add funds dialog
   const [fundsDialogOpen, setFundsDialogOpen] = useState(false);
@@ -84,14 +96,24 @@ export function UserManagement() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    const from = (currentPage - 1) * USERS_PER_PAGE;
+    const to = from + USERS_PER_PAGE - 1;
+
+    let query = supabase
       .from('profiles')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false });
+
+    if (searchTerm) {
+      query = query.or(`email.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
+    }
+
+    const { data, error, count } = await query.range(from, to);
     
     if (error) {
       toast({
@@ -101,6 +123,7 @@ export function UserManagement() {
       });
     } else {
       setUsers(data || []);
+      setTotalCount(count || 0);
     }
     setLoading(false);
   };
@@ -223,10 +246,12 @@ export function UserManagement() {
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const totalPages = Math.ceil(totalCount / USERS_PER_PAGE);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (loading) {
     return (
@@ -263,8 +288,8 @@ export function UserManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
+              {users.length > 0 ? (
+                users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -337,6 +362,54 @@ export function UserManagement() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {((currentPage - 1) * USERS_PER_PAGE) + 1}-{Math.min(currentPage * USERS_PER_PAGE, totalCount)} de {totalCount} usuarios
+          </p>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(pageNum)}
+                      isActive={currentPage === pageNum}
+                      className="cursor-pointer"
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {/* Add funds dialog */}
       <Dialog open={fundsDialogOpen} onOpenChange={setFundsDialogOpen}>
