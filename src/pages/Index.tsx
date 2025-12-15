@@ -162,9 +162,7 @@ export default function Index() {
               <span className="font-display font-bold">Votex
             </span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 PredictX. Todos los derechos reservados.
-            </p>
+            <p className="text-sm text-muted-foreground">© 2024 VoteX. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
