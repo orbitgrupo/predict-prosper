@@ -2,52 +2,46 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, LayoutDashboard, Settings, LogOut, User, Wallet } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-
 export function Navbar() {
-  const { user, profile, isAdmin, signOut } = useAuth();
+  const {
+    user,
+    profile,
+    isAdmin,
+    signOut
+  } = useAuth();
   const navigate = useNavigate();
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
-
-  return (
-    <nav className="sticky top-0 z-50 glass border-b">
+  return <nav className="sticky top-0 z-50 glass border-b">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <TrendingUp className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold">PredictX</span>
+            <span className="font-display text-xl font-bold">VoteX</span>
           </Link>
 
           <div className="flex items-center gap-4">
-            {user ? (
-              <>
+            {user ? <>
                 <Link to="/markets">
                   <Button variant="ghost" size="sm">
                     Mercados
                   </Button>
                 </Link>
                 
-                {profile && (
-                  <div className="hidden items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 sm:flex">
+                {profile && <div className="hidden items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 sm:flex">
                     <Wallet className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">
-                      ${profile.balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      ${profile.balance.toLocaleString('es-ES', {
+                  minimumFractionDigits: 2
+                })}
                     </span>
-                  </div>
-                )}
+                  </div>}
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -77,8 +71,7 @@ export function Navbar() {
                         Perfil
                       </Link>
                     </DropdownMenuItem>
-                    {isAdmin && (
-                      <>
+                    {isAdmin && <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link to="/admin" className="cursor-pointer">
@@ -86,8 +79,7 @@ export function Navbar() {
                             Panel Admin
                           </Link>
                         </DropdownMenuItem>
-                      </>
-                    )}
+                      </>}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
@@ -95,9 +87,7 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Link to="/auth">
                   <Button variant="ghost" size="sm">
                     Iniciar sesión
@@ -108,11 +98,9 @@ export function Navbar() {
                     Registrarse
                   </Button>
                 </Link>
-              </>
-            )}
+              </>}
           </div>
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 }
