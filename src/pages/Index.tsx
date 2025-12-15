@@ -5,15 +5,16 @@ import { MarketCard } from '@/components/markets/MarketCard';
 import { useMarkets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2 } from 'lucide-react';
-
 export default function Index() {
-  const { data: markets, isLoading } = useMarkets();
-  const { user } = useAuth();
-  
+  const {
+    data: markets,
+    isLoading
+  } = useMarkets();
+  const {
+    user
+  } = useAuth();
   const activeMarkets = markets?.filter(m => m.status === 'active').slice(0, 6) || [];
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -32,15 +33,12 @@ export default function Index() {
               Usa tu conocimiento para ganar.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              {user ? (
-                <Link to="/markets">
+              {user ? <Link to="/markets">
                   <Button size="lg" className="gap-2">
                     Explorar mercados
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
-              ) : (
-                <>
+                </Link> : <>
                   <Link to="/auth?mode=signup">
                     <Button size="lg" className="gap-2">
                       Comenzar gratis
@@ -52,8 +50,7 @@ export default function Index() {
                       Iniciar sesión
                     </Button>
                   </Link>
-                </>
-              )}
+                </>}
             </div>
           </div>
         </div>
@@ -120,18 +117,11 @@ export default function Index() {
             </Link>
           </div>
 
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
+          {isLoading ? <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : activeMarkets.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {activeMarkets.map((market) => (
-                <MarketCard key={market.id} market={market} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border bg-card p-12 text-center">
+            </div> : activeMarkets.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {activeMarkets.map(market => <MarketCard key={market.id} market={market} />)}
+            </div> : <div className="rounded-xl border bg-card p-12 text-center">
               <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 font-display text-lg font-semibold">
                 No hay mercados activos
@@ -139,14 +129,12 @@ export default function Index() {
               <p className="mt-2 text-muted-foreground">
                 Vuelve pronto para ver nuevas predicciones.
               </p>
-            </div>
-          )}
+            </div>}
         </div>
       </section>
 
       {/* CTA */}
-      {!user && (
-        <section className="border-t bg-gradient-to-r from-primary/5 via-background to-success/5 py-16 lg:py-24">
+      {!user && <section className="border-t bg-gradient-to-r from-primary/5 via-background to-success/5 py-16 lg:py-24">
           <div className="container mx-auto px-4 text-center">
             <h2 className="font-display text-2xl font-bold lg:text-3xl">
               ¿Listo para empezar?
@@ -161,8 +149,7 @@ export default function Index() {
               </Button>
             </Link>
           </div>
-        </section>
-      )}
+        </section>}
 
       {/* Footer */}
       <footer className="border-t py-8">
@@ -172,7 +159,8 @@ export default function Index() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <TrendingUp className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold">PredictX</span>
+              <span className="font-display font-bold">Votex
+            </span>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2024 PredictX. Todos los derechos reservados.
@@ -180,6 +168,5 @@ export default function Index() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
