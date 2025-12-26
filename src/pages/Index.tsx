@@ -152,8 +152,7 @@ export default function Index() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <TrendingUp className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold">Votex
-            </span>
+              <span className="font-display font-bold">Votox</span>
             </div>
             <p className="text-sm text-muted-foreground">© 2024 VoteX. Todos los derechos reservados.</p>
           </div>
