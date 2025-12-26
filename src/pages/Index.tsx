@@ -28,10 +28,7 @@ export default function Index() {
                 Gana recompensas.
               </span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-              Apuesta en eventos del mundo real. Política, deportes, tecnología y más.
-              Usa tu conocimiento para ganar.
-            </p>
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predise en los eventos del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               {user ? <Link to="/markets">
                   <Button size="lg" className="gap-2">
@@ -66,9 +63,7 @@ export default function Index() {
               </div>
               <div>
                 <h3 className="font-display font-semibold">Fácil de usar</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Apuesta en segundos. Sin complicaciones.
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Predice en segundos. Sin complicaciones.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -77,9 +72,7 @@ export default function Index() {
               </div>
               <div>
                 <h3 className="font-display font-semibold">100% transparente</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Todas las apuestas son públicas y verificables.
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Todas las Predicciones son públicas y verificables.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
