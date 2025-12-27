@@ -142,32 +142,50 @@ export type Database = {
         Row: {
           balance: number
           created_at: string
+          document_back_url: string | null
+          document_front_url: string | null
+          document_rejection_reason: string | null
+          document_status: string | null
           email: string
           id: string
+          is_age_verified: boolean | null
           is_blocked: boolean
           phone: string | null
           updated_at: string
           username: string | null
+          verified_at: string | null
         }
         Insert: {
           balance?: number
           created_at?: string
+          document_back_url?: string | null
+          document_front_url?: string | null
+          document_rejection_reason?: string | null
+          document_status?: string | null
           email: string
           id: string
+          is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
           updated_at?: string
           username?: string | null
+          verified_at?: string | null
         }
         Update: {
           balance?: number
           created_at?: string
+          document_back_url?: string | null
+          document_front_url?: string | null
+          document_rejection_reason?: string | null
+          document_status?: string | null
           email?: string
           id?: string
+          is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
           updated_at?: string
           username?: string | null
+          verified_at?: string | null
         }
         Relationships: []
       }
