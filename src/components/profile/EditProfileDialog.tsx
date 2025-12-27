@@ -18,6 +18,7 @@ interface Profile {
   id: string;
   email: string;
   username: string | null;
+  phone: string | null;
   balance: number;
 }
 
@@ -30,6 +31,7 @@ interface EditProfileDialogProps {
 export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDialogProps) {
   const { refreshProfile } = useAuth();
   const [username, setUsername] = useState(profile.username || '');
+  const [phone, setPhone] = useState(profile.phone || '');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,12 +47,27 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
       return;
     }
 
+    // Validar teléfono si se proporciona
+    const phoneRegex = /^[\d\s\-+()]*$/;
+    if (phone && !phoneRegex.test(phone)) {
+      toast.error('El número de teléfono contiene caracteres inválidos');
+      return;
+    }
+
+    if (phone && phone.length > 20) {
+      toast.error('El número de teléfono es demasiado largo');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ username: username.trim() })
+        .update({ 
+          username: username.trim(),
+          phone: phone.trim() || null
+        })
         .eq('id', profile.id);
 
       if (error) throw error;
@@ -100,6 +117,21 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
               minLength={3}
               maxLength={30}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Número de teléfono</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 234 567 8900"
+              maxLength={20}
+            />
+            <p className="text-xs text-muted-foreground">
+              Opcional. Solo números, espacios, guiones y paréntesis.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

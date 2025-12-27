@@ -6,6 +6,7 @@ interface Profile {
   id: string;
   email: string;
   username: string | null;
+  phone: string | null;
   balance: number;
 }
 
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: profileData.id,
         email: profileData.email,
         username: profileData.username,
+        phone: profileData.phone,
         balance: Number(profileData.balance),
       });
     }

@@ -145,6 +145,7 @@ export type Database = {
           email: string
           id: string
           is_blocked: boolean
+          phone: string | null
           updated_at: string
           username: string | null
         }
@@ -154,6 +155,7 @@ export type Database = {
           email: string
           id: string
           is_blocked?: boolean
+          phone?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -163,6 +165,7 @@ export type Database = {
           email?: string
           id?: string
           is_blocked?: boolean
+          phone?: string | null
           updated_at?: string
           username?: string | null
         }
