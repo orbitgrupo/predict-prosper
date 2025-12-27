@@ -3,15 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Calendar, Edit2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { User, Mail, Phone, Edit2 } from 'lucide-react';
 import { EditProfileDialog } from './EditProfileDialog';
 
 interface Profile {
   id: string;
   email: string;
   username: string | null;
+  phone: string | null;
   balance: number;
 }
 
@@ -63,6 +62,16 @@ export function ProfileInfo({ profile, userId }: ProfileInfoProps) {
             <div className="flex-1">
               <p className="text-muted-foreground text-xs">Nombre de usuario</p>
               <p className="font-medium">{profile.username || 'No configurado'}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="text-muted-foreground text-xs">Teléfono</p>
+              <p className="font-medium">{profile.phone || 'No configurado'}</p>
             </div>
           </div>
 
