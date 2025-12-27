@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { DocumentUploadSection } from './DocumentUploadSection';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Profile {
   id: string;
@@ -20,6 +22,11 @@ interface Profile {
   username: string | null;
   phone: string | null;
   balance: number;
+  document_front_url: string | null;
+  document_back_url: string | null;
+  document_status: string | null;
+  document_rejection_reason: string | null;
+  is_age_verified: boolean;
 }
 
 interface EditProfileDialogProps {
@@ -84,71 +91,79 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Editar perfil</DialogTitle>
           <DialogDescription>
-            Actualiza la información de tu perfil.
+            Actualiza la información de tu perfil y verifica tu identidad.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={profile.email}
-              disabled
-              className="bg-muted"
-            />
-            <p className="text-xs text-muted-foreground">
-              El email no se puede cambiar.
-            </p>
-          </div>
+        <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                El email no se puede cambiar.
+              </p>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="username">Nombre de usuario</Label>
-            <Input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Tu nombre de usuario"
-              minLength={3}
-              maxLength={30}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Nombre de usuario</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Tu nombre de usuario"
+                minLength={3}
+                maxLength={30}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Número de teléfono</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 234 567 8900"
-              maxLength={20}
-            />
-            <p className="text-xs text-muted-foreground">
-              Opcional. Solo números, espacios, guiones y paréntesis.
-            </p>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Número de teléfono</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 234 567 8900"
+                maxLength={20}
+              />
+              <p className="text-xs text-muted-foreground">
+                Opcional. Solo números, espacios, guiones y paréntesis.
+              </p>
+            </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Guardar cambios
-            </Button>
-          </div>
-        </form>
+            {/* Document Upload Section */}
+            <DocumentUploadSection 
+              profile={profile}
+              onDocumentsUpdated={refreshProfile}
+            />
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Guardar cambios
+              </Button>
+            </div>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

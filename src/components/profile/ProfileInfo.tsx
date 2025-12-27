@@ -12,6 +12,11 @@ interface Profile {
   username: string | null;
   phone: string | null;
   balance: number;
+  document_front_url: string | null;
+  document_back_url: string | null;
+  document_status: string | null;
+  document_rejection_reason: string | null;
+  is_age_verified: boolean;
 }
 
 interface ProfileInfoProps {

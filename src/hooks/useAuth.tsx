@@ -8,6 +8,12 @@ interface Profile {
   username: string | null;
   phone: string | null;
   balance: number;
+  document_front_url: string | null;
+  document_back_url: string | null;
+  document_status: string | null;
+  document_rejection_reason: string | null;
+  is_age_verified: boolean;
+  verified_at: string | null;
 }
 
 interface AuthContextType {
@@ -45,6 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         username: profileData.username,
         phone: profileData.phone,
         balance: Number(profileData.balance),
+        document_front_url: profileData.document_front_url,
+        document_back_url: profileData.document_back_url,
+        document_status: profileData.document_status,
+        document_rejection_reason: profileData.document_rejection_reason,
+        is_age_verified: profileData.is_age_verified,
+        verified_at: profileData.verified_at,
       });
     }
 
