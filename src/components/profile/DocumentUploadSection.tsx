@@ -45,10 +45,7 @@ export function DocumentUploadSection({ profile, onDocumentsUpdated }: DocumentU
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('identity-documents')
-        .getPublicUrl(fileName);
-
+      // Store only the file path - the bucket is private and requires signed URLs for access
       const updateData = type === 'front' 
         ? { document_front_url: fileName, document_status: 'pending' }
         : { document_back_url: fileName, document_status: 'pending' };
