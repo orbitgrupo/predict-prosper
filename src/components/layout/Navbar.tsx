@@ -1,9 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, LayoutDashboard, Settings, LogOut, User, Wallet } from 'lucide-react';
+import { TrendingUp, LayoutDashboard, Settings, LogOut, User, Wallet, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useState, useEffect } from 'react';
+
 export function Navbar() {
   const {
     user,
@@ -12,19 +15,49 @@ export function Navbar() {
     signOut
   } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    if (value.trim()) {
+      navigate(`/markets?q=${encodeURIComponent(value.trim())}`);
+    } else {
+      navigate('/markets');
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
+
   return <nav className="sticky top-0 z-50 glass border-b">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <TrendingUp className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="font-display text-xl font-bold">VotoX</span>
           </Link>
+
+          {user && (
+            <div className="relative flex-1 max-w-md hidden sm:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Buscar mercados..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9 bg-secondary/50"
+              />
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             {user ? <>
