@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
+import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import {
   Dialog,
   DialogContent,
@@ -586,6 +587,7 @@ export default function Admin() {
           <TabsList>
             <TabsTrigger value="markets">Mercados</TabsTrigger>
             <TabsTrigger value="users">Usuarios</TabsTrigger>
+            <TabsTrigger value="activity">Historial de Actividades</TabsTrigger>
           </TabsList>
 
           <TabsContent value="markets" className="mt-6">
@@ -694,6 +696,10 @@ export default function Admin() {
 
         <TabsContent value="users" className="mt-6">
           <UserManagement />
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-6">
+          <ActivityHistory />
         </TabsContent>
       </Tabs>
 
