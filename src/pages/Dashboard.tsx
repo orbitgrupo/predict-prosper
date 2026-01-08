@@ -147,8 +147,8 @@ export default function Dashboard() {
                     className="flex items-center justify-between rounded-lg border p-4 hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <Badge className={bet.option === 'yes' ? 'bg-yes' : 'bg-no'}>
-                        {bet.option === 'yes' ? 'Sí' : 'No'}
+                      <Badge className={bet.option === 'yes' ? 'bg-yes' : bet.option === 'no' ? 'bg-no' : 'bg-primary'}>
+                        {bet.option === 'yes' ? 'Sí' : bet.option === 'no' ? 'No' : bet.option}
                       </Badge>
                       <div>
                         <p className="font-medium line-clamp-1">
@@ -198,8 +198,8 @@ export default function Dashboard() {
                     className="flex items-center justify-between rounded-lg border p-4 hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <Badge className={bet.option === 'yes' ? 'bg-yes' : 'bg-no'}>
-                        {bet.option === 'yes' ? 'Sí' : 'No'}
+                      <Badge className={bet.option === 'yes' ? 'bg-yes' : bet.option === 'no' ? 'bg-no' : 'bg-primary'}>
+                        {bet.option === 'yes' ? 'Sí' : bet.option === 'no' ? 'No' : bet.option}
                       </Badge>
                       <div>
                         <p className="font-medium line-clamp-1">
