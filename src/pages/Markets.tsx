@@ -1,22 +1,23 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { MarketCard } from '@/components/markets/MarketCard';
 import { useMarkets } from '@/hooks/useMarkets';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, TrendingUp } from 'lucide-react';
+import { Loader2, TrendingUp } from 'lucide-react';
 
 const CATEGORIES = ['Todos', 'Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento'];
 
 export default function Markets() {
   const { data: markets, isLoading } = useMarkets();
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+  
+  const searchQuery = searchParams.get('q') || '';
 
   const filteredMarkets = markets?.filter((market) => {
-    const matchesSearch = market.title.toLowerCase().includes(search.toLowerCase()) ||
-      market.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = market.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      market.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Todos' || market.category === selectedCategory;
     return matchesSearch && matchesCategory && market.status === 'active';
   }) || [];
@@ -33,19 +34,8 @@ export default function Markets() {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar mercados..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          
+        {/* Category Filters */}
+        <div className="mb-8">
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((category) => (
               <Button
