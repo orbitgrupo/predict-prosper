@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBets } from '@/hooks/useMarkets';
+import { SuggestMarketDialog } from '@/components/dashboard/SuggestMarketDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -126,12 +127,15 @@ export default function Dashboard() {
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Apuestas activas</CardTitle>
-            <Link to="/markets">
-              <Button variant="outline" size="sm" className="gap-2">
-                Nueva apuesta
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <SuggestMarketDialog userId={user.id} userBalance={profile.balance} />
+              <Link to="/markets">
+                <Button variant="outline" size="sm" className="gap-2">
+                  Nueva apuesta
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             {betsLoading ? (
