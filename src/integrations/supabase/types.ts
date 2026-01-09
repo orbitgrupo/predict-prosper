@@ -90,6 +90,60 @@ export type Database = {
           },
         ]
       }
+      market_suggestions: {
+        Row: {
+          admin_notes: string | null
+          category: string | null
+          closes_at: string
+          created_at: string
+          description: string | null
+          fee_amount: number
+          id: string
+          options: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selected_option: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category?: string | null
+          closes_at: string
+          created_at?: string
+          description?: string | null
+          fee_amount?: number
+          id?: string
+          options?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selected_option: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string | null
+          closes_at?: string
+          created_at?: string
+          description?: string | null
+          fee_amount?: number
+          id?: string
+          options?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selected_option?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       markets: {
         Row: {
           category: string | null
@@ -262,6 +316,19 @@ export type Database = {
           p_amount: number
           p_market_id: string
           p_option: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      submit_market_suggestion: {
+        Args: {
+          p_category: string
+          p_closes_at: string
+          p_description: string
+          p_fee_amount?: number
+          p_options: Json
+          p_selected_option: string
+          p_title: string
           p_user_id: string
         }
         Returns: Json
