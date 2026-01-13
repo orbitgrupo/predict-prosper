@@ -87,6 +87,26 @@ export function SuggestionsManagement() {
 
   useEffect(() => {
     fetchSuggestions();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('suggestions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'market_suggestions',
+        },
+        () => {
+          fetchSuggestions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [statusFilter]);
 
   const fetchSuggestions = async () => {
