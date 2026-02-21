@@ -4,7 +4,9 @@ import { Navbar } from '@/components/layout/Navbar';
 import { MarketCard } from '@/components/markets/MarketCard';
 import { useMarkets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2, Gift } from 'lucide-react';
 export default function Index() {
   const {
     data: markets,
@@ -13,6 +15,17 @@ export default function Index() {
   const {
     user
   } = useAuth();
+  const { data: promoSettings } = useQuery({
+    queryKey: ['app_settings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', 'default')
+        .single();
+      return data;
+    },
+  });
   const activeMarkets = markets?.filter((m) => m.status === 'active').slice(0, 6) || [];
   return <div className="min-h-screen bg-background">
       <Navbar />
@@ -28,7 +41,13 @@ export default function Index() {
                 Gana recompensas.
               </span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predise en los eventos del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predice en los eventos del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
+            {!user && promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0 && (
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+                <Gift className="h-4 w-4" />
+                ¡Regístrate y recibe ${promoSettings.welcome_bonus_amount} en créditos gratis!
+              </div>
+            )}
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               {user ? <Link to="/markets">
                   <Button size="lg" className="gap-2">
@@ -132,9 +151,11 @@ export default function Index() {
             <h2 className="font-display text-2xl font-bold lg:text-3xl">
               ¿Listo para empezar?
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-muted-foreground">Regístrate ahora y recibe $100 en créditos gratis para comenzar a predecir.
-
-        </p>
+            <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
+              {promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0
+                ? `Regístrate ahora y recibe $${promoSettings.welcome_bonus_amount} en créditos gratis para comenzar a predecir.`
+                : 'Regístrate ahora y comienza a predecir.'}
+            </p>
             <Link to="/auth?mode=signup">
               <Button size="lg" className="mt-8 gap-2">
                 Crear cuenta gratis

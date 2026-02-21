@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          updated_at: string
+          welcome_bonus_amount: number
+          welcome_bonus_enabled: boolean
+        }
+        Insert: {
+          id?: string
+          updated_at?: string
+          welcome_bonus_amount?: number
+          welcome_bonus_enabled?: boolean
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          welcome_bonus_amount?: number
+          welcome_bonus_enabled?: boolean
+        }
+        Relationships: []
+      }
       bets: {
         Row: {
           amount: number
