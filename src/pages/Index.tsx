@@ -13,7 +13,7 @@ export default function Index() {
   const {
     user
   } = useAuth();
-  const activeMarkets = markets?.filter(m => m.status === 'active').slice(0, 6) || [];
+  const activeMarkets = markets?.filter((m) => m.status === 'active').slice(0, 6) || [];
   return <div className="min-h-screen bg-background">
       <Navbar />
       
@@ -38,7 +38,7 @@ export default function Index() {
                 </Link> : <>
                   <Link to="/auth?mode=signup">
                     <Button size="lg" className="gap-2">
-                      Comenzar
+                      Comenzar gratis
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -113,7 +113,7 @@ export default function Index() {
           {isLoading ? <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div> : activeMarkets.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {activeMarkets.map(market => <MarketCard key={market.id} market={market} />)}
+              {activeMarkets.map((market) => <MarketCard key={market.id} market={market} />)}
             </div> : <div className="rounded-xl border bg-card p-12 text-center">
               <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 font-display text-lg font-semibold">
@@ -132,9 +132,9 @@ export default function Index() {
             <h2 className="font-display text-2xl font-bold lg:text-3xl">
               ¿Listo para empezar?
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-              Regístrate ahora y recibe $1,000 en créditos gratis para comenzar a predecir.
-            </p>
+            <p className="mx-auto mt-4 max-w-lg text-muted-foreground">Regístrate ahora y recibe $100 en créditos gratis para comenzar a predecir.
+
+        </p>
             <Link to="/auth?mode=signup">
               <Button size="lg" className="mt-8 gap-2">
                 Crear cuenta gratis
