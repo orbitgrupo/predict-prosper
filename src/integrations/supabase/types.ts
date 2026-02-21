@@ -304,6 +304,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_add_funds: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -318,6 +322,10 @@ export type Database = {
           p_option: string
           p_user_id: string
         }
+        Returns: Json
+      }
+      resolve_market: {
+        Args: { p_market_id: string; p_winning_option: string }
         Returns: Json
       }
       submit_market_suggestion: {

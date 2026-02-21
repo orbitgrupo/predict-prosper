@@ -294,73 +294,16 @@ export default function Admin() {
 
     setResolving(true);
     try {
-      // Update market status
-      const { error: marketError } = await supabase
-        .from('markets')
-        .update({
-          status: 'resolved',
-          resolved_option: resolveOption,
-        })
-        .eq('id', marketToResolve.id);
+      const { data, error } = await supabase.rpc('resolve_market', {
+        p_market_id: marketToResolve.id,
+        p_winning_option: resolveOption,
+      });
 
-      if (marketError) throw marketError;
+      if (error) throw error;
 
-      // Get all bets for this market
-      const { data: bets, error: betsError } = await supabase
-        .from('bets')
-        .select('*')
-        .eq('market_id', marketToResolve.id);
-
-      if (betsError) throw betsError;
-
-      const winningBets = bets?.filter(b => b.option.toLowerCase() === resolveOption.toLowerCase()) || [];
-      const losingBets = bets?.filter(b => b.option.toLowerCase() !== resolveOption.toLowerCase()) || [];
-      
-      const totalWinning = winningBets.reduce((acc, b) => acc + Number(b.amount), 0);
-      const totalLosing = losingBets.reduce((acc, b) => acc + Number(b.amount), 0);
-
-      // Calculate and distribute payouts
-      for (const bet of winningBets) {
-        const betAmount = Number(bet.amount);
-        const winShare = totalWinning > 0 ? betAmount / totalWinning : 0;
-        const payout = betAmount + (totalLosing * winShare);
-
-        // Update bet
-        await supabase
-          .from('bets')
-          .update({ is_winner: true, payout_amount: payout })
-          .eq('id', bet.id);
-
-        // Update user balance
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('balance')
-          .eq('id', bet.user_id)
-          .single();
-
-        if (profile) {
-          await supabase
-            .from('profiles')
-            .update({ balance: Number(profile.balance) + payout })
-            .eq('id', bet.user_id);
-
-          // Record transaction
-          await supabase.from('transactions').insert({
-            user_id: bet.user_id,
-            type: 'payout',
-            amount: payout,
-            description: `Ganancia: ${marketToResolve.title}`,
-            market_id: marketToResolve.id,
-          });
-        }
-      }
-
-      // Mark losing bets
-      for (const bet of losingBets) {
-        await supabase
-          .from('bets')
-          .update({ is_winner: false, payout_amount: 0 })
-          .eq('id', bet.id);
+      const result = data as { success: boolean; error?: string };
+      if (!result.success) {
+        throw new Error(result.error || 'Error al resolver el mercado');
       }
 
       toast({

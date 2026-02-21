@@ -166,25 +166,17 @@ export function UserManagement() {
 
     setAddingFunds(true);
     try {
-      // Update balance
-      const { error: balanceError } = await supabase
-        .from('profiles')
-        .update({ balance: selectedUser.balance + amount })
-        .eq('id', selectedUser.id);
+      const { data, error } = await supabase.rpc('admin_add_funds', {
+        p_user_id: selectedUser.id,
+        p_amount: amount,
+      });
 
-      if (balanceError) throw balanceError;
-
-      // Record transaction
-      const { error: transactionError } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: selectedUser.id,
-          type: 'admin_credit',
-          amount: amount,
-          description: 'Créditos agregados por administrador',
-        });
-
-      if (transactionError) throw transactionError;
+      if (error) throw error;
+      
+      const result = data as { success: boolean; error?: string };
+      if (!result.success) {
+        throw new Error(result.error || 'Error al agregar fondos');
+      }
 
       toast({
         title: 'Fondos agregados',
