@@ -38,7 +38,7 @@ export default function Index() {
                 </Link> : <>
                   <Link to="/auth?mode=signup">
                     <Button size="lg" className="gap-2">
-                      Comenzar gratis
+                      Comenzar
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
