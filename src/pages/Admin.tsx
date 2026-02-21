@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
+import { PromotionSettings } from '@/components/admin/PromotionSettings';
 import {
   Dialog,
   DialogContent,
@@ -532,6 +533,7 @@ export default function Admin() {
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
             <TabsTrigger value="users">Usuarios</TabsTrigger>
             <TabsTrigger value="activity">Historial de Actividades</TabsTrigger>
+            <TabsTrigger value="promotion">Promoción</TabsTrigger>
           </TabsList>
 
           <TabsContent value="markets" className="mt-6">
@@ -648,6 +650,10 @@ export default function Admin() {
 
         <TabsContent value="activity" className="mt-6">
           <ActivityHistory />
+        </TabsContent>
+
+        <TabsContent value="promotion" className="mt-6">
+          <PromotionSettings />
         </TabsContent>
       </Tabs>
 
