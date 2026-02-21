@@ -21,6 +21,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isEmailConfirmed: boolean;
   loading: boolean;
   signUp: (email: string, password: string, username?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -137,12 +138,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin(false);
   };
 
+  const isEmailConfirmed = !!user?.email_confirmed_at;
+
   return (
     <AuthContext.Provider value={{
       user,
       session,
       profile,
       isAdmin,
+      isEmailConfirmed,
       loading,
       signUp,
       signIn,

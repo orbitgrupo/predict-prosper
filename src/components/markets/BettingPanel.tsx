@@ -96,6 +96,19 @@ export function BettingPanel({ market }: BettingPanelProps) {
     );
   }
 
+  if (!user.email_confirmed_at) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <p className="mb-2 font-medium">Email no confirmado</p>
+          <p className="text-sm text-muted-foreground">
+            Confirma tu email para poder realizar apuestas.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
