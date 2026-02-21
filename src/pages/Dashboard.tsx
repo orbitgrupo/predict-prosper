@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
+import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBets } from '@/hooks/useMarkets';
 import { SuggestMarketDialog } from '@/components/dashboard/SuggestMarketDialog';
@@ -12,7 +13,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function Dashboard() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, isEmailConfirmed } = useAuth();
   const { data: bets, isLoading: betsLoading } = useUserBets(user?.id);
   const navigate = useNavigate();
 
@@ -45,7 +46,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+      <EmailConfirmationBanner />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold">
@@ -128,10 +129,12 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Apuestas activas</CardTitle>
             <div className="flex gap-2">
-              <SuggestMarketDialog userId={user.id} userBalance={profile.balance} />
+              {isEmailConfirmed && (
+                <SuggestMarketDialog userId={user.id} userBalance={profile.balance} />
+              )}
               <Link to="/markets">
                 <Button variant="outline" size="sm" className="gap-2">
-                  Nueva apuesta
+                  {isEmailConfirmed ? 'Nueva apuesta' : 'Ver mercados'}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>

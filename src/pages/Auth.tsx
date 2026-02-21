@@ -110,9 +110,9 @@ export default function Auth() {
         } else {
           toast({
             title: '¡Cuenta creada!',
-            description: 'Te hemos dado $1,000 de créditos de bienvenida.',
+            description: 'Te hemos enviado un correo de confirmación. Revisa tu bandeja de entrada para verificar tu cuenta.',
           });
-          navigate('/dashboard');
+          // Don't navigate - let user know to check email
         }
       }
     } finally {

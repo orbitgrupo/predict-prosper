@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
+import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { MarketCard } from '@/components/markets/MarketCard';
 import { useMarkets } from '@/hooks/useMarkets';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ export default function Markets() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <EmailConfirmationBanner />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
