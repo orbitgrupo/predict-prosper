@@ -18,13 +18,13 @@ export default function Index() {
   const { data: promoSettings } = useQuery({
     queryKey: ['app_settings'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('app_settings')
-        .select('*')
-        .eq('id', 'default')
-        .single();
+      const { data } = await supabase.
+      from('app_settings').
+      select('*').
+      eq('id', 'default').
+      single();
       return data;
-    },
+    }
   });
   const activeMarkets = markets?.filter((m) => m.status === 'active').slice(0, 6) || [];
   return <div className="min-h-screen bg-background">
@@ -41,13 +41,13 @@ export default function Index() {
                 Gana recompensas.
               </span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predice en los eventos del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
-            {!user && promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0 && (
-              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predice en los eventos del Pais y del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
+            {!user && promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0 &&
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                 <Gift className="h-4 w-4" />
                 ¡Regístrate y recibe ${promoSettings.welcome_bonus_amount} en créditos gratis!
               </div>
-            )}
+          }
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               {user ? <Link to="/markets">
                   <Button size="lg" className="gap-2">
@@ -152,9 +152,9 @@ export default function Index() {
               ¿Listo para empezar?
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-              {promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0
-                ? `Regístrate ahora y recibe $${promoSettings.welcome_bonus_amount} en créditos gratis para comenzar a predecir.`
-                : 'Regístrate ahora y comienza a predecir.'}
+              {promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0 ?
+          `Regístrate ahora y recibe $${promoSettings.welcome_bonus_amount} en créditos gratis para comenzar a predecir.` :
+          'Regístrate ahora y comienza a predecir.'}
             </p>
             <Link to="/auth?mode=signup">
               <Button size="lg" className="mt-8 gap-2">
