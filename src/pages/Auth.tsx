@@ -10,12 +10,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, TrendingUp, Mail, Lock, User } from 'lucide-react';
 import { z } from 'zod';
 
+const strongPasswordSchema = z.string()
+  .min(8, 'Mínimo 8 caracteres')
+  .regex(/[A-Z]/, 'Debe incluir al menos una mayúscula')
+  .regex(/[0-9]/, 'Debe incluir al menos un número')
+  .regex(/[^A-Za-z0-9]/, 'Debe incluir al menos un carácter especial (!@#$...)');
+
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  password: z.string().min(1, 'La contraseña es requerida'),
 });
 
-const signupSchema = loginSchema.extend({
+const signupSchema = z.object({
+  email: z.string().email('Email inválido'),
+  password: strongPasswordSchema,
   username: z.string().min(3, 'El nombre de usuario debe tener al menos 3 caracteres'),
 });
 
