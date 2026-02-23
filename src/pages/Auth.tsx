@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, TrendingUp, Mail, Lock, User } from 'lucide-react';
 import { z } from 'zod';
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 
 const strongPasswordSchema = z.string()
   .min(8, 'Mínimo 8 caracteres')
@@ -204,6 +205,7 @@ export default function Auth() {
                   disabled={loading}
                 />
               </div>
+              {!isLogin && <PasswordStrengthIndicator password={password} />}
               {errors.password && (
                 <p className="text-xs text-destructive">{errors.password}</p>
               )}

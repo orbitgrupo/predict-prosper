@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Lock, TrendingUp } from 'lucide-react';
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -103,6 +104,7 @@ export default function ResetPassword() {
                   disabled={loading}
                 />
               </div>
+              <PasswordStrengthIndicator password={password} />
             </div>
 
             <div className="space-y-2">
