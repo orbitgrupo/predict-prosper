@@ -34,8 +34,15 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 6) {
-      toast({ title: 'Error', description: 'La contraseña debe tener al menos 6 caracteres.', variant: 'destructive' });
+    const checks = [
+      { test: password.length >= 8, msg: 'Mínimo 8 caracteres' },
+      { test: /[A-Z]/.test(password), msg: 'Debe incluir al menos una mayúscula' },
+      { test: /[0-9]/.test(password), msg: 'Debe incluir al menos un número' },
+      { test: /[^A-Za-z0-9]/.test(password), msg: 'Debe incluir al menos un carácter especial (!@#$...)' },
+    ];
+    const failed = checks.find(c => !c.test);
+    if (failed) {
+      toast({ title: 'Contraseña insegura', description: failed.msg, variant: 'destructive' });
       return;
     }
 
