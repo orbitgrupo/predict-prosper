@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
+import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { BettingPanel } from '@/components/markets/BettingPanel';
 import { useMarket, useUserBets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
@@ -68,6 +69,7 @@ export default function MarketDetail() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <EmailConfirmationBanner />
       
       <main className="container mx-auto px-4 py-8">
         <Link to="/markets" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
