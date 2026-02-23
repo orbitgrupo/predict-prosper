@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,9 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
@@ -197,6 +201,16 @@ export default function Auth() {
               )}
             </div>
 
+            {isLogin && (
+              <button
+                type="button"
+                onClick={() => { setShowForgot(true); setForgotEmail(email); }}
+                className="text-xs text-muted-foreground hover:text-primary hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            )}
+
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? (
                 <>
@@ -208,6 +222,50 @@ export default function Auth() {
               )}
             </Button>
           </form>
+
+          {showForgot && (
+            <div className="mt-4 rounded-lg border border-border bg-muted/50 p-4 space-y-3">
+              <p className="text-sm font-medium">Recuperar contraseña</p>
+              <p className="text-xs text-muted-foreground">Te enviaremos un enlace para restablecer tu contraseña.</p>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  className="pl-9"
+                  disabled={forgotLoading}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={forgotLoading || !forgotEmail}
+                  onClick={async () => {
+                    setForgotLoading(true);
+                    try {
+                      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+                        redirectTo: `${window.location.origin}/reset-password`,
+                      });
+                      if (error) throw error;
+                      toast({ title: 'Correo enviado', description: 'Revisa tu bandeja de entrada para restablecer tu contraseña.' });
+                      setShowForgot(false);
+                    } catch {
+                      toast({ title: 'Error', description: 'No se pudo enviar el correo. Verifica el email e intenta de nuevo.', variant: 'destructive' });
+                    } finally {
+                      setForgotLoading(false);
+                    }
+                  }}
+                >
+                  {forgotLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar enlace'}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setShowForgot(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 text-center text-sm">
             {isLogin ? (
