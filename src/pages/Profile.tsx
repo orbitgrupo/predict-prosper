@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
+import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { ProfileInfo } from '@/components/profile/ProfileInfo';
 import { ProfileStats } from '@/components/profile/ProfileStats';
@@ -33,6 +34,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <EmailConfirmationBanner />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
