@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { UserDetailDialog } from './UserDetailDialog';
 import {
   Table,
   TableBody,
@@ -44,9 +45,17 @@ interface Profile {
   id: string;
   email: string;
   username: string | null;
+  phone: string | null;
   balance: number;
   is_blocked: boolean;
+  is_age_verified: boolean | null;
+  document_status: string | null;
+  document_front_url: string | null;
+  document_back_url: string | null;
+  document_rejection_reason: string | null;
+  verified_at: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 interface Transaction {
@@ -93,6 +102,12 @@ export function UserManagement() {
     bets: Bet[];
   }>({ transactions: [], bets: [] });
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Detail dialog
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [detailUser, setDetailUser] = useState<Profile | null>(null);
+  const [detailEmailConfirmed, setDetailEmailConfirmed] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -238,6 +253,22 @@ export function UserManagement() {
     }
   };
 
+  const handleViewDetail = async (user: Profile) => {
+    setDetailUser(user);
+    setDetailDialogOpen(true);
+    setLoadingDetail(true);
+    setDetailEmailConfirmed(false);
+
+    try {
+      // We check if the user has confirmed email by looking at verified_at or other heuristics
+      // Since we can't access auth.users, we use the profile's verified_at as a proxy
+      // If verified_at exists, email was confirmed
+      setDetailEmailConfirmed(!!user.verified_at);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
   const totalPages = Math.ceil(totalCount / USERS_PER_PAGE);
 
   // Reset to page 1 when search changes
@@ -282,7 +313,7 @@ export function UserManagement() {
             <TableBody>
               {users.length > 0 ? (
                 users.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} className="cursor-pointer" onClick={() => handleViewDetail(user)}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
@@ -309,7 +340,7 @@ export function UserManagement() {
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "dd MMM yyyy", { locale: es })}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="outline"
@@ -520,6 +551,14 @@ export function UserManagement() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* User detail dialog */}
+      <UserDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        user={detailUser}
+        isEmailConfirmed={detailEmailConfirmed}
+      />
     </div>
   );
 }
