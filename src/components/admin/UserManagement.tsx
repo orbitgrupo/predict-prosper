@@ -558,6 +558,7 @@ export function UserManagement() {
         onOpenChange={setDetailDialogOpen}
         user={detailUser}
         isEmailConfirmed={detailEmailConfirmed}
+        onUserUpdated={fetchUsers}
       />
     </div>
   );
