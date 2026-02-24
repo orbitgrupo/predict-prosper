@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, TrendingUp, Mail, Lock, User } from 'lucide-react';
 import { z } from 'zod';
+import { useQuery } from '@tanstack/react-query';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 
 const strongPasswordSchema = z.string()
@@ -43,6 +44,18 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const { data: promoSettings } = useQuery({
+    queryKey: ['app_settings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', 'default')
+        .single();
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -146,7 +159,9 @@ export default function Auth() {
           <CardDescription>
             {isLogin 
               ? 'Ingresa a tu cuenta para continuar' 
-              : 'Regístrate y recibe $1,000 en créditos'}
+              : promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0
+                ? `Regístrate y recibe $${promoSettings.welcome_bonus_amount} en créditos`
+                : 'Regístrate para comenzar a predecir'}
           </CardDescription>
         </CardHeader>
         <CardContent>
