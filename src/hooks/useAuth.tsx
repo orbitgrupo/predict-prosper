@@ -14,6 +14,7 @@ interface Profile {
   document_rejection_reason: string | null;
   is_age_verified: boolean;
   verified_at: string | null;
+  referral_code: string;
 }
 
 interface AuthContextType {
@@ -58,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document_rejection_reason: profileData.document_rejection_reason,
         is_age_verified: profileData.is_age_verified,
         verified_at: profileData.verified_at,
+        referral_code: (profileData as any).referral_code || '',
       });
     }
 

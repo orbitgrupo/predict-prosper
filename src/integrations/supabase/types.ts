@@ -17,18 +17,27 @@ export type Database = {
       app_settings: {
         Row: {
           id: string
+          referral_bonus_referred: number
+          referral_bonus_referrer: number
+          referral_enabled: boolean
           updated_at: string
           welcome_bonus_amount: number
           welcome_bonus_enabled: boolean
         }
         Insert: {
           id?: string
+          referral_bonus_referred?: number
+          referral_bonus_referrer?: number
+          referral_enabled?: boolean
           updated_at?: string
           welcome_bonus_amount?: number
           welcome_bonus_enabled?: boolean
         }
         Update: {
           id?: string
+          referral_bonus_referred?: number
+          referral_bonus_referrer?: number
+          referral_enabled?: boolean
           updated_at?: string
           welcome_bonus_amount?: number
           welcome_bonus_enabled?: boolean
@@ -226,6 +235,8 @@ export type Database = {
           is_age_verified: boolean | null
           is_blocked: boolean
           phone: string | null
+          referral_code: string
+          referred_by: string | null
           updated_at: string
           username: string | null
           verified_at: string | null
@@ -242,6 +253,8 @@ export type Database = {
           is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
+          referral_code: string
+          referred_by?: string | null
           updated_at?: string
           username?: string | null
           verified_at?: string | null
@@ -258,11 +271,63 @@ export type Database = {
           is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
+          referral_code?: string
+          referred_by?: string | null
           updated_at?: string
           username?: string | null
           verified_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_bonus: number
+          referred_id: string
+          referrer_bonus: number
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_bonus?: number
+          referred_id: string
+          referrer_bonus?: number
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_bonus?: number
+          referred_id?: string
+          referrer_bonus?: number
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
@@ -343,6 +408,10 @@ export type Database = {
           p_option: string
           p_user_id: string
         }
+        Returns: Json
+      }
+      process_referral: {
+        Args: { p_referral_code: string; p_user_id: string }
         Returns: Json
       }
       resolve_market: {
