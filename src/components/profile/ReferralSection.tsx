@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Users, Gift, Loader2, Check } from 'lucide-react';
+import { Copy, Users, Gift, Loader2, Check, Link } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 interface ReferralSectionProps {
@@ -52,11 +52,18 @@ export function ReferralSection({ userId, referralCode }: ReferralSectionProps) 
     },
   });
 
+  const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
+
   const handleCopy = () => {
     navigator.clipboard.writeText(referralCode);
     setCopied(true);
     toast({ title: 'Copiado', description: 'Código de referido copiado al portapapeles.' });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(referralLink);
+    toast({ title: 'Enlace copiado', description: 'Enlace de referido copiado al portapapeles.' });
   };
 
   const handleSubmitCode = async () => {
@@ -107,6 +114,14 @@ export function ReferralSection({ userId, referralCode }: ReferralSectionProps) 
           <div className="flex gap-4 text-sm text-muted-foreground">
             <span>Tú recibes: <strong className="text-foreground">${settings?.referral_bonus_referrer ?? 0}</strong></span>
             <span>Tu amigo recibe: <strong className="text-foreground">${settings?.referral_bonus_referred ?? 0}</strong></span>
+          </div>
+
+          <div className="flex gap-2">
+            <Input value={referralLink} readOnly className="text-xs" />
+            <Button variant="outline" size="sm" onClick={handleCopyLink} className="shrink-0 gap-1">
+              <Link className="h-3 w-3" />
+              Copiar enlace
+            </Button>
           </div>
         </CardContent>
       </Card>
