@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, TrendingUp, Mail, Lock, User } from 'lucide-react';
+import { Loader2, TrendingUp, Mail, Lock, User, Users } from 'lucide-react';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
@@ -31,10 +31,11 @@ const signupSchema = z.object({
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup');
+  const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup' && !searchParams.get('ref'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
   const [forgotEmail, setForgotEmail] = useState('');
   const [showForgot, setShowForgot] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -118,7 +119,7 @@ export default function Auth() {
           navigate('/dashboard');
         }
       } else {
-        const { error } = await signUp(email, password, username);
+        const { error } = await signUp(email, password, username, referralCode || undefined);
         if (error) {
           if (error.message.includes('already registered')) {
             toast({
@@ -225,6 +226,24 @@ export default function Auth() {
                 <p className="text-xs text-destructive">{errors.password}</p>
               )}
             </div>
+
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="referral">Código de referido (opcional)</Label>
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="referral"
+                    type="text"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    placeholder="XXXXXXXX"
+                    className="pl-9 font-mono"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+            )}
 
             {isLogin && (
               <button
