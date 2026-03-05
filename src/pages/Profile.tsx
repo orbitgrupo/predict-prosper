@@ -7,6 +7,7 @@ import { ProfileInfo } from '@/components/profile/ProfileInfo';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { TransactionHistory } from '@/components/profile/TransactionHistory';
 import { BettingHistory } from '@/components/profile/BettingHistory';
+import { ReferralSection } from '@/components/profile/ReferralSection';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -55,15 +56,19 @@ export default function Profile() {
             <ProfileStats userId={user.id} />
             
             <Tabs defaultValue="transactions" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="transactions">Transacciones</TabsTrigger>
-                <TabsTrigger value="bets">Historial de Apuestas</TabsTrigger>
+                <TabsTrigger value="bets">Apuestas</TabsTrigger>
+                <TabsTrigger value="referrals">Referidos</TabsTrigger>
               </TabsList>
               <TabsContent value="transactions" className="mt-4">
                 <TransactionHistory userId={user.id} />
               </TabsContent>
               <TabsContent value="bets" className="mt-4">
                 <BettingHistory userId={user.id} />
+              </TabsContent>
+              <TabsContent value="referrals" className="mt-4">
+                <ReferralSection userId={user.id} referralCode={(profile as any).referral_code || ''} />
               </TabsContent>
             </Tabs>
           </div>
