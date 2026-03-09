@@ -15,6 +15,7 @@ interface Profile {
   is_age_verified: boolean;
   verified_at: string | null;
   referral_code: string;
+  referral_clicks: number;
 }
 
 interface AuthContextType {
