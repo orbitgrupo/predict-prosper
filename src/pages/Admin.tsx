@@ -80,6 +80,7 @@ export default function Admin() {
     closes_at: '',
     image_url: '',
     options: [] as { id?: string; option_name: string }[],
+    allow_cashout: true,
   });
 
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
