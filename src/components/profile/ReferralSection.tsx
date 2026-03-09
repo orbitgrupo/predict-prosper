@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Users, Gift, Loader2, Check, Link } from 'lucide-react';
+import { Copy, Users, Gift, Loader2, Check, Link, MessageCircle, Send } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 interface ReferralSectionProps {
