@@ -571,6 +571,7 @@ export default function Admin() {
           <TabsList>
             <TabsTrigger value="markets">Mercados</TabsTrigger>
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
+            <TabsTrigger value="withdrawals">Retiros</TabsTrigger>
             <TabsTrigger value="users">Usuarios</TabsTrigger>
             <TabsTrigger value="activity">Historial de Actividades</TabsTrigger>
             <TabsTrigger value="promotion">Promoción</TabsTrigger>
