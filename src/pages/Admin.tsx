@@ -40,7 +40,9 @@ import {
   CheckCircle,
   XCircle,
   Settings,
-  Pencil
+  Pencil,
+  UserPlus,
+  Gift
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -90,6 +92,9 @@ export default function Admin() {
     totalUsers: 0,
     totalVolume: 0,
     activeMarkets: 0,
+    totalReferrals: 0,
+    totalReferrerBonuses: 0,
+    totalReferredBonuses: 0,
   });
 
   useEffect(() => {
@@ -110,14 +115,18 @@ export default function Admin() {
   }, [markets]);
 
   useEffect(() => {
-    async function fetchUsers() {
-      const { count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      setStats(prev => ({ ...prev, totalUsers: count || 0 }));
+    async function fetchStats() {
+      const [{ count }, { data: referrals }] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('referrals').select('referrer_bonus, referred_bonus'),
+      ]);
+      const totalReferrals = referrals?.length || 0;
+      const totalReferrerBonuses = referrals?.reduce((s, r) => s + Number(r.referrer_bonus), 0) || 0;
+      const totalReferredBonuses = referrals?.reduce((s, r) => s + Number(r.referred_bonus), 0) || 0;
+      setStats(prev => ({ ...prev, totalUsers: count || 0, totalReferrals, totalReferrerBonuses, totalReferredBonuses }));
     }
     if (isAdmin) {
-      fetchUsers();
+      fetchStats();
     }
   }, [isAdmin]);
 
@@ -481,7 +490,7 @@ export default function Admin() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 mb-8">
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -521,6 +530,36 @@ export default function Admin() {
                 <div>
                   <p className="text-sm text-muted-foreground">Mercados activos</p>
                   <p className="font-display text-2xl font-bold">{stats.activeMarkets}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <UserPlus className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total referidos</p>
+                  <p className="font-display text-2xl font-bold">{stats.totalReferrals}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
+                  <Gift className="h-6 w-6 text-success" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Bonos otorgados</p>
+                  <p className="font-display text-2xl font-bold">
+                    ${(stats.totalReferrerBonuses + stats.totalReferredBonuses).toLocaleString('es-ES')}
+                  </p>
                 </div>
               </div>
             </CardContent>
