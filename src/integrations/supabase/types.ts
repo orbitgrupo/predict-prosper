@@ -303,6 +303,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accepted_terms: boolean
+          accepted_terms_at: string | null
           balance: number
           created_at: string
           document_back_url: string | null
@@ -322,6 +324,8 @@ export type Database = {
           verified_at: string | null
         }
         Insert: {
+          accepted_terms?: boolean
+          accepted_terms_at?: string | null
           balance?: number
           created_at?: string
           document_back_url?: string | null
@@ -341,6 +345,8 @@ export type Database = {
           verified_at?: string | null
         }
         Update: {
+          accepted_terms?: boolean
+          accepted_terms_at?: string | null
           balance?: number
           created_at?: string
           document_back_url?: string | null
