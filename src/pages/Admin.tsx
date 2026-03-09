@@ -152,6 +152,7 @@ export default function Admin() {
           closes_at: new Date(newMarket.closes_at).toISOString(),
           created_by: user?.id,
           image_url: newMarket.image_url || null,
+          allow_cashout: newMarket.allow_cashout,
         })
         .select()
         .single();
