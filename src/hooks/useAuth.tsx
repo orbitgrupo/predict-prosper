@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         is_age_verified: profileData.is_age_verified,
         verified_at: profileData.verified_at,
         referral_code: (profileData as any).referral_code || '',
+        referral_clicks: (profileData as any).referral_clicks ?? 0,
       });
     }
 
