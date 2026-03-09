@@ -24,6 +24,7 @@ export interface Market {
   created_at: string;
   updated_at: string;
   image_url: string | null;
+  allow_cashout: boolean;
   options?: MarketOption[];
 }
 
