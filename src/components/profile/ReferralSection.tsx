@@ -115,6 +115,10 @@ export function ReferralSection({ userId, referralCode, referralClicks = 0 }: Re
           <div className="flex gap-4 text-sm text-muted-foreground">
             <span>Tú recibes: <strong className="text-foreground">${settings?.referral_bonus_referrer ?? 0}</strong></span>
             <span>Tu amigo recibe: <strong className="text-foreground">${settings?.referral_bonus_referred ?? 0}</strong></span>
+            <span className="flex items-center gap-1">
+              <MousePointerClick className="h-3.5 w-3.5" />
+              Clics en tu enlace: <strong className="text-foreground">{referralClicks}</strong>
+            </span>
           </div>
 
           <div className="flex gap-2">

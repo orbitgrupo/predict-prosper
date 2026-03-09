@@ -46,8 +46,6 @@ export default function Auth() {
       supabase.rpc('track_referral_click', { p_referral_code: refCode } as any).then();
     }
   }, [refCode]);
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [showForgot, setShowForgot] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
