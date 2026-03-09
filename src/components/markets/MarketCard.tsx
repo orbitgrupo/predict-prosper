@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, TrendingUp, ImageIcon } from 'lucide-react';
+import { Clock, TrendingUp, ImageIcon, ShieldCheck, ShieldOff } from 'lucide-react';
 import { Market } from '@/hooks/useMarkets';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -118,9 +118,21 @@ export function MarketCard({ market }: MarketCardProps) {
 
           {/* Stats */}
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <TrendingUp className="h-3.5 w-3.5" />
-              <span>${totalVolume.toLocaleString('es-ES')}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-3.5 w-3.5" />
+                <span>${totalVolume.toLocaleString('es-ES')}</span>
+              </div>
+              <div className="flex items-center gap-1" title={market.allow_cashout ? 'Retiro disponible' : 'Retiro no disponible'}>
+                {market.allow_cashout ? (
+                  <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+                ) : (
+                  <ShieldOff className="h-3.5 w-3.5 text-destructive" />
+                )}
+                <span className={market.allow_cashout ? 'text-green-500' : 'text-destructive'}>
+                  {market.allow_cashout ? 'Cashout' : 'Sin cashout'}
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
