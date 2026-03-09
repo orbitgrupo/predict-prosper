@@ -67,6 +67,7 @@ export default function Admin() {
     closes_at: '',
     image_url: '',
     options: ['', ''],
+    allow_cashout: true,
   });
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
