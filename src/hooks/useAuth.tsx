@@ -16,6 +16,7 @@ interface Profile {
   verified_at: string | null;
   referral_code: string;
   referral_clicks: number;
+  accepted_terms: boolean;
 }
 
 interface AuthContextType {
