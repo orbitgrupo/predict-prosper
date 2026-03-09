@@ -8,6 +8,7 @@ import { ProfileStats } from '@/components/profile/ProfileStats';
 import { TransactionHistory } from '@/components/profile/TransactionHistory';
 import { BettingHistory } from '@/components/profile/BettingHistory';
 import { ReferralSection } from '@/components/profile/ReferralSection';
+import { WithdrawalSection } from '@/components/profile/WithdrawalSection';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
