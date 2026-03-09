@@ -120,6 +120,44 @@ export type Database = {
           },
         ]
       }
+      market_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          market_id: string
+          option_name: string
+          probability: number
+          total_amount: number
+          total_volume: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          market_id: string
+          option_name: string
+          probability?: number
+          total_amount?: number
+          total_volume?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          market_id?: string
+          option_name?: string
+          probability?: number
+          total_amount?: number
+          total_volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_snapshots_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_suggestions: {
         Row: {
           admin_notes: string | null
@@ -492,6 +530,10 @@ export type Database = {
     Functions: {
       admin_add_funds: {
         Args: { p_amount: number; p_user_id: string }
+        Returns: Json
+      }
+      cashout_bet: {
+        Args: { p_bet_id: string; p_user_id: string }
         Returns: Json
       }
       has_role: {

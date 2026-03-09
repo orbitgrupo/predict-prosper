@@ -2,6 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { BettingPanel } from '@/components/markets/BettingPanel';
+import { MarketCharts } from '@/components/markets/MarketCharts';
+import { CashoutButton } from '@/components/markets/CashoutButton';
 import { useMarket, useUserBets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
@@ -129,6 +131,9 @@ export default function MarketDetail() {
               <BettingPanel market={market} />
             </div>
 
+            {/* Market Charts */}
+            <MarketCharts marketId={market.id} options={options} />
+
             {/* Probability chart */}
             <Card>
               <CardHeader className="px-4 sm:px-6">
@@ -249,10 +254,23 @@ export default function MarketDetail() {
                             </p>
                           </div>
                         </div>
-                        {bet.is_winner !== null && (
+                        {bet.is_winner !== null ? (
                           <Badge variant={bet.is_winner ? 'default' : 'secondary'} className="shrink-0 text-xs">
-                            {bet.is_winner ? `+$${Number(bet.payout_amount).toFixed(2)}` : 'Perdida'}
+                            {bet.is_winner ? `+$${Number(bet.payout_amount).toFixed(2)}` : bet.payout_amount ? `Retirado: $${Number(bet.payout_amount).toFixed(2)}` : 'Perdida'}
                           </Badge>
+                        ) : (
+                          <CashoutButton
+                            bet={{
+                              id: bet.id,
+                              option: bet.option,
+                              amount: Number(bet.amount),
+                              potential_payout: bet.potential_payout ? Number(bet.potential_payout) : null,
+                              is_winner: bet.is_winner,
+                            }}
+                            marketOptions={options}
+                            marketStatus={market.status}
+                            marketClosesAt={market.closes_at}
+                          />
                         )}
                       </div>
                     ))}
