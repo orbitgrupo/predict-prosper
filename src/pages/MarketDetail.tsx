@@ -2,6 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { BettingPanel } from '@/components/markets/BettingPanel';
+import { MarketCharts } from '@/components/markets/MarketCharts';
+import { CashoutButton } from '@/components/markets/CashoutButton';
 import { useMarket, useUserBets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
