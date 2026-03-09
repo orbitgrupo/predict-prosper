@@ -113,14 +113,18 @@ export default function Admin() {
   }, [markets]);
 
   useEffect(() => {
-    async function fetchUsers() {
-      const { count } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      setStats(prev => ({ ...prev, totalUsers: count || 0 }));
+    async function fetchStats() {
+      const [{ count }, { data: referrals }] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('referrals').select('referrer_bonus, referred_bonus'),
+      ]);
+      const totalReferrals = referrals?.length || 0;
+      const totalReferrerBonuses = referrals?.reduce((s, r) => s + Number(r.referrer_bonus), 0) || 0;
+      const totalReferredBonuses = referrals?.reduce((s, r) => s + Number(r.referred_bonus), 0) || 0;
+      setStats(prev => ({ ...prev, totalUsers: count || 0, totalReferrals, totalReferrerBonuses, totalReferredBonuses }));
     }
     if (isAdmin) {
-      fetchUsers();
+      fetchStats();
     }
   }, [isAdmin]);
 
