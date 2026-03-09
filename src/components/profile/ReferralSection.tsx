@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 interface ReferralSectionProps {
   userId: string;
   referralCode: string;
+  referralClicks?: number;
 }
 
 export function ReferralSection({ userId, referralCode }: ReferralSectionProps) {
