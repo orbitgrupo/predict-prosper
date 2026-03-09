@@ -16,6 +16,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
+import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
 import {
   Dialog,
   DialogContent,
