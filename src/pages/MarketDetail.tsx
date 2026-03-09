@@ -270,6 +270,7 @@ export default function MarketDetail() {
                             marketOptions={options}
                             marketStatus={market.status}
                             marketClosesAt={market.closes_at}
+                            allowCashout={market.allow_cashout ?? true}
                           />
                         )}
                       </div>
