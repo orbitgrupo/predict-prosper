@@ -15,7 +15,7 @@ interface ReferralSectionProps {
   referralClicks?: number;
 }
 
-export function ReferralSection({ userId, referralCode }: ReferralSectionProps) {
+export function ReferralSection({ userId, referralCode, referralClicks = 0 }: ReferralSectionProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [inputCode, setInputCode] = useState('');
