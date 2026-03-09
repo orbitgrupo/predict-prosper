@@ -28,7 +28,7 @@ export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt
   const queryClient = useQueryClient();
 
   const isExpired = new Date(marketClosesAt) <= new Date();
-  const canCashout = marketStatus === 'active' && !isExpired && bet.is_winner === null;
+  const canCashout = marketStatus === 'active' && !isExpired && bet.is_winner === null && allowCashout;
 
   // Calculate current cashout value
   const totalVolume = marketOptions.reduce((sum, o) => sum + o.total_amount, 0);
