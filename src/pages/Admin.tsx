@@ -685,6 +685,10 @@ export default function Admin() {
           <SuggestionsManagement />
         </TabsContent>
 
+        <TabsContent value="withdrawals" className="mt-6">
+          <WithdrawalManagement />
+        </TabsContent>
+
         <TabsContent value="users" className="mt-6">
           <UserManagement />
         </TabsContent>
