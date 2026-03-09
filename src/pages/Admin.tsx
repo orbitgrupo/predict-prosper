@@ -352,6 +352,17 @@ export default function Admin() {
                     placeholder="https://ejemplo.com/imagen.jpg"
                   />
                 </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div>
+                    <Label htmlFor="allow_cashout" className="text-sm font-medium">Permitir retiro (cashout)</Label>
+                    <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus apuestas mientras el mercado esté activo.</p>
+                  </div>
+                  <Switch
+                    id="allow_cashout"
+                    checked={newMarket.allow_cashout}
+                    onCheckedChange={(checked) => setNewMarket({ ...newMarket, allow_cashout: checked })}
+                  />
+                </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>Opciones de respuesta *</Label>
