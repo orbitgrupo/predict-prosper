@@ -725,6 +725,17 @@ export default function Admin() {
                 <Label htmlFor="edit-image_url">URL de imagen</Label>
                 <Input id="edit-image_url" type="url" value={editMarket.image_url} onChange={(e) => setEditMarket({ ...editMarket, image_url: e.target.value })} />
               </div>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <Label htmlFor="edit-allow_cashout" className="text-sm font-medium">Permitir retiro (cashout)</Label>
+                  <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus apuestas mientras el mercado esté activo.</p>
+                </div>
+                <Switch
+                  id="edit-allow_cashout"
+                  checked={editMarket.allow_cashout}
+                  onCheckedChange={(checked) => setEditMarket({ ...editMarket, allow_cashout: checked })}
+                />
+              </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>Opciones *</Label>
