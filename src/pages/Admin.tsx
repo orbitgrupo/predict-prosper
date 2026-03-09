@@ -165,7 +165,7 @@ export default function Admin() {
       if (optionsError) throw optionsError;
       toast({ title: 'Mercado creado', description: 'El mercado se ha creado correctamente.' });
       setCreateDialogOpen(false);
-      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''] });
+      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
