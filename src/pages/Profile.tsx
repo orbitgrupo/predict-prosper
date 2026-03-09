@@ -68,7 +68,7 @@ export default function Profile() {
                 <BettingHistory userId={user.id} />
               </TabsContent>
               <TabsContent value="referrals" className="mt-4">
-                <ReferralSection userId={user.id} referralCode={(profile as any).referral_code || ''} referralClicks={(profile as any).referral_clicks ?? 0} />
+                <ReferralSection userId={user.id} referralCode={profile.referral_code} referralClicks={profile.referral_clicks} />
               </TabsContent>
             </Tabs>
           </div>
