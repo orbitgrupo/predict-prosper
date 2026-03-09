@@ -208,6 +208,7 @@ export default function Admin() {
           category: editMarket.category || null,
           closes_at: new Date(editMarket.closes_at).toISOString(),
           image_url: editMarket.image_url || null,
+          allow_cashout: editMarket.allow_cashout,
         })
         .eq('id', marketToEdit.id);
       if (marketError) throw marketError;
