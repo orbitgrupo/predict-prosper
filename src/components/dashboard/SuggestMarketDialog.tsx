@@ -90,10 +90,10 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
       const { data, error } = await supabase.rpc('submit_market_suggestion', {
         p_user_id: userId,
         p_title: suggestion.title,
-        p_description: suggestion.description || null,
-        p_category: suggestion.category || null,
+        p_description: suggestion.description || '',
+        p_category: suggestion.category || '',
         p_closes_at: new Date(suggestion.closes_at).toISOString(),
-        p_options: JSON.stringify(validOptions),
+        p_options: validOptions as any,
         p_selected_option: suggestion.selectedOption,
         p_fee_amount: FEE_AMOUNT,
       });
