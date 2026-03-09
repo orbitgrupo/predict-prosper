@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, LayoutDashboard, Settings, LogOut, User, Wallet, Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 import { useState, useEffect } from 'react';
 
 export function Navbar() {
