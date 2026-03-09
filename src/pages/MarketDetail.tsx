@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, TrendingUp, Users, Loader2, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, Users, Loader2, ImageIcon, Info } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
