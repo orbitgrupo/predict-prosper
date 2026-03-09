@@ -21,7 +21,7 @@ interface CashoutButtonProps {
   allowCashout: boolean;
 }
 
-export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt }: CashoutButtonProps) {
+export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt, allowCashout }: CashoutButtonProps) {
   const [open, setOpen] = useState(false);
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
