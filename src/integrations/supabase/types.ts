@@ -388,6 +388,65 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          account_holder: string | null
+          account_number: string | null
+          admin_notes: string | null
+          amount: number
+          bank_name: string | null
+          created_at: string
+          id: string
+          method: Database["public"]["Enums"]["withdrawal_method"]
+          paypal_email: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_holder?: string | null
+          account_number?: string | null
+          admin_notes?: string | null
+          amount: number
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          method: Database["public"]["Enums"]["withdrawal_method"]
+          paypal_email?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_holder?: string | null
+          account_number?: string | null
+          admin_notes?: string | null
+          amount?: number
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          method?: Database["public"]["Enums"]["withdrawal_method"]
+          paypal_email?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -417,6 +476,26 @@ export type Database = {
         Args: { p_referral_code: string; p_user_id: string }
         Returns: Json
       }
+      process_withdrawal: {
+        Args: {
+          p_action: string
+          p_admin_notes?: string
+          p_withdrawal_id: string
+        }
+        Returns: Json
+      }
+      request_withdrawal: {
+        Args: {
+          p_account_holder?: string
+          p_account_number?: string
+          p_amount: number
+          p_bank_name?: string
+          p_method: Database["public"]["Enums"]["withdrawal_method"]
+          p_paypal_email?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       resolve_market: {
         Args: { p_market_id: string; p_winning_option: string }
         Returns: Json
@@ -442,6 +521,8 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       market_status: "active" | "closed" | "resolved"
+      withdrawal_method: "bank_transfer" | "paypal"
+      withdrawal_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -571,6 +652,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       market_status: ["active", "closed", "resolved"],
+      withdrawal_method: ["bank_transfer", "paypal"],
+      withdrawal_status: ["pending", "approved", "rejected"],
     },
   },
 } as const

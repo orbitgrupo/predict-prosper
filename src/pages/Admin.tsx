@@ -16,6 +16,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
+import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
 import {
   Dialog,
   DialogContent,
@@ -570,6 +571,7 @@ export default function Admin() {
           <TabsList>
             <TabsTrigger value="markets">Mercados</TabsTrigger>
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
+            <TabsTrigger value="withdrawals">Retiros</TabsTrigger>
             <TabsTrigger value="users">Usuarios</TabsTrigger>
             <TabsTrigger value="activity">Historial de Actividades</TabsTrigger>
             <TabsTrigger value="promotion">Promoción</TabsTrigger>
@@ -681,6 +683,10 @@ export default function Admin() {
 
         <TabsContent value="suggestions" className="mt-6">
           <SuggestionsManagement />
+        </TabsContent>
+
+        <TabsContent value="withdrawals" className="mt-6">
+          <WithdrawalManagement />
         </TabsContent>
 
         <TabsContent value="users" className="mt-6">
