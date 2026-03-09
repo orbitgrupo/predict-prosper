@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlaceBet, Market } from '@/hooks/useMarkets';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface BettingPanelProps {
   market: Market;
@@ -16,9 +17,25 @@ type OptionLike = { id: string; option_name: string; total_amount: number };
 export function BettingPanel({ market }: BettingPanelProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
+  const [isRestrictedLocation, setIsRestrictedLocation] = useState<boolean>(false);
   const { user, profile, refreshProfile } = useAuth();
   const placeBet = usePlaceBet();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.country_code === 'US' || data.country === 'US' || data.country_name === 'United States') {
+          setIsRestrictedLocation(true);
+        }
+      } catch (error) {
+        console.error('Error checking location:', error);
+      }
+    };
+    checkLocation();
+  }, []);
 
   const hasOptions = market.options && market.options.length > 0;
   const options: OptionLike[] = hasOptions 
@@ -209,21 +226,30 @@ export function BettingPanel({ market }: BettingPanelProps) {
         )}
 
         {/* Place bet button */}
-        <Button
-          className="w-full"
-          size="lg"
-          disabled={!selectedOption || betAmount <= 0 || placeBet.isPending || (profile && betAmount > profile.balance)}
-          onClick={handlePlaceBet}
-        >
-          {placeBet.isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Procesando...
-            </>
-          ) : (
-            'Confirmar apuesta'
-          )}
-        </Button>
+        {isRestrictedLocation ? (
+          <Alert variant="destructive" className="mt-4 bg-destructive/10">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Por restricciones legales, las apuestas no están permitidas desde Estados Unidos.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Button
+            className="w-full"
+            size="lg"
+            disabled={!selectedOption || betAmount <= 0 || placeBet.isPending || (profile && betAmount > profile.balance)}
+            onClick={handlePlaceBet}
+          >
+            {placeBet.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              'Confirmar apuesta'
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
