@@ -124,16 +124,25 @@ export function MarketCard({ market }: MarketCardProps) {
                 <TrendingUp className="h-3.5 w-3.5" />
                 <span>${totalVolume.toLocaleString('es-ES')}</span>
               </div>
-              <div className="flex items-center gap-1" title={market.allow_cashout ? 'Retiro disponible' : 'Retiro no disponible'}>
-                {market.allow_cashout ? (
-                  <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
-                ) : (
-                  <ShieldOff className="h-3.5 w-3.5 text-destructive" />
-                )}
-                <span className={market.allow_cashout ? 'text-green-500' : 'text-destructive'}>
-                  {market.allow_cashout ? 'Cashout' : 'Sin cashout'}
-                </span>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1 cursor-help">
+                    {market.allow_cashout ? (
+                      <ShieldCheck className="h-3.5 w-3.5 text-yes" />
+                    ) : (
+                      <ShieldOff className="h-3.5 w-3.5 text-destructive" />
+                    )}
+                    <span className={market.allow_cashout ? 'text-yes' : 'text-destructive'}>
+                      {market.allow_cashout ? 'Cashout' : 'Sin cashout'}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[200px] text-center text-xs">
+                  {market.allow_cashout
+                    ? 'Puedes retirar tu apuesta antes de que cierre el mercado y recibir su valor actual.'
+                    : 'No es posible retirar tu apuesta anticipadamente en este mercado. Debes esperar al resultado final.'}
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
