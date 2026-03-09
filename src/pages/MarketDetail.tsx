@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, TrendingUp, Users, Loader2, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, Users, Loader2, ImageIcon, Info } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -229,6 +229,14 @@ export default function MarketDetail() {
                   <CardTitle className="text-base sm:text-lg">Tus apuestas</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
+                  {!(market.allow_cashout ?? true) && market.status === 'active' && (
+                    <div className="flex items-start gap-2 rounded-lg bg-muted p-3 mb-3">
+                      <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground">
+                        El retiro de apuestas no está disponible para este mercado. Tus apuestas se mantendrán hasta que el mercado sea resuelto.
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-3">
                     {marketBets.map((bet) => (
                       <div 
