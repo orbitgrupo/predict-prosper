@@ -16,6 +16,7 @@ interface Profile {
   verified_at: string | null;
   referral_code: string;
   referral_clicks: number;
+  accepted_terms: boolean;
 }
 
 interface AuthContextType {
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verified_at: profileData.verified_at,
         referral_code: (profileData as any).referral_code || '',
         referral_clicks: (profileData as any).referral_clicks ?? 0,
+        accepted_terms: (profileData as any).accepted_terms ?? false,
       });
     }
 

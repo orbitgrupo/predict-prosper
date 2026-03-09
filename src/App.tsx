@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { RequireTerms } from "@/components/auth/RequireTerms";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -14,6 +15,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Notifications from "./pages/Notifications";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -27,13 +29,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/markets" element={<Markets />} />
-            <Route path="/market/:id" element={<MarketDetail />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/dashboard" element={<RequireTerms><Dashboard /></RequireTerms>} />
+            <Route path="/markets" element={<RequireTerms><Markets /></RequireTerms>} />
+            <Route path="/market/:id" element={<RequireTerms><MarketDetail /></RequireTerms>} />
+            <Route path="/admin" element={<RequireTerms><Admin /></RequireTerms>} />
+            <Route path="/profile" element={<RequireTerms><Profile /></RequireTerms>} />
+            <Route path="/notifications" element={<RequireTerms><Notifications /></RequireTerms>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
