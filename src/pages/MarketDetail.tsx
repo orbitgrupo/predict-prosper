@@ -131,6 +131,9 @@ export default function MarketDetail() {
               <BettingPanel market={market} />
             </div>
 
+            {/* Market Charts */}
+            <MarketCharts marketId={market.id} options={options} />
+
             {/* Probability chart */}
             <Card>
               <CardHeader className="px-4 sm:px-6">
