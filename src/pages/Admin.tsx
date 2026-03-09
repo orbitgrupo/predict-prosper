@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 import { 
   Plus, 
   Loader2, 
@@ -67,6 +68,7 @@ export default function Admin() {
     closes_at: '',
     image_url: '',
     options: ['', ''],
+    allow_cashout: true,
   });
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -79,6 +81,7 @@ export default function Admin() {
     closes_at: '',
     image_url: '',
     options: [] as { id?: string; option_name: string }[],
+    allow_cashout: true,
   });
 
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
@@ -149,6 +152,7 @@ export default function Admin() {
           closes_at: new Date(newMarket.closes_at).toISOString(),
           created_by: user?.id,
           image_url: newMarket.image_url || null,
+          allow_cashout: newMarket.allow_cashout,
         })
         .select()
         .single();
@@ -161,7 +165,7 @@ export default function Admin() {
       if (optionsError) throw optionsError;
       toast({ title: 'Mercado creado', description: 'El mercado se ha creado correctamente.' });
       setCreateDialogOpen(false);
-      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''] });
+      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -179,6 +183,7 @@ export default function Admin() {
       closes_at: market.closes_at ? new Date(market.closes_at).toISOString().slice(0, 16) : '',
       image_url: market.image_url || '',
       options: market.options?.map(o => ({ id: o.id, option_name: o.option_name })) || [],
+      allow_cashout: market.allow_cashout ?? true,
     });
     setEditDialogOpen(true);
   };
@@ -203,6 +208,7 @@ export default function Admin() {
           category: editMarket.category || null,
           closes_at: new Date(editMarket.closes_at).toISOString(),
           image_url: editMarket.image_url || null,
+          allow_cashout: editMarket.allow_cashout,
         })
         .eq('id', marketToEdit.id);
       if (marketError) throw marketError;
@@ -344,6 +350,17 @@ export default function Admin() {
                     value={newMarket.image_url}
                     onChange={(e) => setNewMarket({ ...newMarket, image_url: e.target.value })}
                     placeholder="https://ejemplo.com/imagen.jpg"
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div>
+                    <Label htmlFor="allow_cashout" className="text-sm font-medium">Permitir retiro (cashout)</Label>
+                    <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus apuestas mientras el mercado esté activo.</p>
+                  </div>
+                  <Switch
+                    id="allow_cashout"
+                    checked={newMarket.allow_cashout}
+                    onCheckedChange={(checked) => setNewMarket({ ...newMarket, allow_cashout: checked })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -512,6 +529,9 @@ export default function Admin() {
                                 <Badge variant="outline" className="text-xs">{market.category}</Badge>
                               )}
                               <Badge className="text-xs">Activo</Badge>
+                              {market.allow_cashout && (
+                                <Badge variant="outline" className="text-xs text-green-600 border-green-600">Cashout</Badge>
+                              )}
                             </div>
                             <h3 className="font-medium text-sm sm:text-base truncate">{market.title}</h3>
                             <p className="text-xs sm:text-sm text-muted-foreground">
@@ -707,6 +727,17 @@ export default function Admin() {
               <div className="space-y-2">
                 <Label htmlFor="edit-image_url">URL de imagen</Label>
                 <Input id="edit-image_url" type="url" value={editMarket.image_url} onChange={(e) => setEditMarket({ ...editMarket, image_url: e.target.value })} />
+              </div>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <Label htmlFor="edit-allow_cashout" className="text-sm font-medium">Permitir retiro (cashout)</Label>
+                  <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus apuestas mientras el mercado esté activo.</p>
+                </div>
+                <Switch
+                  id="edit-allow_cashout"
+                  checked={editMarket.allow_cashout}
+                  onCheckedChange={(checked) => setEditMarket({ ...editMarket, allow_cashout: checked })}
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">

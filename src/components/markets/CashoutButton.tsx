@@ -18,16 +18,17 @@ interface CashoutButtonProps {
   marketOptions: { option_name: string; total_amount: number }[];
   marketStatus: string;
   marketClosesAt: string;
+  allowCashout: boolean;
 }
 
-export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt }: CashoutButtonProps) {
+export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt, allowCashout }: CashoutButtonProps) {
   const [open, setOpen] = useState(false);
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const isExpired = new Date(marketClosesAt) <= new Date();
-  const canCashout = marketStatus === 'active' && !isExpired && bet.is_winner === null;
+  const canCashout = marketStatus === 'active' && !isExpired && bet.is_winner === null && allowCashout;
 
   // Calculate current cashout value
   const totalVolume = marketOptions.reduce((sum, o) => sum + o.total_amount, 0);

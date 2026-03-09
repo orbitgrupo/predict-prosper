@@ -214,6 +214,7 @@ export type Database = {
       }
       markets: {
         Row: {
+          allow_cashout: boolean
           category: string | null
           closes_at: string
           created_at: string
@@ -229,6 +230,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_cashout?: boolean
           category?: string | null
           closes_at: string
           created_at?: string
@@ -244,6 +246,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_cashout?: boolean
           category?: string | null
           closes_at?: string
           created_at?: string
