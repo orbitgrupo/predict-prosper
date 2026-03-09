@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Otro'];
 
@@ -57,7 +58,6 @@ export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Create market form
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newMarket, setNewMarket] = useState({
@@ -69,7 +69,6 @@ export default function Admin() {
     options: ['', ''],
   });
 
-  // Edit market form
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [marketToEdit, setMarketToEdit] = useState<Market | null>(null);
@@ -82,13 +81,11 @@ export default function Admin() {
     options: [] as { id?: string; option_name: string }[],
   });
 
-  // Resolve market
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [marketToResolve, setMarketToResolve] = useState<Market | null>(null);
   const [resolveOption, setResolveOption] = useState<string | null>(null);
 
-  // Stats
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalVolume: 0,
@@ -133,24 +130,14 @@ export default function Admin() {
 
   const handleCreateMarket = async () => {
     if (!newMarket.title || !newMarket.closes_at) {
-      toast({
-        title: 'Error',
-        description: 'Título y fecha de cierre son requeridos.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Título y fecha de cierre son requeridos.', variant: 'destructive' });
       return;
     }
-
     const validOptions = newMarket.options.filter(opt => opt.trim() !== '');
     if (validOptions.length < 2) {
-      toast({
-        title: 'Error',
-        description: 'Debes agregar al menos 2 opciones.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Debes agregar al menos 2 opciones.', variant: 'destructive' });
       return;
     }
-
     setCreating(true);
     try {
       const { data: marketData, error: marketError } = await supabase
@@ -165,35 +152,19 @@ export default function Admin() {
         })
         .select()
         .single();
-
       if (marketError) throw marketError;
-
-      // Insert options
       const optionsToInsert = validOptions.map(option => ({
         market_id: marketData.id,
         option_name: option.trim(),
       }));
-
-      const { error: optionsError } = await supabase
-        .from('market_options')
-        .insert(optionsToInsert);
-
+      const { error: optionsError } = await supabase.from('market_options').insert(optionsToInsert);
       if (optionsError) throw optionsError;
-
-      toast({
-        title: 'Mercado creado',
-        description: 'El mercado se ha creado correctamente.',
-      });
-      
+      toast({ title: 'Mercado creado', description: 'El mercado se ha creado correctamente.' });
       setCreateDialogOpen(false);
       setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''] });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setCreating(false);
     }
@@ -214,27 +185,16 @@ export default function Admin() {
 
   const handleEditMarket = async () => {
     if (!marketToEdit || !editMarket.title || !editMarket.closes_at) {
-      toast({
-        title: 'Error',
-        description: 'Título y fecha de cierre son requeridos.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Título y fecha de cierre son requeridos.', variant: 'destructive' });
       return;
     }
-
     const validOptions = editMarket.options.filter(opt => opt.option_name.trim() !== '');
     if (validOptions.length < 2) {
-      toast({
-        title: 'Error',
-        description: 'Debes tener al menos 2 opciones.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Debes tener al menos 2 opciones.', variant: 'destructive' });
       return;
     }
-
     setEditing(true);
     try {
-      // Update market
       const { error: marketError } = await supabase
         .from('markets')
         .update({
@@ -245,56 +205,27 @@ export default function Admin() {
           image_url: editMarket.image_url || null,
         })
         .eq('id', marketToEdit.id);
-
       if (marketError) throw marketError;
-
-      // Get existing option IDs
       const existingOptionIds = marketToEdit.options?.map(o => o.id) || [];
       const updatedOptionIds = validOptions.filter(o => o.id).map(o => o.id!);
-      
-      // Delete removed options
       const optionsToDelete = existingOptionIds.filter(id => !updatedOptionIds.includes(id));
       if (optionsToDelete.length > 0) {
-        const { error: deleteError } = await supabase
-          .from('market_options')
-          .delete()
-          .in('id', optionsToDelete);
+        const { error: deleteError } = await supabase.from('market_options').delete().in('id', optionsToDelete);
         if (deleteError) throw deleteError;
       }
-
-      // Update existing options and insert new ones
       for (const option of validOptions) {
         if (option.id) {
-          // Update existing
-          await supabase
-            .from('market_options')
-            .update({ option_name: option.option_name.trim() })
-            .eq('id', option.id);
+          await supabase.from('market_options').update({ option_name: option.option_name.trim() }).eq('id', option.id);
         } else {
-          // Insert new
-          await supabase
-            .from('market_options')
-            .insert({
-              market_id: marketToEdit.id,
-              option_name: option.option_name.trim(),
-            });
+          await supabase.from('market_options').insert({ market_id: marketToEdit.id, option_name: option.option_name.trim() });
         }
       }
-
-      toast({
-        title: 'Mercado actualizado',
-        description: 'El mercado se ha actualizado correctamente.',
-      });
-      
+      toast({ title: 'Mercado actualizado', description: 'El mercado se ha actualizado correctamente.' });
       setEditDialogOpen(false);
       setMarketToEdit(null);
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setEditing(false);
     }
@@ -302,36 +233,22 @@ export default function Admin() {
 
   const handleResolveMarket = async () => {
     if (!marketToResolve || !resolveOption) return;
-
     setResolving(true);
     try {
       const { data, error } = await supabase.rpc('resolve_market', {
         p_market_id: marketToResolve.id,
         p_winning_option: resolveOption,
       });
-
       if (error) throw error;
-
       const result = data as { success: boolean; error?: string };
-      if (!result.success) {
-        throw new Error(result.error || 'Error al resolver el mercado');
-      }
-
-      toast({
-        title: 'Mercado resuelto',
-        description: `El mercado se ha resuelto como "${resolveOption}".`,
-      });
-
+      if (!result.success) throw new Error(result.error || 'Error al resolver el mercado');
+      toast({ title: 'Mercado resuelto', description: `El mercado se ha resuelto como "${resolveOption}".` });
       setResolveDialogOpen(false);
       setMarketToResolve(null);
       setResolveOption(null);
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setResolving(false);
     }
@@ -355,23 +272,23 @@ export default function Admin() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold">Panel de Administración</h1>
-            <p className="mt-2 text-muted-foreground">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold">Panel de Administración</h1>
+            <p className="mt-1 sm:mt-2 text-sm sm:text-base text-muted-foreground">
               Gestiona mercados, usuarios y configuración.
             </p>
           </div>
           
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 Crear mercado
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[85vh] flex flex-col">
+            <DialogContent className="max-h-[85vh] flex flex-col max-w-[95vw] sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>Crear nuevo mercado</DialogTitle>
               </DialogHeader>
@@ -405,9 +322,7 @@ export default function Admin() {
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -441,7 +356,7 @@ export default function Admin() {
                       onClick={() => setNewMarket({ ...newMarket, options: [...newMarket.options, ''] })}
                     >
                       <Plus className="h-4 w-4 mr-1" />
-                      Agregar opción
+                      Agregar
                     </Button>
                   </div>
                   {newMarket.options.map((option, index) => (
@@ -460,6 +375,7 @@ export default function Admin() {
                           type="button"
                           variant="outline"
                           size="icon"
+                          className="shrink-0"
                           onClick={() => {
                             const newOptions = newMarket.options.filter((_, i) => i !== index);
                             setNewMarket({ ...newMarket, options: newOptions });
@@ -471,16 +387,9 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
-                <Button
-                  className="w-full" 
-                  onClick={handleCreateMarket}
-                  disabled={creating}
-                >
+                <Button className="w-full" onClick={handleCreateMarket} disabled={creating}>
                   {creating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creando...
-                    </>
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</>
                   ) : (
                     'Crear mercado'
                   )}
@@ -491,30 +400,30 @@ export default function Admin() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-8">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                  <Users className="h-6 w-6 text-primary" />
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Usuarios totales</p>
-                  <p className="font-display text-2xl font-bold">{stats.totalUsers}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Usuarios</p>
+                  <p className="font-display text-lg sm:text-2xl font-bold">{stats.totalUsers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
-                  <DollarSign className="h-6 w-6 text-success" />
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-success/10 shrink-0">
+                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Volumen total</p>
-                  <p className="font-display text-2xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Volumen</p>
+                  <p className="font-display text-lg sm:text-2xl font-bold">
                     ${stats.totalVolume.toLocaleString('es-ES')}
                   </p>
                 </div>
@@ -523,42 +432,42 @@ export default function Admin() {
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
-                  <TrendingUp className="h-6 w-6 text-warning" />
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-warning/10 shrink-0">
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Mercados activos</p>
-                  <p className="font-display text-2xl font-bold">{stats.activeMarkets}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                  <UserPlus className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total referidos</p>
-                  <p className="font-display text-2xl font-bold">{stats.totalReferrals}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Activos</p>
+                  <p className="font-display text-lg sm:text-2xl font-bold">{stats.activeMarkets}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
-                  <Gift className="h-6 w-6 text-success" />
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+                  <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Bonos otorgados</p>
-                  <p className="font-display text-2xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Referidos</p>
+                  <p className="font-display text-lg sm:text-2xl font-bold">{stats.totalReferrals}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="col-span-2 sm:col-span-1">
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-success/10 shrink-0">
+                  <Gift className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Bonos</p>
+                  <p className="font-display text-lg sm:text-2xl font-bold">
                     ${(stats.totalReferrerBonuses + stats.totalReferredBonuses).toLocaleString('es-ES')}
                   </p>
                 </div>
@@ -568,150 +477,150 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="markets">
-          <TabsList>
-            <TabsTrigger value="markets">Mercados</TabsTrigger>
-            <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
-            <TabsTrigger value="withdrawals">Retiros</TabsTrigger>
-            <TabsTrigger value="users">Usuarios</TabsTrigger>
-            <TabsTrigger value="activity">Historial de Actividades</TabsTrigger>
-            <TabsTrigger value="promotion">Promoción</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full">
+            <TabsList className="w-max">
+              <TabsTrigger value="markets" className="text-xs sm:text-sm">Mercados</TabsTrigger>
+              <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Sugerencias</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
+              <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
+              <TabsTrigger value="activity" className="text-xs sm:text-sm">Actividades</TabsTrigger>
+              <TabsTrigger value="promotion" className="text-xs sm:text-sm">Promoción</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
-          <TabsContent value="markets" className="mt-6">
+          <TabsContent value="markets" className="mt-4 sm:mt-6">
             <Tabs defaultValue="active">
               <TabsList>
-                <TabsTrigger value="active">Activos ({activeMarkets.length})</TabsTrigger>
-                <TabsTrigger value="resolved">Resueltos ({resolvedMarkets.length})</TabsTrigger>
-          </TabsList>
+                <TabsTrigger value="active" className="text-xs sm:text-sm">Activos ({activeMarkets.length})</TabsTrigger>
+                <TabsTrigger value="resolved" className="text-xs sm:text-sm">Resueltos ({resolvedMarkets.length})</TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="active" className="mt-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : activeMarkets.length > 0 ? (
-              <div className="space-y-4">
-                {activeMarkets.map((market) => (
-                  <Card key={market.id}>
-                    <CardContent className="flex items-center justify-between py-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          {market.category && (
-                            <Badge variant="outline">{market.category}</Badge>
-                          )}
-                          <Badge>Activo</Badge>
-                        </div>
-                        <h3 className="font-medium">{market.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Cierra: {format(new Date(market.closes_at), "dd MMM yyyy, HH:mm", { locale: es })}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Volumen: ${(Number(market.total_yes_amount) + Number(market.total_no_amount)).toLocaleString('es-ES')}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => openEditDialog(market)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setMarketToResolve(market);
-                            setResolveDialogOpen(true);
-                          }}
-                        >
-                          Resolver
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-xl border bg-card p-12 text-center">
-                <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 font-display text-lg font-semibold">
-                  No hay mercados activos
-                </h3>
-                <p className="mt-2 text-muted-foreground">
-                  Crea un nuevo mercado para comenzar.
-                </p>
-              </div>
-            )}
+              <TabsContent value="active" className="mt-4 sm:mt-6">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : activeMarkets.length > 0 ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    {activeMarkets.map((market) => (
+                      <Card key={market.id}>
+                        <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 px-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                              {market.category && (
+                                <Badge variant="outline" className="text-xs">{market.category}</Badge>
+                              )}
+                              <Badge className="text-xs">Activo</Badge>
+                            </div>
+                            <h3 className="font-medium text-sm sm:text-base truncate">{market.title}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              Cierra: {format(new Date(market.closes_at), "dd MMM yyyy, HH:mm", { locale: es })}
+                            </p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              Volumen: ${(Number(market.total_yes_amount) + Number(market.total_no_amount)).toLocaleString('es-ES')}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 sm:h-9 sm:w-9"
+                              onClick={() => openEditDialog(market)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs sm:text-sm"
+                              onClick={() => {
+                                setMarketToResolve(market);
+                                setResolveDialogOpen(true);
+                              }}
+                            >
+                              Resolver
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border bg-card p-8 sm:p-12 text-center">
+                    <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 font-display text-lg font-semibold">No hay mercados activos</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">Crea un nuevo mercado para comenzar.</p>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="resolved" className="mt-4 sm:mt-6">
+                {resolvedMarkets.length > 0 ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    {resolvedMarkets.map((market) => (
+                      <Card key={market.id}>
+                        <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 px-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                              {market.category && (
+                                <Badge variant="outline" className="text-xs">{market.category}</Badge>
+                              )}
+                              <Badge variant="secondary" className="text-xs">Resuelto</Badge>
+                              <Badge className={`text-xs ${market.resolved_option === 'yes' ? 'bg-yes' : 'bg-no'}`}>
+                                {market.resolved_option === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <h3 className="font-medium text-sm sm:text-base truncate">{market.title}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              Volumen: ${(Number(market.total_yes_amount) + Number(market.total_no_amount)).toLocaleString('es-ES')}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border bg-card p-8 sm:p-12 text-center">
+                    <CheckCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 font-display text-lg font-semibold">No hay mercados resueltos</h3>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="resolved" className="mt-6">
-            {resolvedMarkets.length > 0 ? (
-              <div className="space-y-4">
-                {resolvedMarkets.map((market) => (
-                  <Card key={market.id}>
-                    <CardContent className="flex items-center justify-between py-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          {market.category && (
-                            <Badge variant="outline">{market.category}</Badge>
-                          )}
-                          <Badge variant="secondary">Resuelto</Badge>
-                          <Badge className={market.resolved_option === 'yes' ? 'bg-yes' : 'bg-no'}>
-                            {market.resolved_option === 'yes' ? 'Sí' : 'No'}
-                          </Badge>
-                        </div>
-                        <h3 className="font-medium">{market.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Volumen: ${(Number(market.total_yes_amount) + Number(market.total_no_amount)).toLocaleString('es-ES')}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-xl border bg-card p-12 text-center">
-                <CheckCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 font-display text-lg font-semibold">
-                  No hay mercados resueltos
-                </h3>
-              </div>
-            )}
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
+          <TabsContent value="suggestions" className="mt-4 sm:mt-6">
+            <SuggestionsManagement />
+          </TabsContent>
 
-        <TabsContent value="suggestions" className="mt-6">
-          <SuggestionsManagement />
-        </TabsContent>
+          <TabsContent value="withdrawals" className="mt-4 sm:mt-6">
+            <WithdrawalManagement />
+          </TabsContent>
 
-        <TabsContent value="withdrawals" className="mt-6">
-          <WithdrawalManagement />
-        </TabsContent>
+          <TabsContent value="users" className="mt-4 sm:mt-6">
+            <UserManagement />
+          </TabsContent>
 
-        <TabsContent value="users" className="mt-6">
-          <UserManagement />
-        </TabsContent>
+          <TabsContent value="activity" className="mt-4 sm:mt-6">
+            <ActivityHistory />
+          </TabsContent>
 
-        <TabsContent value="activity" className="mt-6">
-          <ActivityHistory />
-        </TabsContent>
-
-        <TabsContent value="promotion" className="mt-6">
-          <PromotionSettings />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="promotion" className="mt-4 sm:mt-6">
+            <PromotionSettings />
+          </TabsContent>
+        </Tabs>
 
         {/* Resolve dialog */}
         <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Resolver mercado</DialogTitle>
             </DialogHeader>
             {marketToResolve && (
               <div className="space-y-4 pt-4">
-                <p className="font-medium">{marketToResolve.title}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="font-medium text-sm sm:text-base">{marketToResolve.title}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Selecciona el resultado final de este mercado. Esta acción distribuirá
                   automáticamente las ganancias a los apostadores ganadores.
                 </p>
@@ -722,7 +631,7 @@ export default function Admin() {
                       <Button
                         key={option.id}
                         variant={resolveOption === option.option_name ? 'default' : 'outline'}
-                        className="h-16 flex-col gap-1"
+                        className="h-14 sm:h-16 flex-col gap-1 text-sm"
                         onClick={() => setResolveOption(option.option_name)}
                       >
                         <CheckCircle className="h-5 w-5" />
@@ -733,10 +642,8 @@ export default function Admin() {
                     <>
                       <Button
                         variant={resolveOption === 'yes' ? 'default' : 'outline'}
-                        className={`h-16 flex-col gap-1 ${
-                          resolveOption === 'yes' 
-                            ? 'bg-yes hover:bg-yes/90' 
-                            : 'hover:border-yes hover:text-yes'
+                        className={`h-14 sm:h-16 flex-col gap-1 ${
+                          resolveOption === 'yes' ? 'bg-yes hover:bg-yes/90' : 'hover:border-yes hover:text-yes'
                         }`}
                         onClick={() => setResolveOption('yes')}
                       >
@@ -745,10 +652,8 @@ export default function Admin() {
                       </Button>
                       <Button
                         variant={resolveOption === 'no' ? 'default' : 'outline'}
-                        className={`h-16 flex-col gap-1 ${
-                          resolveOption === 'no' 
-                            ? 'bg-no hover:bg-no/90' 
-                            : 'hover:border-no hover:text-no'
+                        className={`h-14 sm:h-16 flex-col gap-1 ${
+                          resolveOption === 'no' ? 'bg-no hover:bg-no/90' : 'hover:border-no hover:text-no'
                         }`}
                         onClick={() => setResolveOption('no')}
                       >
@@ -759,16 +664,9 @@ export default function Admin() {
                   )}
                 </div>
 
-                <Button 
-                  className="w-full" 
-                  onClick={handleResolveMarket}
-                  disabled={!resolveOption || resolving}
-                >
+                <Button className="w-full" onClick={handleResolveMarket} disabled={!resolveOption || resolving}>
                   {resolving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Resolviendo...
-                    </>
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Resolviendo...</>
                   ) : (
                     'Confirmar resolución'
                   )}
@@ -780,77 +678,41 @@ export default function Admin() {
 
         {/* Edit dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-h-[85vh] flex flex-col">
+          <DialogContent className="max-h-[85vh] flex flex-col max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Editar mercado</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4 overflow-y-auto flex-1 pr-2">
               <div className="space-y-2">
                 <Label htmlFor="edit-title">Título *</Label>
-                <Input
-                  id="edit-title"
-                  value={editMarket.title}
-                  onChange={(e) => setEditMarket({ ...editMarket, title: e.target.value })}
-                  placeholder="¿Ganará el equipo X el campeonato?"
-                />
+                <Input id="edit-title" value={editMarket.title} onChange={(e) => setEditMarket({ ...editMarket, title: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-description">Descripción</Label>
-                <Textarea
-                  id="edit-description"
-                  value={editMarket.description}
-                  onChange={(e) => setEditMarket({ ...editMarket, description: e.target.value })}
-                  placeholder="Detalles adicionales sobre el evento..."
-                />
+                <Textarea id="edit-description" value={editMarket.description} onChange={(e) => setEditMarket({ ...editMarket, description: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-category">Categoría</Label>
-                <Select
-                  value={editMarket.category}
-                  onValueChange={(value) => setEditMarket({ ...editMarket, category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
+                <Select value={editMarket.category} onValueChange={(value) => setEditMarket({ ...editMarket, category: value })}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
+                    {CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-closes_at">Fecha de cierre *</Label>
-                <Input
-                  id="edit-closes_at"
-                  type="datetime-local"
-                  value={editMarket.closes_at}
-                  onChange={(e) => setEditMarket({ ...editMarket, closes_at: e.target.value })}
-                />
+                <Input id="edit-closes_at" type="datetime-local" value={editMarket.closes_at} onChange={(e) => setEditMarket({ ...editMarket, closes_at: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-image_url">URL de imagen</Label>
-                <Input
-                  id="edit-image_url"
-                  type="url"
-                  value={editMarket.image_url}
-                  onChange={(e) => setEditMarket({ ...editMarket, image_url: e.target.value })}
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
+                <Input id="edit-image_url" type="url" value={editMarket.image_url} onChange={(e) => setEditMarket({ ...editMarket, image_url: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Opciones de respuesta *</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditMarket({ ...editMarket, options: [...editMarket.options, { option_name: '' }] })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Agregar opción
+                  <Label>Opciones *</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setEditMarket({ ...editMarket, options: [...editMarket.options, { option_name: '' }] })}>
+                    <Plus className="h-4 w-4 mr-1" />Agregar
                   </Button>
                 </div>
                 {editMarket.options.map((option, index) => (
@@ -865,34 +727,18 @@ export default function Admin() {
                       placeholder={`Opción ${index + 1}`}
                     />
                     {editMarket.options.length > 2 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => {
-                          const newOptions = editMarket.options.filter((_, i) => i !== index);
-                          setEditMarket({ ...editMarket, options: newOptions });
-                        }}
-                      >
+                      <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => {
+                        const newOptions = editMarket.options.filter((_, i) => i !== index);
+                        setEditMarket({ ...editMarket, options: newOptions });
+                      }}>
                         <XCircle className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
                 ))}
               </div>
-              <Button
-                className="w-full" 
-                onClick={handleEditMarket}
-                disabled={editing}
-              >
-                {editing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  'Guardar cambios'
-                )}
+              <Button className="w-full" onClick={handleEditMarket} disabled={editing}>
+                {editing ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Guardando...</>) : ('Guardar cambios')}
               </Button>
             </div>
           </DialogContent>

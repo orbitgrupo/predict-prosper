@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Bell, CheckCircle, XCircle, Info, Check, Trash2 } from 'lucide-react';
+import { Loader2, Bell, CheckCircle, XCircle, Info, Check } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -50,7 +50,7 @@ export default function Notifications() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'withdrawal_approved':
-        return <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />;
+        return <CheckCircle className="h-5 w-5 text-success shrink-0" />;
       case 'withdrawal_rejected':
         return <XCircle className="h-5 w-5 text-destructive shrink-0" />;
       default:
@@ -74,21 +74,21 @@ export default function Notifications() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="flex items-center justify-between mb-6">
+      <main className="container mx-auto px-4 py-6 sm:py-8 max-w-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="font-display text-3xl font-bold flex items-center gap-3">
-              <Bell className="h-7 w-7" />
+            <h1 className="font-display text-2xl sm:text-3xl font-bold flex items-center gap-2 sm:gap-3">
+              <Bell className="h-6 w-6 sm:h-7 sm:w-7" />
               Notificaciones
             </h1>
-            <p className="mt-1 text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               {unreadCount > 0
                 ? `Tienes ${unreadCount} notificación${unreadCount > 1 ? 'es' : ''} sin leer`
                 : 'Estás al día'}
             </p>
           </div>
           {unreadCount > 0 && (
-            <Button variant="outline" size="sm" onClick={markAllAsRead} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={markAllAsRead} className="gap-1.5 text-xs sm:text-sm w-full sm:w-auto">
               <Check className="h-4 w-4" />
               Marcar todas como leídas
             </Button>
@@ -101,9 +101,9 @@ export default function Notifications() {
           </div>
         ) : !notifications || notifications.length === 0 ? (
           <Card>
-            <CardContent className="py-16 text-center">
+            <CardContent className="py-12 sm:py-16 text-center">
               <Bell className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">No tienes notificaciones aún</p>
+              <p className="text-sm text-muted-foreground">No tienes notificaciones aún</p>
             </CardContent>
           </Card>
         ) : (
@@ -116,21 +116,21 @@ export default function Notifications() {
                 }`}
                 onClick={() => { if (!n.is_read) markAsRead(n.id); }}
               >
-                <CardContent className="flex items-start gap-4 py-4">
+                <CardContent className="flex items-start gap-3 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6">
                   <div className="mt-0.5">{getIcon(n.type)}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className={`text-sm ${!n.is_read ? 'font-bold' : 'font-medium'}`}>
+                      <p className={`text-sm ${!n.is_read ? 'font-bold' : 'font-medium'} truncate`}>
                         {n.title}
                       </p>
                       {!n.is_read && (
-                        <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="default" className="text-[10px] px-1.5 py-0 shrink-0">
                           Nueva
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{n.message}</p>
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs sm:text-sm text-muted-foreground">{n.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1.5 sm:mt-2">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: es })}
                     </p>
                   </div>

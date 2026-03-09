@@ -71,15 +71,15 @@ export default function MarketDetail() {
       <Navbar />
       <EmailConfirmationBanner />
       
-      <main className="container mx-auto px-4 py-8">
-        <Link to="/markets" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <Link to="/markets" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 sm:mb-6">
           <ArrowLeft className="h-4 w-4" />
           Volver a mercados
         </Link>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
           {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Market image */}
             {market.image_url ? (
               <div className="aspect-[16/9] w-full overflow-hidden rounded-xl">
@@ -91,12 +91,12 @@ export default function MarketDetail() {
               </div>
             ) : (
               <div className="aspect-[16/9] w-full bg-muted rounded-xl flex items-center justify-center">
-                <ImageIcon className="h-16 w-16 text-muted-foreground/40" />
+                <ImageIcon className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/40" />
               </div>
             )}
 
             <div>
-              <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
                 {market.category && (
                   <Badge variant="outline">{market.category}</Badge>
                 )}
@@ -113,23 +113,28 @@ export default function MarketDetail() {
                 </Badge>
               </div>
               
-              <h1 className="font-display text-2xl font-bold lg:text-3xl">
+              <h1 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold">
                 {market.title}
               </h1>
               
               {market.description && (
-                <p className="mt-4 text-muted-foreground">
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground">
                   {market.description}
                 </p>
               )}
             </div>
 
+            {/* Mobile betting panel */}
+            <div className="lg:hidden">
+              <BettingPanel market={market} />
+            </div>
+
             {/* Probability chart */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Probabilidad actual</CardTitle>
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="text-base sm:text-lg">Probabilidad actual</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 px-4 sm:px-6">
                 <div className="space-y-2">
                   {options.map((option) => {
                     const percentage = totalVolume > 0 
@@ -162,16 +167,16 @@ export default function MarketDetail() {
             </Card>
 
             {/* Stats */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <TrendingUp className="h-5 w-5 text-primary" />
+                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Volumen total</p>
-                      <p className="font-display text-xl font-bold">
+                    <div className="text-center sm:text-left">
+                      <p className="text-xs text-muted-foreground">Volumen</p>
+                      <p className="font-display text-sm sm:text-xl font-bold">
                         ${totalVolume.toLocaleString('es-ES')}
                       </p>
                     </div>
@@ -180,14 +185,14 @@ export default function MarketDetail() {
               </Card>
               
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Users className="h-5 w-5 text-primary" />
+                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Líder</p>
-                      <p className="font-display text-xl font-bold">
+                    <div className="text-center sm:text-left min-w-0">
+                      <p className="text-xs text-muted-foreground">Líder</p>
+                      <p className="font-display text-sm sm:text-xl font-bold truncate">
                         {topOption?.option_name} ({topPercentage.toFixed(0)}%)
                       </p>
                     </div>
@@ -196,14 +201,14 @@ export default function MarketDetail() {
               </Card>
               
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
-                      <TrendingUp className="h-5 w-5 text-success" />
+                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-success/10 shrink-0">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Opciones</p>
-                      <p className="font-display text-xl font-bold">
+                    <div className="text-center sm:text-left">
+                      <p className="text-xs text-muted-foreground">Opciones</p>
+                      <p className="font-display text-sm sm:text-xl font-bold">
                         {options.length}
                       </p>
                     </div>
@@ -215,37 +220,37 @@ export default function MarketDetail() {
             {/* User bets */}
             {marketBets.length > 0 && (
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Tus apuestas</CardTitle>
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg">Tus apuestas</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 sm:px-6">
                   <div className="space-y-3">
                     {marketBets.map((bet) => (
                       <div 
                         key={bet.id}
-                        className="flex items-center justify-between rounded-lg bg-secondary p-4"
+                        className="flex items-center justify-between rounded-lg bg-secondary p-3 sm:p-4 gap-3"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                           <Badge 
-                            className={
+                            className={`shrink-0 text-xs ${
                               bet.option.toLowerCase() === 'yes' || bet.option.toLowerCase() === 'sí'
                                 ? 'bg-yes'
                                 : bet.option.toLowerCase() === 'no'
                                 ? 'bg-no'
                                 : ''
-                            }
+                            }`}
                           >
                             {bet.option}
                           </Badge>
-                          <div>
-                            <p className="font-medium">${Number(bet.amount).toFixed(2)}</p>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm">${Number(bet.amount).toFixed(2)}</p>
                             <p className="text-xs text-muted-foreground">
                               {format(new Date(bet.created_at), 'dd MMM yyyy, HH:mm', { locale: es })}
                             </p>
                           </div>
                         </div>
                         {bet.is_winner !== null && (
-                          <Badge variant={bet.is_winner ? 'default' : 'secondary'}>
+                          <Badge variant={bet.is_winner ? 'default' : 'secondary'} className="shrink-0 text-xs">
                             {bet.is_winner ? `+$${Number(bet.payout_amount).toFixed(2)}` : 'Perdida'}
                           </Badge>
                         )}
@@ -258,20 +263,20 @@ export default function MarketDetail() {
 
             {/* Info */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Información</CardTitle>
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="text-base sm:text-lg">Información</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Cierra:</span>
-                  <span>
+              <CardContent className="space-y-3 px-4 sm:px-6">
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground shrink-0">Cierra:</span>
+                  <span className="truncate">
                     {format(new Date(market.closes_at), "dd 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Tiempo restante:</span>
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground shrink-0">Restante:</span>
                   <span>
                     {isExpired 
                       ? 'Expirado' 
@@ -282,8 +287,8 @@ export default function MarketDetail() {
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Desktop sidebar */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-24">
               <BettingPanel market={market} />
             </div>

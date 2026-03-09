@@ -11,6 +11,7 @@ import { ReferralSection } from '@/components/profile/ReferralSection';
 import { WithdrawalSection } from '@/components/profile/WithdrawalSection';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export default function Profile() {
   const { user, profile, loading } = useAuth();
@@ -38,31 +39,34 @@ export default function Profile() {
       <Navbar />
       <EmailConfirmationBanner />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold">Mi Perfil</h1>
-          <p className="mt-2 text-muted-foreground">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold">Mi Perfil</h1>
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-muted-foreground">
             Gestiona tu cuenta y revisa tu historial.
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
           {/* Sidebar con info del perfil */}
           <div className="lg:col-span-1">
             <ProfileInfo profile={profile} userId={user.id} />
           </div>
 
           {/* Contenido principal */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             <ProfileStats userId={user.id} />
             
             <Tabs defaultValue="transactions" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="transactions">Transacciones</TabsTrigger>
-                <TabsTrigger value="bets">Apuestas</TabsTrigger>
-                <TabsTrigger value="withdrawals">Retiros</TabsTrigger>
-                <TabsTrigger value="referrals">Referidos</TabsTrigger>
-              </TabsList>
+              <ScrollArea className="w-full">
+                <TabsList className="w-max">
+                  <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transacciones</TabsTrigger>
+                  <TabsTrigger value="bets" className="text-xs sm:text-sm">Apuestas</TabsTrigger>
+                  <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
+                  <TabsTrigger value="referrals" className="text-xs sm:text-sm">Referidos</TabsTrigger>
+                </TabsList>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
               <TabsContent value="transactions" className="mt-4">
                 <TransactionHistory userId={user.id} />
               </TabsContent>
