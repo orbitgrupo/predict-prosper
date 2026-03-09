@@ -87,15 +87,16 @@ export default function Terms() {
                 cumples con este requisito de edad.
               </p>
 
-              <h2 className="text-lg font-semibold">5. Uso Responsable</h2>
+              <h2 className="text-lg font-semibold">5. Uso Responsable y Restricciones Geográficas</h2>
               <p className="text-sm text-muted-foreground">
-                Te comprometes a utilizar la plataforma de manera responsable y ética. Queda prohibido:
+                Te comprometes a utilizar la plataforma de manera responsable y ética. Queda estrictamente prohibido:
               </p>
               <ul className="list-disc pl-6 text-sm text-muted-foreground space-y-1">
                 <li>Crear múltiples cuentas para manipular mercados.</li>
                 <li>Utilizar información privilegiada para obtener ventajas indebidas.</li>
                 <li>Realizar cualquier actividad que interfiera con el funcionamiento normal de la plataforma.</li>
                 <li>Intentar acceder a cuentas de otros usuarios sin autorización.</li>
+                <li><strong className="text-foreground">Restricción territorial:</strong> Por motivos legales, los usuarios que se encuentren dentro del territorio de los Estados Unidos de América no tienen permitido realizar apuestas. Pueden crear cuentas y visualizar el contenido, pero la función de apostar se encuentra deshabilitada.</li>
               </ul>
 
               <h2 className="text-lg font-semibold">6. Saldo y Transacciones</h2>

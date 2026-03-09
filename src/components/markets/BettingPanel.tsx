@@ -226,21 +226,30 @@ export function BettingPanel({ market }: BettingPanelProps) {
         )}
 
         {/* Place bet button */}
-        <Button
-          className="w-full"
-          size="lg"
-          disabled={!selectedOption || betAmount <= 0 || placeBet.isPending || (profile && betAmount > profile.balance)}
-          onClick={handlePlaceBet}
-        >
-          {placeBet.isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Procesando...
-            </>
-          ) : (
-            'Confirmar apuesta'
-          )}
-        </Button>
+        {isRestrictedLocation ? (
+          <Alert variant="destructive" className="mt-4 bg-destructive/10">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Por restricciones legales, las apuestas no están permitidas desde Estados Unidos.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Button
+            className="w-full"
+            size="lg"
+            disabled={!selectedOption || betAmount <= 0 || placeBet.isPending || (profile && betAmount > profile.balance)}
+            onClick={handlePlaceBet}
+          >
+            {placeBet.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              'Confirmar apuesta'
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
