@@ -235,6 +235,7 @@ export type Database = {
           is_age_verified: boolean | null
           is_blocked: boolean
           phone: string | null
+          referral_clicks: number
           referral_code: string
           referred_by: string | null
           updated_at: string
@@ -253,6 +254,7 @@ export type Database = {
           is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
+          referral_clicks?: number
           referral_code: string
           referred_by?: string | null
           updated_at?: string
@@ -271,6 +273,7 @@ export type Database = {
           is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
+          referral_clicks?: number
           referral_code?: string
           referred_by?: string | null
           updated_at?: string
@@ -430,6 +433,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: Json
+      }
+      track_referral_click: {
+        Args: { p_referral_code: string }
+        Returns: undefined
       }
     }
     Enums: {

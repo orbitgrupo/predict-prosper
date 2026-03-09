@@ -31,13 +31,21 @@ const signupSchema = z.object({
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup' && !searchParams.get('ref'));
+  const refCode = searchParams.get('ref') || '';
+  const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup' && !refCode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
+  const [referralCode, setReferralCode] = useState(refCode);
   const [forgotEmail, setForgotEmail] = useState('');
   const [showForgot, setShowForgot] = useState(false);
+
+  // Track referral link click
+  useEffect(() => {
+    if (refCode) {
+      supabase.rpc('track_referral_click', { p_referral_code: refCode } as any).then();
+    }
+  }, [refCode]);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
