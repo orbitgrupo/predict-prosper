@@ -183,6 +183,7 @@ export default function Admin() {
       closes_at: market.closes_at ? new Date(market.closes_at).toISOString().slice(0, 16) : '',
       image_url: market.image_url || '',
       options: market.options?.map(o => ({ id: o.id, option_name: o.option_name })) || [],
+      allow_cashout: market.allow_cashout ?? true,
     });
     setEditDialogOpen(true);
   };
