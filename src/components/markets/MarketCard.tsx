@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, TrendingUp, ImageIcon } from 'lucide-react';
+import { Clock, TrendingUp, ImageIcon, ShieldCheck, ShieldOff } from 'lucide-react';
 import { Market } from '@/hooks/useMarkets';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
