@@ -90,6 +90,9 @@ export default function Admin() {
     totalUsers: 0,
     totalVolume: 0,
     activeMarkets: 0,
+    totalReferrals: 0,
+    totalReferrerBonuses: 0,
+    totalReferredBonuses: 0,
   });
 
   useEffect(() => {
