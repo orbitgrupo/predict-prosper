@@ -62,12 +62,17 @@ export function BettingPanel({ market }: BettingPanelProps) {
     refreshProfile();
   };
 
-  if (market.status !== 'active') {
+  const isExpired = new Date(market.closes_at) <= new Date();
+  const isClosed = market.status !== 'active' || isExpired;
+
+  if (isClosed) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground">
-            Este mercado ya no acepta apuestas.
+            {isExpired && market.status === 'active'
+              ? 'Este mercado ha expirado y ya no acepta apuestas.'
+              : 'Este mercado ya no acepta apuestas.'}
           </p>
           {market.resolved_option && (
             <p className="mt-2 font-medium">
