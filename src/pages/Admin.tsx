@@ -529,6 +529,9 @@ export default function Admin() {
                                 <Badge variant="outline" className="text-xs">{market.category}</Badge>
                               )}
                               <Badge className="text-xs">Activo</Badge>
+                              {market.allow_cashout && (
+                                <Badge variant="outline" className="text-xs text-green-600 border-green-600">Cashout</Badge>
+                              )}
                             </div>
                             <h3 className="font-medium text-sm sm:text-base truncate">{market.title}</h3>
                             <p className="text-xs sm:text-sm text-muted-foreground">
