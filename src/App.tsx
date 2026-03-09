@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
