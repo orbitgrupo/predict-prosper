@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Users, Gift, Loader2, Check, Link } from 'lucide-react';
+import { Copy, Users, Gift, Loader2, Check, Link, MessageCircle, Send } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 interface ReferralSectionProps {
@@ -121,6 +121,36 @@ export function ReferralSection({ userId, referralCode }: ReferralSectionProps) 
             <Button variant="outline" size="sm" onClick={handleCopyLink} className="shrink-0 gap-1">
               <Link className="h-3 w-3" />
               Copiar enlace
+            </Button>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-[#25D366] border-[#25D366]/30 hover:bg-[#25D366]/10"
+              onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`¡Únete y recibe $${settings?.referral_bonus_referred ?? 0} en créditos gratis! ${referralLink}`)}`, '_blank')}
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-[#1DA1F2] border-[#1DA1F2]/30 hover:bg-[#1DA1F2]/10"
+              onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`¡Únete y recibe $${settings?.referral_bonus_referred ?? 0} en créditos gratis!`)}&url=${encodeURIComponent(referralLink)}`, '_blank')}
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Twitter
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-[#0088cc] border-[#0088cc]/30 hover:bg-[#0088cc]/10"
+              onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(`¡Únete y recibe $${settings?.referral_bonus_referred ?? 0} en créditos gratis!`)}`, '_blank')}
+            >
+              <Send className="h-4 w-4" />
+              Telegram
             </Button>
           </div>
         </CardContent>
