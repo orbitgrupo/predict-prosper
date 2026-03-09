@@ -18,6 +18,7 @@ interface CashoutButtonProps {
   marketOptions: { option_name: string; total_amount: number }[];
   marketStatus: string;
   marketClosesAt: string;
+  allowCashout: boolean;
 }
 
 export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt }: CashoutButtonProps) {
