@@ -490,7 +490,7 @@ export default function Admin() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 mb-8">
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -530,6 +530,36 @@ export default function Admin() {
                 <div>
                   <p className="text-sm text-muted-foreground">Mercados activos</p>
                   <p className="font-display text-2xl font-bold">{stats.activeMarkets}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <UserPlus className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total referidos</p>
+                  <p className="font-display text-2xl font-bold">{stats.totalReferrals}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
+                  <Gift className="h-6 w-6 text-success" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Bonos otorgados</p>
+                  <p className="font-display text-2xl font-bold">
+                    ${(stats.totalReferrerBonuses + stats.totalReferredBonuses).toLocaleString('es-ES')}
+                  </p>
                 </div>
               </div>
             </CardContent>
