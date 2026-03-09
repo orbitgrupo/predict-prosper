@@ -17,9 +17,25 @@ type OptionLike = { id: string; option_name: string; total_amount: number };
 export function BettingPanel({ market }: BettingPanelProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
+  const [isRestrictedLocation, setIsRestrictedLocation] = useState<boolean>(false);
   const { user, profile, refreshProfile } = useAuth();
   const placeBet = usePlaceBet();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.country_code === 'US' || data.country === 'US' || data.country_name === 'United States') {
+          setIsRestrictedLocation(true);
+        }
+      } catch (error) {
+        console.error('Error checking location:', error);
+      }
+    };
+    checkLocation();
+  }, []);
 
   const hasOptions = market.options && market.options.length > 0;
   const options: OptionLike[] = hasOptions 
