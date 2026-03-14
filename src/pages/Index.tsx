@@ -6,26 +6,38 @@ import { useMarkets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2, Gift } from 'lucide-react';
+import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2, Gift, Users, Activity } from 'lucide-react';
+
 export default function Index() {
-  const {
-    data: markets,
-    isLoading
-  } = useMarkets();
-  const {
-    user
-  } = useAuth();
+  const { data: markets, isLoading } = useMarkets();
+  const { user } = useAuth();
+
   const { data: promoSettings } = useQuery({
     queryKey: ['app_settings'],
     queryFn: async () => {
-      const { data } = await supabase.
-      from('app_settings').
-      select('*').
-      eq('id', 'default').
-      single();
+      const { data } = await supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', 'default')
+        .single();
       return data;
-    }
+    },
   });
+
+  const { data: liveStats } = useQuery({
+    queryKey: ['live_stats'],
+    queryFn: async () => {
+      const [marketsRes, betsRes] = await Promise.all([
+        supabase.from('markets').select('id, total_yes_amount, total_no_amount', { count: 'exact' }).eq('status', 'active'),
+        supabase.from('bets').select('amount'),
+      ]);
+      const activeCount = marketsRes.count || 0;
+      const totalVolume = (betsRes.data || []).reduce((sum, b) => sum + Number(b.amount), 0);
+      return { activeMarkets: activeCount, totalVolume };
+    },
+    refetchInterval: 30000,
+  });
+
   const activeMarkets = markets?.filter((m) => m.status === 'active').slice(0, 6) || [];
   return <div className="min-h-screen bg-background">
       <Navbar />
