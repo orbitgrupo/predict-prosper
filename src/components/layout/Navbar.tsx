@@ -65,7 +65,8 @@ export function Navbar() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle />
             {user ? <>
                 {/* Desktop nav */}
                 <Link to="/markets" className="hidden sm:block">
