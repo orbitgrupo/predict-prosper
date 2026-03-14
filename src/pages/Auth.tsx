@@ -117,6 +117,15 @@ export default function Auth() {
     e.preventDefault();
     
     if (!validateForm()) return;
+
+    if (isLogin && isLocked()) {
+      toast({
+        title: 'Cuenta bloqueada temporalmente',
+        description: `Demasiados intentos fallidos. Intenta de nuevo en ${getRemainingLockTime()} segundos.`,
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setLoading(true);
 
