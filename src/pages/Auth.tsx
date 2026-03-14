@@ -50,6 +50,12 @@ export default function Auth() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { isLocked, getRemainingLockTime, recordAttempt, resetAttempts, attemptsLeft } = useRateLimit({
+    maxAttempts: 5,
+    windowMs: 60000,
+    lockoutMs: 120000,
+  });
+  const [lockTimer, setLockTimer] = useState(0);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
