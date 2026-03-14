@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, TrendingUp, Mail, Lock, User, Users } from 'lucide-react';
+import { Loader2, TrendingUp, Mail, Lock, User, Users, ShieldAlert } from 'lucide-react';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
+import { useRateLimit } from '@/hooks/useRateLimit';
 
 const strongPasswordSchema = z.string()
   .min(8, 'Mínimo 8 caracteres')
