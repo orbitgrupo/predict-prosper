@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, TrendingUp, Mail, Lock, User, Users } from 'lucide-react';
+import { Loader2, TrendingUp, Mail, Lock, User, Users, ShieldAlert } from 'lucide-react';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
+import { useRateLimit } from '@/hooks/useRateLimit';
 
 const strongPasswordSchema = z.string()
   .min(8, 'Mínimo 8 caracteres')
@@ -49,6 +50,12 @@ export default function Auth() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { isLocked, getRemainingLockTime, recordAttempt, resetAttempts, attemptsLeft } = useRateLimit({
+    maxAttempts: 5,
+    windowMs: 60000,
+    lockoutMs: 120000,
+  });
+  const [lockTimer, setLockTimer] = useState(0);
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -65,6 +72,17 @@ export default function Auth() {
       return data;
     },
   });
+
+  // Lock timer countdown
+  useEffect(() => {
+    if (!isLocked()) return;
+    const interval = setInterval(() => {
+      const remaining = getRemainingLockTime();
+      setLockTimer(remaining);
+      if (remaining <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isLocked, getRemainingLockTime]);
 
   useEffect(() => {
     if (user) {
@@ -99,6 +117,15 @@ export default function Auth() {
     e.preventDefault();
     
     if (!validateForm()) return;
+
+    if (isLogin && isLocked()) {
+      toast({
+        title: 'Cuenta bloqueada temporalmente',
+        description: `Demasiados intentos fallidos. Intenta de nuevo en ${getRemainingLockTime()} segundos.`,
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setLoading(true);
 
@@ -106,10 +133,11 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
+          recordAttempt();
           if (error.message.includes('Invalid login credentials')) {
             toast({
               title: 'Error de autenticación',
-              description: 'Email o contraseña incorrectos.',
+              description: `Email o contraseña incorrectos. ${attemptsLeft > 0 ? `Te quedan ${attemptsLeft} intentos.` : ''}`,
               variant: 'destructive',
             });
           } else {
@@ -120,6 +148,7 @@ export default function Auth() {
             });
           }
         } else {
+          resetAttempts();
           toast({
             title: '¡Bienvenido!',
             description: 'Has iniciado sesión correctamente.',
@@ -253,6 +282,13 @@ export default function Auth() {
               </div>
             )}
 
+            {isLogin && isLocked() && (
+              <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <ShieldAlert className="h-4 w-4 shrink-0" />
+                <span>Bloqueado temporalmente. Intenta en {lockTimer}s</span>
+              </div>
+            )}
+
             {isLogin && (
               <button
                 type="button"
@@ -263,7 +299,7 @@ export default function Auth() {
               </button>
             )}
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button type="submit" className="w-full" size="lg" disabled={loading || (isLogin && isLocked())}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

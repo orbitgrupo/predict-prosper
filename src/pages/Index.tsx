@@ -6,26 +6,38 @@ import { useMarkets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2, Gift } from 'lucide-react';
+import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2, Gift, Users, Activity } from 'lucide-react';
+
 export default function Index() {
-  const {
-    data: markets,
-    isLoading
-  } = useMarkets();
-  const {
-    user
-  } = useAuth();
+  const { data: markets, isLoading } = useMarkets();
+  const { user } = useAuth();
+
   const { data: promoSettings } = useQuery({
     queryKey: ['app_settings'],
     queryFn: async () => {
-      const { data } = await supabase.
-      from('app_settings').
-      select('*').
-      eq('id', 'default').
-      single();
+      const { data } = await supabase
+        .from('app_settings')
+        .select('*')
+        .eq('id', 'default')
+        .single();
       return data;
-    }
+    },
   });
+
+  const { data: liveStats } = useQuery({
+    queryKey: ['live_stats'],
+    queryFn: async () => {
+      const [marketsRes, betsRes] = await Promise.all([
+        supabase.from('markets').select('id, total_yes_amount, total_no_amount', { count: 'exact' }).eq('status', 'active'),
+        supabase.from('bets').select('amount'),
+      ]);
+      const activeCount = marketsRes.count || 0;
+      const totalVolume = (betsRes.data || []).reduce((sum, b) => sum + Number(b.amount), 0);
+      return { activeMarkets: activeCount, totalVolume };
+    },
+    refetchInterval: 30000,
+  });
+
   const activeMarkets = markets?.filter((m) => m.status === 'active').slice(0, 6) || [];
   return <div className="min-h-screen bg-background">
       <Navbar />
@@ -72,9 +84,30 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Live Stats + Features */}
       <section className="border-y bg-secondary/30 py-16">
         <div className="container mx-auto px-4">
+          {/* Live Stats */}
+          <div className="mb-10 grid gap-4 sm:grid-cols-3">
+            <div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center">
+              <Activity className="mb-2 h-6 w-6 text-primary" />
+              <span className="font-display text-3xl font-bold">{liveStats?.activeMarkets ?? '—'}</span>
+              <span className="text-sm text-muted-foreground">Mercados activos</span>
+            </div>
+            <div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center">
+              <BarChart3 className="mb-2 h-6 w-6 text-success" />
+              <span className="font-display text-3xl font-bold">
+                ${(liveStats?.totalVolume ?? 0).toLocaleString('es-ES', { maximumFractionDigits: 0 })}
+              </span>
+              <span className="text-sm text-muted-foreground">Volumen total</span>
+            </div>
+            <div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center">
+              <Users className="mb-2 h-6 w-6 text-warning" />
+              <span className="font-display text-3xl font-bold">{activeMarkets.length}+</span>
+              <span className="text-sm text-muted-foreground">Predicciones disponibles</span>
+            </div>
+          </div>
+
           <div className="grid gap-8 md:grid-cols-3">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
