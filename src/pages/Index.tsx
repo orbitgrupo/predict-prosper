@@ -84,9 +84,30 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Live Stats + Features */}
       <section className="border-y bg-secondary/30 py-16">
         <div className="container mx-auto px-4">
+          {/* Live Stats */}
+          <div className="mb-10 grid gap-4 sm:grid-cols-3">
+            <div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center">
+              <Activity className="mb-2 h-6 w-6 text-primary" />
+              <span className="font-display text-3xl font-bold">{liveStats?.activeMarkets ?? '—'}</span>
+              <span className="text-sm text-muted-foreground">Mercados activos</span>
+            </div>
+            <div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center">
+              <BarChart3 className="mb-2 h-6 w-6 text-success" />
+              <span className="font-display text-3xl font-bold">
+                ${(liveStats?.totalVolume ?? 0).toLocaleString('es-ES', { maximumFractionDigits: 0 })}
+              </span>
+              <span className="text-sm text-muted-foreground">Volumen total</span>
+            </div>
+            <div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center">
+              <Users className="mb-2 h-6 w-6 text-warning" />
+              <span className="font-display text-3xl font-bold">{activeMarkets.length}+</span>
+              <span className="text-sm text-muted-foreground">Predicciones disponibles</span>
+            </div>
+          </div>
+
           <div className="grid gap-8 md:grid-cols-3">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
