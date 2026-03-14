@@ -133,10 +133,11 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
+          recordAttempt();
           if (error.message.includes('Invalid login credentials')) {
             toast({
               title: 'Error de autenticación',
-              description: 'Email o contraseña incorrectos.',
+              description: `Email o contraseña incorrectos. ${attemptsLeft > 0 ? `Te quedan ${attemptsLeft} intentos.` : ''}`,
               variant: 'destructive',
             });
           } else {
@@ -147,6 +148,7 @@ export default function Auth() {
             });
           }
         } else {
+          resetAttempts();
           toast({
             title: '¡Bienvenido!',
             description: 'Has iniciado sesión correctamente.',
