@@ -73,6 +73,17 @@ export default function Auth() {
     },
   });
 
+  // Lock timer countdown
+  useEffect(() => {
+    if (!isLocked()) return;
+    const interval = setInterval(() => {
+      const remaining = getRemainingLockTime();
+      setLockTimer(remaining);
+      if (remaining <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isLocked, getRemainingLockTime]);
+
   useEffect(() => {
     if (user) {
       navigate('/dashboard');
