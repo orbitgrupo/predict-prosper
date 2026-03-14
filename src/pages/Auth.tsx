@@ -282,6 +282,13 @@ export default function Auth() {
               </div>
             )}
 
+            {isLogin && isLocked() && (
+              <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <ShieldAlert className="h-4 w-4 shrink-0" />
+                <span>Bloqueado temporalmente. Intenta en {lockTimer}s</span>
+              </div>
+            )}
+
             {isLogin && (
               <button
                 type="button"
@@ -292,7 +299,7 @@ export default function Auth() {
               </button>
             )}
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button type="submit" className="w-full" size="lg" disabled={loading || (isLogin && isLocked())}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
