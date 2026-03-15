@@ -507,6 +507,7 @@ export default function Admin() {
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
               <TabsTrigger value="activity" className="text-xs sm:text-sm">Actividades</TabsTrigger>
               <TabsTrigger value="promotion" className="text-xs sm:text-sm">Promoción</TabsTrigger>
+              <TabsTrigger value="audit" className="text-xs sm:text-sm">Auditoría</TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
