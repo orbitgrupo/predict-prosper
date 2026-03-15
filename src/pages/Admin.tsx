@@ -17,6 +17,7 @@ import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
 import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
+import { AuditLogsPanel } from '@/components/admin/AuditLogsPanel';
 import {
   Dialog,
   DialogContent,
