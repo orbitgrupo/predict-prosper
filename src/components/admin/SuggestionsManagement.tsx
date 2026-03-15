@@ -269,6 +269,7 @@ export function SuggestionsManagement() {
 
       if (error) throw error;
 
+      await logAction('reject_suggestion', 'market_suggestion', selectedSuggestion.id, { title: selectedSuggestion.title, reason: editForm.admin_notes });
       toast({
         title: 'Sugerencia rechazada',
         description: 'La sugerencia ha sido rechazada.',

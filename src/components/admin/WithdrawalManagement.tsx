@@ -58,6 +58,12 @@ export function WithdrawalManagement() {
       const result = data as any;
       if (!result.success) throw new Error(result.error);
 
+      await logAction(
+        action === 'approve' ? 'approve_withdrawal' : 'reject_withdrawal',
+        'withdrawal',
+        selectedRequest.id,
+        { amount: selectedRequest.amount, method: selectedRequest.method, user_id: selectedRequest.user_id }
+      );
       toast({
         title: action === 'approve' ? 'Retiro aprobado' : 'Retiro rechazado',
         description:

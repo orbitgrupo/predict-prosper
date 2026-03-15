@@ -196,6 +196,7 @@ export function UserManagement() {
         throw new Error(result.error || 'Error al agregar fondos');
       }
 
+      await logAction('add_funds', 'user', selectedUser.id, { email: selectedUser.email, amount });
       toast({
         title: 'Fondos agregados',
         description: `Se han agregado $${amount.toLocaleString('es-ES')} a ${selectedUser.email}.`,
