@@ -66,6 +66,7 @@ const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entret
 export function SuggestionsManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
   const queryClient = useQueryClient();
 
   const [suggestions, setSuggestions] = useState<MarketSuggestion[]>([]);
