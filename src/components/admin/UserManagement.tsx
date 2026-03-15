@@ -29,6 +29,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { 
   Loader2, 
   Search, 
