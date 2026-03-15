@@ -84,6 +84,7 @@ const USERS_PER_PAGE = 10;
 
 export function UserManagement() {
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
