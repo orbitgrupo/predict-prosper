@@ -26,6 +26,7 @@ import { es } from 'date-fns/locale';
 
 export function WithdrawalManagement() {
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
   const queryClient = useQueryClient();
   const [processing, setProcessing] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
