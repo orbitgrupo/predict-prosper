@@ -160,6 +160,7 @@ export function UserManagement() {
         variant: 'destructive',
       });
     } else {
+      await logAction(newBlockedStatus ? 'block_user' : 'unblock_user', 'user', user.id, { email: user.email });
       toast({
         title: newBlockedStatus ? 'Usuario bloqueado' : 'Usuario desbloqueado',
         description: `${user.email} ha sido ${newBlockedStatus ? 'bloqueado' : 'desbloqueado'}.`,
