@@ -17,6 +17,7 @@ import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
 import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
+import { AuditLogsPanel } from '@/components/admin/AuditLogsPanel';
 import {
   Dialog,
   DialogContent,
@@ -506,6 +507,7 @@ export default function Admin() {
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
               <TabsTrigger value="activity" className="text-xs sm:text-sm">Actividades</TabsTrigger>
               <TabsTrigger value="promotion" className="text-xs sm:text-sm">Promoción</TabsTrigger>
+              <TabsTrigger value="audit" className="text-xs sm:text-sm">Auditoría</TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -632,6 +634,10 @@ export default function Admin() {
 
           <TabsContent value="promotion" className="mt-4 sm:mt-6">
             <PromotionSettings />
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-4 sm:mt-6">
+            <AuditLogsPanel />
           </TabsContent>
         </Tabs>
 
