@@ -635,6 +635,10 @@ export default function Admin() {
           <TabsContent value="promotion" className="mt-4 sm:mt-6">
             <PromotionSettings />
           </TabsContent>
+
+          <TabsContent value="audit" className="mt-4 sm:mt-6">
+            <AuditLogsPanel />
+          </TabsContent>
         </Tabs>
 
         {/* Resolve dialog */}
