@@ -29,6 +29,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { 
   Loader2, 
   Search, 
@@ -83,6 +84,7 @@ const USERS_PER_PAGE = 10;
 
 export function UserManagement() {
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -158,6 +160,7 @@ export function UserManagement() {
         variant: 'destructive',
       });
     } else {
+      await logAction(newBlockedStatus ? 'block_user' : 'unblock_user', 'user', user.id, { email: user.email });
       toast({
         title: newBlockedStatus ? 'Usuario bloqueado' : 'Usuario desbloqueado',
         description: `${user.email} ha sido ${newBlockedStatus ? 'bloqueado' : 'desbloqueado'}.`,
@@ -193,6 +196,7 @@ export function UserManagement() {
         throw new Error(result.error || 'Error al agregar fondos');
       }
 
+      await logAction('add_funds', 'user', selectedUser.id, { email: selectedUser.email, amount });
       toast({
         title: 'Fondos agregados',
         description: `Se han agregado $${amount.toLocaleString('es-ES')} a ${selectedUser.email}.`,

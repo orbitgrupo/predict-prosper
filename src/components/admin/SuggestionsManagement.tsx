@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -65,6 +66,7 @@ const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entret
 export function SuggestionsManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
   const queryClient = useQueryClient();
 
   const [suggestions, setSuggestions] = useState<MarketSuggestion[]>([]);
@@ -220,6 +222,7 @@ export function SuggestionsManagement() {
 
       if (updateError) throw updateError;
 
+      await logAction('approve_suggestion', 'market_suggestion', selectedSuggestion.id, { title: editForm.title });
       toast({
         title: 'Sugerencia aprobada',
         description: 'El mercado ha sido creado exitosamente.',
@@ -266,6 +269,7 @@ export function SuggestionsManagement() {
 
       if (error) throw error;
 
+      await logAction('reject_suggestion', 'market_suggestion', selectedSuggestion.id, { title: selectedSuggestion.title, reason: editForm.admin_notes });
       toast({
         title: 'Sugerencia rechazada',
         description: 'La sugerencia ha sido rechazada.',

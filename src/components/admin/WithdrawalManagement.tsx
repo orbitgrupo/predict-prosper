@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
@@ -25,6 +26,7 @@ import { es } from 'date-fns/locale';
 
 export function WithdrawalManagement() {
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
   const queryClient = useQueryClient();
   const [processing, setProcessing] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
@@ -56,6 +58,12 @@ export function WithdrawalManagement() {
       const result = data as any;
       if (!result.success) throw new Error(result.error);
 
+      await logAction(
+        action === 'approve' ? 'approve_withdrawal' : 'reject_withdrawal',
+        'withdrawal',
+        selectedRequest.id,
+        { amount: selectedRequest.amount, method: selectedRequest.method, user_id: selectedRequest.user_id }
+      );
       toast({
         title: action === 'approve' ? 'Retiro aprobado' : 'Retiro rechazado',
         description:

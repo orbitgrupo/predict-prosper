@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Switch } from '@/components/ui/switch';
 import { 
   Plus, 
@@ -237,6 +238,8 @@ export default function Admin() {
     }
   };
 
+  const { logAction } = useAuditLog();
+
   const handleResolveMarket = async () => {
     if (!marketToResolve || !resolveOption) return;
     setResolving(true);
@@ -248,6 +251,7 @@ export default function Admin() {
       if (error) throw error;
       const result = data as { success: boolean; error?: string };
       if (!result.success) throw new Error(result.error || 'Error al resolver el mercado');
+      await logAction('resolve_market', 'market', marketToResolve.id, { winning_option: resolveOption, title: marketToResolve.title });
       toast({ title: 'Mercado resuelto', description: `El mercado se ha resuelto como "${resolveOption}".` });
       setResolveDialogOpen(false);
       setMarketToResolve(null);
