@@ -289,6 +289,9 @@ export default function MarketDetail() {
               </Card>
             )}
 
+            {/* Comments */}
+            <CommentsSection marketId={market.id} />
+
             {/* Info */}
             <Card>
               <CardHeader className="px-4 sm:px-6">
