@@ -4,6 +4,7 @@ import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBa
 import { BettingPanel } from '@/components/markets/BettingPanel';
 import { MarketCharts } from '@/components/markets/MarketCharts';
 import { CashoutButton } from '@/components/markets/CashoutButton';
+import { CommentsSection } from '@/components/markets/CommentsSection';
 import { useMarket, useUserBets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
