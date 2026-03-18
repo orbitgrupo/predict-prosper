@@ -124,6 +124,7 @@ export type Database = {
           created_at: string
           id: string
           market_id: string
+          parent_id: string | null
           updated_at: string
           user_id: string
         }
@@ -132,6 +133,7 @@ export type Database = {
           created_at?: string
           id?: string
           market_id: string
+          parent_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -140,6 +142,7 @@ export type Database = {
           created_at?: string
           id?: string
           market_id?: string
+          parent_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -149,6 +152,13 @@ export type Database = {
             columns: ["market_id"]
             isOneToOne: false
             referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "market_comments"
             referencedColumns: ["id"]
           },
         ]

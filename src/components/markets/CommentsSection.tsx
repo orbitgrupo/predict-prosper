@@ -1,26 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSquare, Send, Trash2, Loader2 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { MessageSquare, Send, Loader2 } from 'lucide-react';
+import { CommentItem, CommentWithReplies } from './CommentItem';
 
-interface Comment {
-  id: string;
-  market_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  profile?: {
-    username: string | null;
-    email: string;
-  };
+function buildTree(comments: CommentWithReplies[]): CommentWithReplies[] {
+  const map = new Map<string, CommentWithReplies>();
+  const roots: CommentWithReplies[] = [];
+
+  comments.forEach(c => map.set(c.id, { ...c, replies: [] }));
+
+  map.forEach((comment) => {
+    if (comment.parent_id && map.has(comment.parent_id)) {
+      map.get(comment.parent_id)!.replies.push(comment);
+    } else {
+      roots.push(comment);
+    }
+  });
+
+  return roots;
 }
 
 export function CommentsSection({ marketId }: { marketId: string }) {
@@ -29,7 +32,7 @@ export function CommentsSection({ marketId }: { marketId: string }) {
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
 
-  const { data: comments = [], isLoading } = useQuery({
+  const { data: flatComments = [], isLoading } = useQuery({
     queryKey: ['market-comments', marketId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,7 +42,7 @@ export function CommentsSection({ marketId }: { marketId: string }) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      if (!data || data.length === 0) return [] as Comment[];
+      if (!data || data.length === 0) return [] as CommentWithReplies[];
 
       const userIds = [...new Set(data.map(c => c.user_id))];
       const { data: profiles } = await supabase
@@ -51,12 +54,15 @@ export function CommentsSection({ marketId }: { marketId: string }) {
 
       return data.map(c => ({
         ...c,
+        parent_id: (c as any).parent_id || null,
         profile: profileMap.get(c.user_id) || undefined,
-      })) as Comment[];
+        replies: [],
+      })) as CommentWithReplies[];
     },
   });
 
-  // Realtime subscription
+  const comments = useMemo(() => buildTree(flatComments), [flatComments]);
+
   useEffect(() => {
     const channel = supabase
       .channel(`comments-${marketId}`)
@@ -74,14 +80,15 @@ export function CommentsSection({ marketId }: { marketId: string }) {
   }, [marketId, queryClient]);
 
   const postComment = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (params: { content: string; parentId?: string }) => {
       if (!user) throw new Error('Debes iniciar sesión');
-      const trimmed = content.trim();
+      const trimmed = params.content.trim();
       if (!trimmed || trimmed.length > 500) throw new Error('El comentario debe tener entre 1 y 500 caracteres');
 
-      const { error } = await supabase
-        .from('market_comments')
-        .insert({ market_id: marketId, user_id: user.id, content: trimmed });
+      const insertData: any = { market_id: marketId, user_id: user.id, content: trimmed };
+      if (params.parentId) insertData.parent_id = params.parentId;
+
+      const { error } = await supabase.from('market_comments').insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -107,13 +114,8 @@ export function CommentsSection({ marketId }: { marketId: string }) {
     },
   });
 
-  const getInitials = (comment: Comment) => {
-    const name = comment.profile?.username || comment.profile?.email || '?';
-    return name.slice(0, 2).toUpperCase();
-  };
-
-  const getDisplayName = (comment: Comment) => {
-    return comment.profile?.username || comment.profile?.email?.split('@')[0] || 'Usuario';
+  const handleReply = async (parentId: string, replyContent: string) => {
+    await postComment.mutateAsync({ content: replyContent, parentId });
   };
 
   return (
@@ -121,11 +123,10 @@ export function CommentsSection({ marketId }: { marketId: string }) {
       <CardHeader className="px-4 sm:px-6">
         <CardTitle className="text-base sm:text-lg flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          Comentarios ({comments.length})
+          Comentarios ({flatComments.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 sm:px-6 space-y-4">
-        {/* Post form */}
         {user ? (
           <div className="space-y-2">
             <Textarea
@@ -140,7 +141,7 @@ export function CommentsSection({ marketId }: { marketId: string }) {
               <span className="text-xs text-muted-foreground">{content.length}/500</span>
               <Button
                 size="sm"
-                onClick={() => postComment.mutate()}
+                onClick={() => postComment.mutate({ content })}
                 disabled={!content.trim() || postComment.isPending}
               >
                 {postComment.isPending ? (
@@ -158,7 +159,6 @@ export function CommentsSection({ marketId }: { marketId: string }) {
           </p>
         )}
 
-        {/* Comments list */}
         {isLoading ? (
           <div className="flex justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -170,32 +170,14 @@ export function CommentsSection({ marketId }: { marketId: string }) {
         ) : (
           <div className="space-y-3">
             {comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3 rounded-lg bg-secondary/50 p-3">
-                <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarFallback className="text-xs">{getInitials(comment)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium truncate">{getDisplayName(comment)}</span>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
-                      </span>
-                      {user && user.id === comment.user_id && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => deleteComment.mutate(comment.id)}
-                        >
-                          <Trash2 className="h-3 w-3 text-muted-foreground" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
-                </div>
-              </div>
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                userId={user?.id}
+                onReply={handleReply}
+                onDelete={(id) => deleteComment.mutate(id)}
+                isReplying={postComment.isPending}
+              />
             ))}
           </div>
         )}
