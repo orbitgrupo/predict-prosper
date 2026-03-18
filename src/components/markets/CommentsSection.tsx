@@ -34,21 +34,25 @@ export function CommentsSection({ marketId }: { marketId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('market_comments')
-        .select('*, profile:profiles!market_comments_user_id_fkey(username, email)')
+        .select('*')
         .eq('market_id', marketId)
         .order('created_at', { ascending: true });
 
-      if (error) {
-        // Fallback without join if FK doesn't exist
-        const { data: fallback, error: err2 } = await supabase
-          .from('market_comments')
-          .select('*')
-          .eq('market_id', marketId)
-          .order('created_at', { ascending: true });
-        if (err2) throw err2;
-        return (fallback || []) as Comment[];
-      }
-      return (data || []) as Comment[];
+      if (error) throw error;
+      if (!data || data.length === 0) return [] as Comment[];
+
+      const userIds = [...new Set(data.map(c => c.user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, email')
+        .in('id', userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      return data.map(c => ({
+        ...c,
+        profile: profileMap.get(c.user_id) || undefined,
+      })) as Comment[];
     },
   });
 
