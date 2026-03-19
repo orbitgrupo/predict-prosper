@@ -225,6 +225,8 @@ export function CommentsSection({ marketId }: { marketId: string }) {
                 userId={user?.id}
                 onReply={handleReply}
                 onDelete={(id) => deleteComment.mutate(id)}
+                onReact={handleReact}
+                reactions={reactionsMap}
                 isReplying={postComment.isPending}
               />
             ))}
