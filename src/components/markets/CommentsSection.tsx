@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MessageSquare, Send, Loader2 } from 'lucide-react';
-import { CommentItem, CommentWithReplies } from './CommentItem';
+import { CommentItem, CommentWithReplies, ReactionCounts } from './CommentItem';
 
 function buildTree(comments: CommentWithReplies[]): CommentWithReplies[] {
   const map = new Map<string, CommentWithReplies>();
@@ -63,6 +63,34 @@ export function CommentsSection({ marketId }: { marketId: string }) {
 
   const comments = useMemo(() => buildTree(flatComments), [flatComments]);
 
+  // Fetch reactions for all comments in this market
+  const { data: reactionsMap = new Map<string, ReactionCounts>() } = useQuery({
+    queryKey: ['comment-reactions', marketId],
+    queryFn: async () => {
+      const commentIds = flatComments.map(c => c.id);
+      if (commentIds.length === 0) return new Map<string, ReactionCounts>();
+
+      const { data: allReactions } = await supabase
+        .from('comment_reactions')
+        .select('comment_id, user_id, reaction_type')
+        .in('comment_id', commentIds);
+
+      const map = new Map<string, ReactionCounts>();
+      commentIds.forEach(id => map.set(id, { likes: 0, dislikes: 0, userReaction: null }));
+
+      (allReactions || []).forEach((r: any) => {
+        const entry = map.get(r.comment_id);
+        if (!entry) return;
+        if (r.reaction_type === 'like') entry.likes++;
+        else entry.dislikes++;
+        if (user && r.user_id === user.id) entry.userReaction = r.reaction_type;
+      });
+
+      return map;
+    },
+    enabled: flatComments.length > 0,
+  });
+
   useEffect(() => {
     const channel = supabase
       .channel(`comments-${marketId}`)
@@ -116,6 +144,27 @@ export function CommentsSection({ marketId }: { marketId: string }) {
 
   const handleReply = async (parentId: string, replyContent: string) => {
     await postComment.mutateAsync({ content: replyContent, parentId });
+  };
+
+  const handleReact = async (commentId: string, type: 'like' | 'dislike') => {
+    if (!user) return;
+    const current = reactionsMap.get(commentId);
+    
+    if (current?.userReaction === type) {
+      // Remove reaction
+      await supabase.from('comment_reactions').delete()
+        .eq('comment_id', commentId).eq('user_id', user.id);
+    } else if (current?.userReaction) {
+      // Switch reaction
+      await supabase.from('comment_reactions').update({ reaction_type: type })
+        .eq('comment_id', commentId).eq('user_id', user.id);
+    } else {
+      // New reaction
+      await supabase.from('comment_reactions').insert({
+        comment_id: commentId, user_id: user.id, reaction_type: type
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ['comment-reactions', marketId] });
   };
 
   return (
@@ -176,6 +225,8 @@ export function CommentsSection({ marketId }: { marketId: string }) {
                 userId={user?.id}
                 onReply={handleReply}
                 onDelete={(id) => deleteComment.mutate(id)}
+                onReact={handleReact}
+                reactions={reactionsMap}
                 isReplying={postComment.isPending}
               />
             ))}

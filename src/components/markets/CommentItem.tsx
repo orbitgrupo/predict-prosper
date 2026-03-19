@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Reply, Send, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Reply, Send, Loader2, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -20,16 +20,24 @@ export interface CommentWithReplies {
   replies: CommentWithReplies[];
 }
 
+export interface ReactionCounts {
+  likes: number;
+  dislikes: number;
+  userReaction: 'like' | 'dislike' | null;
+}
+
 interface CommentItemProps {
   comment: CommentWithReplies;
   userId?: string;
   depth?: number;
   onReply: (parentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => void;
+  onReact: (commentId: string, type: 'like' | 'dislike') => void;
+  reactions: Map<string, ReactionCounts>;
   isReplying: boolean;
 }
 
-export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, isReplying }: CommentItemProps) {
+export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onReact, reactions, isReplying }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -97,6 +105,35 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, isR
           </div>
           <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
 
+          {/* Reactions */}
+          {(() => {
+            const r = reactions.get(comment.id) || { likes: 0, dislikes: 0, userReaction: null };
+            return (
+              <div className="flex items-center gap-2 mt-1.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 px-1.5 gap-1 text-xs ${r.userReaction === 'like' ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`}
+                  onClick={() => userId && onReact(comment.id, 'like')}
+                  disabled={!userId}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                  {r.likes > 0 && r.likes}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 px-1.5 gap-1 text-xs ${r.userReaction === 'dislike' ? 'text-destructive bg-destructive/10' : 'text-muted-foreground'}`}
+                  onClick={() => userId && onReact(comment.id, 'dislike')}
+                  disabled={!userId}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                  {r.dislikes > 0 && r.dislikes}
+                </Button>
+              </div>
+            );
+          })()}
+
           {/* Reply form */}
           {showReplyForm && (
             <div className="mt-2 space-y-2">
@@ -151,6 +188,8 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, isR
                   depth={depth + 1}
                   onReply={onReply}
                   onDelete={onDelete}
+                  onReact={onReact}
+                  reactions={reactions}
                   isReplying={isReplying}
                 />
               ))}
