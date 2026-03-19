@@ -146,6 +146,27 @@ export function CommentsSection({ marketId }: { marketId: string }) {
     await postComment.mutateAsync({ content: replyContent, parentId });
   };
 
+  const handleReact = async (commentId: string, type: 'like' | 'dislike') => {
+    if (!user) return;
+    const current = reactionsMap.get(commentId);
+    
+    if (current?.userReaction === type) {
+      // Remove reaction
+      await supabase.from('comment_reactions').delete()
+        .eq('comment_id', commentId).eq('user_id', user.id);
+    } else if (current?.userReaction) {
+      // Switch reaction
+      await supabase.from('comment_reactions').update({ reaction_type: type })
+        .eq('comment_id', commentId).eq('user_id', user.id);
+    } else {
+      // New reaction
+      await supabase.from('comment_reactions').insert({
+        comment_id: commentId, user_id: user.id, reaction_type: type
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ['comment-reactions', marketId] });
+  };
+
   return (
     <Card>
       <CardHeader className="px-4 sm:px-6">
