@@ -188,6 +188,8 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onR
                   depth={depth + 1}
                   onReply={onReply}
                   onDelete={onDelete}
+                  onReact={onReact}
+                  reactions={reactions}
                   isReplying={isReplying}
                 />
               ))}
