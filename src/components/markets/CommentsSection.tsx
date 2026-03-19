@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MessageSquare, Send, Loader2 } from 'lucide-react';
-import { CommentItem, CommentWithReplies } from './CommentItem';
+import { CommentItem, CommentWithReplies, ReactionCounts } from './CommentItem';
 
 function buildTree(comments: CommentWithReplies[]): CommentWithReplies[] {
   const map = new Map<string, CommentWithReplies>();
