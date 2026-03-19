@@ -20,12 +20,20 @@ export interface CommentWithReplies {
   replies: CommentWithReplies[];
 }
 
+export interface ReactionCounts {
+  likes: number;
+  dislikes: number;
+  userReaction: 'like' | 'dislike' | null;
+}
+
 interface CommentItemProps {
   comment: CommentWithReplies;
   userId?: string;
   depth?: number;
   onReply: (parentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => void;
+  onReact: (commentId: string, type: 'like' | 'dislike') => void;
+  reactions: Map<string, ReactionCounts>;
   isReplying: boolean;
 }
 
