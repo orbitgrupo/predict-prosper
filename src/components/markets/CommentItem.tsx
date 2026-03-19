@@ -37,7 +37,7 @@ interface CommentItemProps {
   isReplying: boolean;
 }
 
-export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, isReplying }: CommentItemProps) {
+export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onReact, reactions, isReplying }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
