@@ -105,6 +105,35 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onR
           </div>
           <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
 
+          {/* Reactions */}
+          {(() => {
+            const r = reactions.get(comment.id) || { likes: 0, dislikes: 0, userReaction: null };
+            return (
+              <div className="flex items-center gap-2 mt-1.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 px-1.5 gap-1 text-xs ${r.userReaction === 'like' ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`}
+                  onClick={() => userId && onReact(comment.id, 'like')}
+                  disabled={!userId}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                  {r.likes > 0 && r.likes}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 px-1.5 gap-1 text-xs ${r.userReaction === 'dislike' ? 'text-destructive bg-destructive/10' : 'text-muted-foreground'}`}
+                  onClick={() => userId && onReact(comment.id, 'dislike')}
+                  disabled={!userId}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                  {r.dislikes > 0 && r.dislikes}
+                </Button>
+              </div>
+            );
+          })()}
+
           {/* Reply form */}
           {showReplyForm && (
             <div className="mt-2 space-y-2">
