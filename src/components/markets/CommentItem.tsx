@@ -38,13 +38,17 @@ interface CommentItemProps {
   isReplying: boolean;
 }
 
-export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onReact, reactions, isReplying }: CommentItemProps) {
+export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onEdit, onReact, reactions, isReplying }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showReplies, setShowReplies] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const maxDepth = 3;
+  const canEdit = userId === comment.user_id && differenceInMinutes(new Date(), new Date(comment.created_at)) < 5;
 
   const getInitials = () => {
     const name = comment.profile?.username || comment.profile?.email || '?';
