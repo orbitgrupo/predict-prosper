@@ -71,6 +71,21 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onE
     }
   };
 
+  const handleSubmitEdit = async () => {
+    if (!editContent.trim() || editContent.trim() === comment.content) {
+      setIsEditing(false);
+      setEditContent(comment.content);
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      await onEdit(comment.id, editContent.trim());
+      setIsEditing(false);
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
   return (
     <div className={depth > 0 ? 'ml-4 sm:ml-8 border-l-2 border-border pl-3 sm:pl-4' : ''}>
       <div className="flex gap-3 rounded-lg bg-secondary/50 p-3">
