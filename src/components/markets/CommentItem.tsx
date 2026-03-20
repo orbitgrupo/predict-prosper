@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Reply, Send, Loader2, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Trash2, Reply, Send, Loader2, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown, Pencil, X, Check } from 'lucide-react';
+import { formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export interface CommentWithReplies {
@@ -32,18 +32,23 @@ interface CommentItemProps {
   depth?: number;
   onReply: (parentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => void;
+  onEdit: (commentId: string, newContent: string) => Promise<void>;
   onReact: (commentId: string, type: 'like' | 'dislike') => void;
   reactions: Map<string, ReactionCounts>;
   isReplying: boolean;
 }
 
-export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onReact, reactions, isReplying }: CommentItemProps) {
+export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onEdit, onReact, reactions, isReplying }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showReplies, setShowReplies] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const maxDepth = 3;
+  const canEdit = userId === comment.user_id && differenceInMinutes(new Date(), new Date(comment.created_at)) < 5;
 
   const getInitials = () => {
     const name = comment.profile?.username || comment.profile?.email || '?';
@@ -63,6 +68,21 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onR
       setShowReplyForm(false);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!editContent.trim() || editContent.trim() === comment.content) {
+      setIsEditing(false);
+      setEditContent(comment.content);
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      await onEdit(comment.id, editContent.trim());
+      setIsEditing(false);
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -91,6 +111,17 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onR
                   <Reply className="h-3 w-3 text-muted-foreground" />
                 </Button>
               )}
+              {canEdit && !isEditing && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => { setIsEditing(true); setEditContent(comment.content); }}
+                  title="Editar (disponible por 5 min)"
+                >
+                  <Pencil className="h-3 w-3 text-muted-foreground" />
+                </Button>
+              )}
               {userId && userId === comment.user_id && (
                 <Button
                   variant="ghost"
@@ -103,7 +134,37 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onR
               )}
             </div>
           </div>
-          <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
+
+          {/* Edit form */}
+          {isEditing ? (
+            <div className="mt-2 space-y-2">
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                maxLength={500}
+                className="resize-none text-sm"
+                rows={2}
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{editContent.length}/500</span>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditContent(comment.content); }}>
+                    <X className="h-3 w-3 mr-1" /> Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitEdit}
+                    disabled={!editContent.trim() || editSubmitting}
+                  >
+                    {editSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    Guardar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
+          )}
 
           {/* Reactions */}
           {(() => {
@@ -188,6 +249,7 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onR
                   depth={depth + 1}
                   onReply={onReply}
                   onDelete={onDelete}
+                  onEdit={onEdit}
                   onReact={onReact}
                   reactions={reactions}
                   isReplying={isReplying}

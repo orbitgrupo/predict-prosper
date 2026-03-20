@@ -146,6 +146,21 @@ export function CommentsSection({ marketId }: { marketId: string }) {
     await postComment.mutateAsync({ content: replyContent, parentId });
   };
 
+  const handleEdit = async (commentId: string, newContent: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('market_comments')
+      .update({ content: newContent })
+      .eq('id', commentId)
+      .eq('user_id', user.id);
+    if (error) {
+      toast({ title: 'Error', description: 'No se pudo editar el comentario. El tiempo de edición puede haber expirado.', variant: 'destructive' });
+      throw error;
+    }
+    queryClient.invalidateQueries({ queryKey: ['market-comments', marketId] });
+    toast({ title: 'Comentario editado' });
+  };
+
   const handleReact = async (commentId: string, type: 'like' | 'dislike') => {
     if (!user) return;
     const current = reactionsMap.get(commentId);
@@ -225,6 +240,7 @@ export function CommentsSection({ marketId }: { marketId: string }) {
                 userId={user?.id}
                 onReply={handleReply}
                 onDelete={(id) => deleteComment.mutate(id)}
+                onEdit={handleEdit}
                 onReact={handleReact}
                 reactions={reactionsMap}
                 isReplying={postComment.isPending}
