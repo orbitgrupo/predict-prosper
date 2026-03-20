@@ -132,7 +132,39 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onE
                   <Trash2 className="h-3 w-3 text-muted-foreground" />
                 </Button>
               )}
-          <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
+            </div>
+          </div>
+
+          {/* Edit form */}
+          {isEditing ? (
+            <div className="mt-2 space-y-2">
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                maxLength={500}
+                className="resize-none text-sm"
+                rows={2}
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{editContent.length}/500</span>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditContent(comment.content); }}>
+                    <X className="h-3 w-3 mr-1" /> Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitEdit}
+                    disabled={!editContent.trim() || editSubmitting}
+                  >
+                    {editSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    Guardar
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
+          )}
 
           {/* Reactions */}
           {(() => {
