@@ -111,6 +111,17 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onE
                   <Reply className="h-3 w-3 text-muted-foreground" />
                 </Button>
               )}
+              {canEdit && !isEditing && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => { setIsEditing(true); setEditContent(comment.content); }}
+                  title="Editar (disponible por 5 min)"
+                >
+                  <Pencil className="h-3 w-3 text-muted-foreground" />
+                </Button>
+              )}
               {userId && userId === comment.user_id && (
                 <Button
                   variant="ghost"
@@ -121,8 +132,6 @@ export function CommentItem({ comment, userId, depth = 0, onReply, onDelete, onE
                   <Trash2 className="h-3 w-3 text-muted-foreground" />
                 </Button>
               )}
-            </div>
-          </div>
           <p className="text-sm mt-1 whitespace-pre-wrap break-words">{comment.content}</p>
 
           {/* Reactions */}
