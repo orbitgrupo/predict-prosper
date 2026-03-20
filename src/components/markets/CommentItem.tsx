@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Reply, Send, Loader2, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Trash2, Reply, Send, Loader2, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown, Pencil, X, Check } from 'lucide-react';
+import { formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export interface CommentWithReplies {
@@ -32,6 +32,7 @@ interface CommentItemProps {
   depth?: number;
   onReply: (parentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => void;
+  onEdit: (commentId: string, newContent: string) => Promise<void>;
   onReact: (commentId: string, type: 'like' | 'dislike') => void;
   reactions: Map<string, ReactionCounts>;
   isReplying: boolean;
