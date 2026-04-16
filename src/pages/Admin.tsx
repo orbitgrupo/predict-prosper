@@ -35,6 +35,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { 
   Plus, 
   Loader2, 
@@ -46,7 +47,8 @@ import {
   Settings,
   Pencil,
   UserPlus,
-  Gift
+  Gift,
+  Star
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -71,6 +73,8 @@ export default function Admin() {
     image_url: '',
     options: ['', ''],
     allow_cashout: true,
+    favorite_option: '',
+    favorite_probability: 60,
   });
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -84,6 +88,8 @@ export default function Admin() {
     image_url: '',
     options: [] as { id?: string; option_name: string }[],
     allow_cashout: true,
+    favorite_option: '',
+    favorite_probability: 60,
   });
 
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
