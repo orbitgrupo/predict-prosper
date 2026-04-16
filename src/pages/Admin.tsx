@@ -161,7 +161,9 @@ export default function Admin() {
           created_by: user?.id,
           image_url: newMarket.image_url || null,
           allow_cashout: newMarket.allow_cashout,
-        })
+          favorite_option: newMarket.favorite_option || null,
+          favorite_probability: newMarket.favorite_option ? newMarket.favorite_probability : 50,
+        } as any)
         .select()
         .single();
       if (marketError) throw marketError;
@@ -173,7 +175,7 @@ export default function Admin() {
       if (optionsError) throw optionsError;
       toast({ title: 'Mercado creado', description: 'El mercado se ha creado correctamente.' });
       setCreateDialogOpen(false);
-      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true });
+      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true, favorite_option: '', favorite_probability: 60 });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -192,6 +194,8 @@ export default function Admin() {
       image_url: market.image_url || '',
       options: market.options?.map(o => ({ id: o.id, option_name: o.option_name })) || [],
       allow_cashout: market.allow_cashout ?? true,
+      favorite_option: (market as any).favorite_option || '',
+      favorite_probability: (market as any).favorite_probability || 50,
     });
     setEditDialogOpen(true);
   };
@@ -217,7 +221,9 @@ export default function Admin() {
           closes_at: new Date(editMarket.closes_at).toISOString(),
           image_url: editMarket.image_url || null,
           allow_cashout: editMarket.allow_cashout,
-        })
+          favorite_option: editMarket.favorite_option || null,
+          favorite_probability: editMarket.favorite_option ? editMarket.favorite_probability : 50,
+        } as any)
         .eq('id', marketToEdit.id);
       if (marketError) throw marketError;
       const existingOptionIds = marketToEdit.options?.map(o => o.id) || [];
