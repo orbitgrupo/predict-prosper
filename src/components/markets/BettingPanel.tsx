@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlaceBet, Market } from '@/hooks/useMarkets';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Star } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface BettingPanelProps {
@@ -46,6 +47,9 @@ export function BettingPanel({ market }: BettingPanelProps) {
       ];
 
   const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
+  const hasBets = totalVolume > 0;
+  const favoriteOption = (market as any).favorite_option as string | null;
+  const favoriteProbability = (market as any).favorite_probability as number || 50;
 
   const betAmount = parseFloat(amount) || 0;
   const potentialPayout = selectedOption 
@@ -140,17 +144,20 @@ export function BettingPanel({ market }: BettingPanelProps) {
         {/* Option buttons */}
         <div className={`grid gap-3 ${options.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {options.map((option) => {
-            const percentage = totalVolume > 0 
+            const percentage = hasBets 
               ? (option.total_amount / totalVolume) * 100 
-              : 100 / options.length;
+              : (favoriteOption && options.length === 2)
+                ? (option.option_name === favoriteOption ? favoriteProbability : 100 - favoriteProbability)
+                : 100 / options.length;
             const isYes = option.option_name.toLowerCase() === 'sí' || option.option_name.toLowerCase() === 'yes';
             const isNo = option.option_name.toLowerCase() === 'no';
+            const isFavorite = option.option_name === favoriteOption;
             
             return (
               <Button
                 key={option.id}
                 variant={selectedOption === option.option_name ? 'default' : 'outline'}
-                className={`h-16 flex-col gap-1 ${
+                className={`h-16 flex-col gap-1 relative ${
                   selectedOption === option.option_name
                     ? isYes
                       ? 'bg-yes hover:bg-yes/90 text-yes-foreground'
@@ -162,9 +169,12 @@ export function BettingPanel({ market }: BettingPanelProps) {
                     : isNo
                     ? 'hover:border-no hover:text-no'
                     : ''
-                }`}
+                } ${isFavorite ? 'border-warning/50' : ''}`}
                 onClick={() => setSelectedOption(option.option_name)}
               >
+                {isFavorite && (
+                  <Star className="absolute top-1 right-1 h-3.5 w-3.5 fill-warning text-warning" />
+                )}
                 <span className="text-lg font-bold">{option.option_name}</span>
                 <span className="text-xs opacity-80">{percentage.toFixed(1)}%</span>
               </Button>

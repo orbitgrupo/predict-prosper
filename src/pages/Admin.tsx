@@ -35,6 +35,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { 
   Plus, 
   Loader2, 
@@ -46,7 +47,8 @@ import {
   Settings,
   Pencil,
   UserPlus,
-  Gift
+  Gift,
+  Star
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -71,6 +73,8 @@ export default function Admin() {
     image_url: '',
     options: ['', ''],
     allow_cashout: true,
+    favorite_option: '',
+    favorite_probability: 60,
   });
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -84,6 +88,8 @@ export default function Admin() {
     image_url: '',
     options: [] as { id?: string; option_name: string }[],
     allow_cashout: true,
+    favorite_option: '',
+    favorite_probability: 60,
   });
 
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
@@ -145,6 +151,7 @@ export default function Admin() {
     }
     setCreating(true);
     try {
+      const favoriteOpt = newMarket.favorite_option && newMarket.favorite_option !== 'none' ? newMarket.favorite_option : null;
       const { data: marketData, error: marketError } = await supabase
         .from('markets')
         .insert({
@@ -155,7 +162,9 @@ export default function Admin() {
           created_by: user?.id,
           image_url: newMarket.image_url || null,
           allow_cashout: newMarket.allow_cashout,
-        })
+          favorite_option: favoriteOpt,
+          favorite_probability: favoriteOpt ? newMarket.favorite_probability : 50,
+        } as any)
         .select()
         .single();
       if (marketError) throw marketError;
@@ -167,7 +176,7 @@ export default function Admin() {
       if (optionsError) throw optionsError;
       toast({ title: 'Mercado creado', description: 'El mercado se ha creado correctamente.' });
       setCreateDialogOpen(false);
-      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true });
+      setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true, favorite_option: '', favorite_probability: 60 });
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -186,6 +195,8 @@ export default function Admin() {
       image_url: market.image_url || '',
       options: market.options?.map(o => ({ id: o.id, option_name: o.option_name })) || [],
       allow_cashout: market.allow_cashout ?? true,
+      favorite_option: (market as any).favorite_option || '',
+      favorite_probability: (market as any).favorite_probability || 50,
     });
     setEditDialogOpen(true);
   };
@@ -211,7 +222,9 @@ export default function Admin() {
           closes_at: new Date(editMarket.closes_at).toISOString(),
           image_url: editMarket.image_url || null,
           allow_cashout: editMarket.allow_cashout,
-        })
+          favorite_option: editMarket.favorite_option || null,
+          favorite_probability: editMarket.favorite_option ? editMarket.favorite_probability : 50,
+        } as any)
         .eq('id', marketToEdit.id);
       if (marketError) throw marketError;
       const existingOptionIds = marketToEdit.options?.map(o => o.id) || [];
@@ -409,6 +422,47 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
+                {/* Favorite option selection */}
+                {newMarket.options.filter(o => o.trim()).length >= 2 && (
+                  <div className="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-warning" />
+                      <Label className="text-sm font-medium">Opción favorita</Label>
+                    </div>
+                    <Select
+                      value={newMarket.favorite_option}
+                      onValueChange={(value) => setNewMarket({ ...newMarket, favorite_option: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin favorito (probabilidades iguales)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin favorito</SelectItem>
+                        {newMarket.options.filter(o => o.trim()).map((opt) => (
+                          <SelectItem key={opt} value={opt.trim()}>{opt.trim()}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {newMarket.favorite_option && newMarket.favorite_option !== 'none' && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Probabilidad del favorito</span>
+                          <span className="font-medium text-foreground">{newMarket.favorite_probability}%</span>
+                        </div>
+                        <Slider
+                          value={[newMarket.favorite_probability]}
+                          onValueChange={([val]) => setNewMarket({ ...newMarket, favorite_probability: val })}
+                          min={51}
+                          max={95}
+                          step={1}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Esto ajusta la probabilidad inicial mostrada. A mayor probabilidad, menor el pago potencial para quien apueste por el favorito.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <Button className="w-full" onClick={handleCreateMarket} disabled={creating}>
                   {creating ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</>
@@ -778,6 +832,44 @@ export default function Admin() {
                   </div>
                 ))}
               </div>
+              {/* Favorite option selection for edit */}
+              {editMarket.options.filter(o => o.option_name.trim()).length >= 2 && (
+                <div className="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-warning" />
+                    <Label className="text-sm font-medium">Opción favorita</Label>
+                  </div>
+                  <Select
+                    value={editMarket.favorite_option || 'none'}
+                    onValueChange={(value) => setEditMarket({ ...editMarket, favorite_option: value === 'none' ? '' : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sin favorito" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin favorito</SelectItem>
+                      {editMarket.options.filter(o => o.option_name.trim()).map((opt) => (
+                        <SelectItem key={opt.option_name} value={opt.option_name.trim()}>{opt.option_name.trim()}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {editMarket.favorite_option && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Probabilidad del favorito</span>
+                        <span className="font-medium text-foreground">{editMarket.favorite_probability}%</span>
+                      </div>
+                      <Slider
+                        value={[editMarket.favorite_probability]}
+                        onValueChange={([val]) => setEditMarket({ ...editMarket, favorite_probability: val })}
+                        min={51}
+                        max={95}
+                        step={1}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
               <Button className="w-full" onClick={handleEditMarket} disabled={editing}>
                 {editing ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Guardando...</>) : ('Guardar cambios')}
               </Button>

@@ -327,6 +327,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          favorite_option: string | null
+          favorite_probability: number | null
           id: string
           image_url: string | null
           resolved_option: string | null
@@ -343,6 +345,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          favorite_option?: string | null
+          favorite_probability?: number | null
           id?: string
           image_url?: string | null
           resolved_option?: string | null
@@ -359,6 +363,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          favorite_option?: string | null
+          favorite_probability?: number | null
           id?: string
           image_url?: string | null
           resolved_option?: string | null
