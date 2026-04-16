@@ -59,6 +59,15 @@ export function BettingPanel({ market }: BettingPanelProps) {
   function calculatePotentialPayout(amount: number, optionName: string, opts: OptionLike[]) {
     const selectedOpt = opts.find(o => o.option_name === optionName);
     if (!selectedOpt) return 0;
+
+    // When no bets exist, use favorite probability to set implied odds
+    if (!hasBets && favoriteOption && options.length === 2) {
+      const prob = optionName === favoriteOption
+        ? favoriteProbability / 100
+        : (100 - favoriteProbability) / 100;
+      // Payout = stake / probability (lower payout for favorites)
+      return amount / prob;
+    }
     
     const currentTotal = selectedOpt.total_amount;
     const newTotal = currentTotal + amount;
