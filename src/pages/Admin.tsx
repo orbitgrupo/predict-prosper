@@ -831,6 +831,44 @@ export default function Admin() {
                   </div>
                 ))}
               </div>
+              {/* Favorite option selection for edit */}
+              {editMarket.options.filter(o => o.option_name.trim()).length >= 2 && (
+                <div className="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-warning" />
+                    <Label className="text-sm font-medium">Opción favorita</Label>
+                  </div>
+                  <Select
+                    value={editMarket.favorite_option || 'none'}
+                    onValueChange={(value) => setEditMarket({ ...editMarket, favorite_option: value === 'none' ? '' : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sin favorito" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin favorito</SelectItem>
+                      {editMarket.options.filter(o => o.option_name.trim()).map((opt) => (
+                        <SelectItem key={opt.option_name} value={opt.option_name.trim()}>{opt.option_name.trim()}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {editMarket.favorite_option && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Probabilidad del favorito</span>
+                        <span className="font-medium text-foreground">{editMarket.favorite_probability}%</span>
+                      </div>
+                      <Slider
+                        value={[editMarket.favorite_probability]}
+                        onValueChange={([val]) => setEditMarket({ ...editMarket, favorite_probability: val })}
+                        min={51}
+                        max={95}
+                        step={1}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
               <Button className="w-full" onClick={handleEditMarket} disabled={editing}>
                 {editing ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Guardando...</>) : ('Guardar cambios')}
               </Button>
