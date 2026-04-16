@@ -421,6 +421,47 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
+                {/* Favorite option selection */}
+                {newMarket.options.filter(o => o.trim()).length >= 2 && (
+                  <div className="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-warning" />
+                      <Label className="text-sm font-medium">Opción favorita</Label>
+                    </div>
+                    <Select
+                      value={newMarket.favorite_option}
+                      onValueChange={(value) => setNewMarket({ ...newMarket, favorite_option: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin favorito (probabilidades iguales)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin favorito</SelectItem>
+                        {newMarket.options.filter(o => o.trim()).map((opt) => (
+                          <SelectItem key={opt} value={opt.trim()}>{opt.trim()}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {newMarket.favorite_option && newMarket.favorite_option !== 'none' && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Probabilidad del favorito</span>
+                          <span className="font-medium text-foreground">{newMarket.favorite_probability}%</span>
+                        </div>
+                        <Slider
+                          value={[newMarket.favorite_probability]}
+                          onValueChange={([val]) => setNewMarket({ ...newMarket, favorite_probability: val })}
+                          min={51}
+                          max={95}
+                          step={1}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Esto ajusta la probabilidad inicial mostrada. A mayor probabilidad, menor el pago potencial para quien apueste por el favorito.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <Button className="w-full" onClick={handleCreateMarket} disabled={creating}>
                   {creating ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</>
