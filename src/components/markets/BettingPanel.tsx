@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlaceBet, Market } from '@/hooks/useMarkets';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Star } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface BettingPanelProps {
@@ -46,6 +47,9 @@ export function BettingPanel({ market }: BettingPanelProps) {
       ];
 
   const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
+  const hasBets = totalVolume > 0;
+  const favoriteOption = (market as any).favorite_option as string | null;
+  const favoriteProbability = (market as any).favorite_probability as number || 50;
 
   const betAmount = parseFloat(amount) || 0;
   const potentialPayout = selectedOption 

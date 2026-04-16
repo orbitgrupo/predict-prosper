@@ -151,6 +151,7 @@ export default function Admin() {
     }
     setCreating(true);
     try {
+      const favoriteOpt = newMarket.favorite_option && newMarket.favorite_option !== 'none' ? newMarket.favorite_option : null;
       const { data: marketData, error: marketError } = await supabase
         .from('markets')
         .insert({
@@ -161,8 +162,8 @@ export default function Admin() {
           created_by: user?.id,
           image_url: newMarket.image_url || null,
           allow_cashout: newMarket.allow_cashout,
-          favorite_option: newMarket.favorite_option || null,
-          favorite_probability: newMarket.favorite_option ? newMarket.favorite_probability : 50,
+          favorite_option: favoriteOpt,
+          favorite_probability: favoriteOpt ? newMarket.favorite_probability : 50,
         } as any)
         .select()
         .single();
