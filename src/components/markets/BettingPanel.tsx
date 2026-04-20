@@ -78,13 +78,22 @@ export function BettingPanel({ market }: BettingPanelProps) {
   }
 
   const handlePlaceBet = async () => {
-    if (!user || !selectedOption || betAmount <= 0) return;
+    if (!user || !selectedOption) return;
+
+    // Validación robusta del monto
+    const parsed = parseFloat(amount);
+    if (!amount || isNaN(parsed) || !isFinite(parsed)) return;
+
+    // Máximo 2 decimales para evitar fracciones de centavo
+    const roundedAmount = Math.round(parsed * 100) / 100;
+    if (roundedAmount < 1) return; // Mínimo $1
+    if (profile && roundedAmount > profile.balance) return;
 
     await placeBet.mutateAsync({
       marketId: market.id,
       userId: user.id,
       option: selectedOption,
-      amount: betAmount,
+      amount: roundedAmount,
     });
 
     setAmount('');
@@ -202,14 +211,18 @@ export function BettingPanel({ market }: BettingPanelProps) {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
               className="pl-7"
-              min="0"
+              min="1"
+              max={profile?.balance ?? undefined}
               step="0.01"
             />
           </div>
           {profile && (
             <p className="text-xs text-muted-foreground">
-              Saldo disponible: ${profile.balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+              Saldo disponible: ${profile.balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })} · Mínimo $1
             </p>
+          )}
+          {amount && parseFloat(amount) > 0 && parseFloat(amount) < 1 && (
+            <p className="text-xs text-destructive">El monto mínimo de apuesta es $1</p>
           )}
         </div>
 
@@ -277,7 +290,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
           <Button
             className="w-full"
             size="lg"
-            disabled={!selectedOption || betAmount <= 0 || placeBet.isPending || (profile && betAmount > profile.balance)}
+            disabled={!selectedOption || betAmount < 1 || placeBet.isPending || (profile && betAmount > profile.balance)}
             onClick={handlePlaceBet}
           >
             {placeBet.isPending ? (

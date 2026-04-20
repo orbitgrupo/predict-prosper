@@ -15,6 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DocumentUploadSection } from './DocumentUploadSection';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { friendlyError } from '@/lib/errors';
 
 interface Profile {
   id: string;
@@ -54,6 +55,18 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
       return;
     }
 
+    if (username.length > 30) {
+      toast.error('El nombre de usuario no puede superar 30 caracteres');
+      return;
+    }
+
+    // Validar caracteres permitidos en username
+    const usernameRegex = /^[a-zA-Z0-9_\-.áéíóúñüÁÉÍÓÚÑÜ]+$/;
+    if (!usernameRegex.test(username.trim())) {
+      toast.error('El nombre de usuario solo puede contener letras, números, puntos, guiones y guión bajo');
+      return;
+    }
+
     // Validar teléfono si se proporciona
     const phoneRegex = /^[\d\s\-+()]*$/;
     if (phone && !phoneRegex.test(phone)) {
@@ -83,7 +96,7 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
       toast.success('Perfil actualizado correctamente');
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar el perfil');
+      toast.error(friendlyError(error));
     } finally {
       setIsLoading(false);
     }

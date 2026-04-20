@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { useRateLimit } from '@/hooks/useRateLimit';
+import { friendlyError } from '@/lib/errors';
 
 const strongPasswordSchema = z.string()
   .min(8, 'Mínimo 8 caracteres')
@@ -27,7 +28,13 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   email: z.string().email('Email inválido'),
   password: strongPasswordSchema,
-  username: z.string().min(3, 'El nombre de usuario debe tener al menos 3 caracteres'),
+  username: z.string()
+    .min(3, 'El nombre de usuario debe tener al menos 3 caracteres')
+    .max(30, 'El nombre de usuario no puede superar 30 caracteres')
+    .regex(
+      /^[a-zA-Z0-9_\-.áéíóúñüÁÉÍÓÚÑÜ]+$/,
+      'Solo se permiten letras, números, puntos, guiones y guión bajo'
+    ),
 });
 
 export default function Auth() {
@@ -143,7 +150,7 @@ export default function Auth() {
           } else {
             toast({
               title: 'Error',
-              description: error.message,
+              description: friendlyError(error),
               variant: 'destructive',
             });
           }
@@ -167,7 +174,7 @@ export default function Auth() {
           } else {
             toast({
               title: 'Error',
-              description: error.message,
+              description: friendlyError(error),
               variant: 'destructive',
             });
           }
