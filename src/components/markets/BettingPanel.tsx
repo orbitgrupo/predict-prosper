@@ -228,6 +228,27 @@ export function BettingPanel({ market }: BettingPanelProps) {
           ))}
         </div>
 
+        {/* Risk indicator */}
+        {selectedOption && (
+          <div className="flex items-center justify-center gap-2 py-2">
+            {selectedOption === favoriteOption ? (
+              <>
+                <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+                  Menor riesgo
+                </Badge>
+                <span className="text-xs text-muted-foreground">Pago más bajo pero más probable</span>
+              </>
+            ) : (
+              <>
+                <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">
+                  Mayor riesgo
+                </Badge>
+                <span className="text-xs text-muted-foreground">Pago más alto pero menos probable</span>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Potential payout */}
         {selectedOption && betAmount > 0 && (
           <div className="rounded-lg bg-secondary p-3">
