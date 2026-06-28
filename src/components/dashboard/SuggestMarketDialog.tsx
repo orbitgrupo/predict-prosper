@@ -230,6 +230,40 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
           </div>
 
           <div className="space-y-2">
+            <Label>Imagen de portada (opcional)</Label>
+            {imagePreview ? (
+              <div className="relative rounded-lg overflow-hidden border bg-muted">
+                <img src={imagePreview} alt="Vista previa" className="w-full h-40 object-cover" />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8"
+                  onClick={clearImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label
+                htmlFor="market-image"
+                className="flex flex-col items-center justify-center gap-2 h-32 rounded-lg border-2 border-dashed border-border bg-muted/30 hover:bg-muted/60 cursor-pointer transition-colors"
+              >
+                <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Haz clic para subir una imagen</span>
+                <span className="text-xs text-muted-foreground">JPG, PNG · máx 5 MB</span>
+                <input
+                  id="market-image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+              </label>
+            )}
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="category">Categoría</Label>
             <Select
               value={suggestion.category}
