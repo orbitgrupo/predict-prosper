@@ -132,6 +132,8 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
 
     setSubmitting(true);
     try {
+      const imageUrl = await uploadImage();
+
       const { data, error } = await supabase.rpc('submit_market_suggestion', {
         p_user_id: userId,
         p_title: suggestion.title,
@@ -141,6 +143,7 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
         p_options: validOptions as any,
         p_selected_option: suggestion.selectedOption,
         p_fee_amount: FEE_AMOUNT,
+        p_image_url: imageUrl,
       });
 
       if (error) throw error;
@@ -157,6 +160,7 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
       });
 
       setOpen(false);
+      clearImage();
       setSuggestion({
         title: '',
         description: '',
