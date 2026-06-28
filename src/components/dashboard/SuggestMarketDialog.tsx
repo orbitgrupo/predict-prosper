@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Lightbulb, Plus, XCircle, Loader2, DollarSign } from 'lucide-react';
+import { Lightbulb, Plus, XCircle, Loader2, DollarSign, ImagePlus, X } from 'lucide-react';
 
 const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Otro'];
 const FEE_AMOUNT = 50;
