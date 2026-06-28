@@ -58,6 +58,7 @@ interface MarketSuggestion {
   reviewed_by: string | null;
   reviewed_at: string | null;
   created_at: string;
+  image_url?: string | null;
   profiles?: { email: string; username: string | null };
 }
 
