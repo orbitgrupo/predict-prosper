@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Lightbulb, Plus, XCircle, Loader2, DollarSign } from 'lucide-react';
+import { Lightbulb, Plus, XCircle, Loader2, DollarSign, ImagePlus, X } from 'lucide-react';
 
 const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Otro'];
 const FEE_AMOUNT = 50;
@@ -35,6 +35,9 @@ interface SuggestMarketDialogProps {
 export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialogProps) {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -46,6 +49,48 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
     options: ['', ''],
     selectedOption: '',
   });
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Archivo inválido', description: 'Solo se permiten imágenes.', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Imagen demasiado grande', description: 'Máximo 5 MB.', variant: 'destructive' });
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return null;
+    setUploadingImage(true);
+    try {
+      const ext = imageFile.name.split('.').pop() || 'jpg';
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('market-images')
+        .upload(path, imageFile, { contentType: imageFile.type, upsert: false });
+      if (upErr) throw upErr;
+      // bucket is private; create a long-lived signed URL (10 years)
+      const { data: signed, error: signErr } = await supabase.storage
+        .from('market-images')
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr) throw signErr;
+      return signed.signedUrl;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!suggestion.title || !suggestion.closes_at) {
@@ -87,6 +132,8 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
 
     setSubmitting(true);
     try {
+      const imageUrl = await uploadImage();
+
       const { data, error } = await supabase.rpc('submit_market_suggestion', {
         p_user_id: userId,
         p_title: suggestion.title,
@@ -96,6 +143,7 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
         p_options: validOptions as any,
         p_selected_option: suggestion.selectedOption,
         p_fee_amount: FEE_AMOUNT,
+        p_image_url: imageUrl,
       });
 
       if (error) throw error;
@@ -112,6 +160,7 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
       });
 
       setOpen(false);
+      clearImage();
       setSuggestion({
         title: '',
         description: '',
@@ -178,6 +227,40 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
               onChange={(e) => setSuggestion({ ...suggestion, description: e.target.value })}
               placeholder="Detalles adicionales sobre el evento..."
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Imagen de portada (opcional)</Label>
+            {imagePreview ? (
+              <div className="relative rounded-lg overflow-hidden border bg-muted">
+                <img src={imagePreview} alt="Vista previa" className="w-full h-40 object-cover" />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8"
+                  onClick={clearImage}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label
+                htmlFor="market-image"
+                className="flex flex-col items-center justify-center gap-2 h-32 rounded-lg border-2 border-dashed border-border bg-muted/30 hover:bg-muted/60 cursor-pointer transition-colors"
+              >
+                <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Haz clic para subir una imagen</span>
+                <span className="text-xs text-muted-foreground">JPG, PNG · máx 5 MB</span>
+                <input
+                  id="market-image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+              </label>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -292,12 +375,12 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
           <Button
             className="w-full"
             onClick={handleSubmit}
-            disabled={submitting || userBalance < FEE_AMOUNT}
+            disabled={submitting || uploadingImage || userBalance < FEE_AMOUNT}
           >
-            {submitting ? (
+            {submitting || uploadingImage ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Enviando...
+                {uploadingImage ? 'Subiendo imagen...' : 'Enviando...'}
               </>
             ) : (
               <>

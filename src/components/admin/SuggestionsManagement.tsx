@@ -58,6 +58,7 @@ interface MarketSuggestion {
   reviewed_by: string | null;
   reviewed_at: string | null;
   created_at: string;
+  image_url?: string | null;
   profiles?: { email: string; username: string | null };
 }
 
@@ -191,6 +192,7 @@ export function SuggestionsManagement() {
           category: editForm.category || null,
           closes_at: new Date(editForm.closes_at).toISOString(),
           created_by: user.id,
+          image_url: selectedSuggestion.image_url || null,
         })
         .select()
         .single();

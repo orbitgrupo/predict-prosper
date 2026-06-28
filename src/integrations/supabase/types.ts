@@ -702,19 +702,34 @@ export type Database = {
         Args: { p_market_id: string; p_winning_option: string }
         Returns: Json
       }
-      submit_market_suggestion: {
-        Args: {
-          p_category: string
-          p_closes_at: string
-          p_description: string
-          p_fee_amount?: number
-          p_options: Json
-          p_selected_option: string
-          p_title: string
-          p_user_id: string
-        }
-        Returns: Json
-      }
+      submit_market_suggestion:
+        | {
+            Args: {
+              p_category: string
+              p_closes_at: string
+              p_description: string
+              p_fee_amount?: number
+              p_options: Json
+              p_selected_option: string
+              p_title: string
+              p_user_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_category: string
+              p_closes_at: string
+              p_description: string
+              p_fee_amount?: number
+              p_image_url?: string
+              p_options: Json
+              p_selected_option: string
+              p_title: string
+              p_user_id: string
+            }
+            Returns: Json
+          }
       track_referral_click: {
         Args: { p_referral_code: string }
         Returns: undefined
