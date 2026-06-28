@@ -375,12 +375,12 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
           <Button
             className="w-full"
             onClick={handleSubmit}
-            disabled={submitting || userBalance < FEE_AMOUNT}
+            disabled={submitting || uploadingImage || userBalance < FEE_AMOUNT}
           >
-            {submitting ? (
+            {submitting || uploadingImage ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Enviando...
+                {uploadingImage ? 'Subiendo imagen...' : 'Enviando...'}
               </>
             ) : (
               <>
