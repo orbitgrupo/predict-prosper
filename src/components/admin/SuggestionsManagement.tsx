@@ -192,6 +192,7 @@ export function SuggestionsManagement() {
           category: editForm.category || null,
           closes_at: new Date(editForm.closes_at).toISOString(),
           created_by: user.id,
+          image_url: selectedSuggestion.image_url || null,
         })
         .select()
         .single();
