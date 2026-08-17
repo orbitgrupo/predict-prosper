@@ -378,8 +378,8 @@ export default function Auth() {
                       if (error) throw error;
                       toast({ title: 'Correo enviado', description: 'Revisa tu bandeja de entrada para restablecer tu contraseña.' });
                       setShowForgot(false);
-                    } catch {
-                      toast({ title: 'Error', description: 'No se pudo enviar el correo. Verifica el email e intenta de nuevo.', variant: 'destructive' });
+                    } catch (error) {
+                      toast({ title: 'Error', description: friendlyError(error), variant: 'destructive' });
                     } finally {
                       setForgotLoading(false);
                     }

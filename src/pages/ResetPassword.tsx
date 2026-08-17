@@ -8,16 +8,55 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Lock, TrendingUp } from 'lucide-react';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
+import { friendlyError } from '@/lib/errors';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  const [checkingRecovery, setCheckingRecovery] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
+    const prepareRecoverySession = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const code = queryParams.get('code');
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!mounted) return;
+
+        if (error) {
+          toast({
+            title: 'Enlace invalido',
+            description: friendlyError(error),
+            variant: 'destructive',
+          });
+          setIsRecovery(false);
+          setCheckingRecovery(false);
+          return;
+        }
+
+        window.history.replaceState({}, document.title, '/reset-password');
+        setIsRecovery(true);
+        setCheckingRecovery(false);
+        return;
+      }
+
+      if (hashParams.get('type') === 'recovery' || hashParams.has('access_token')) {
+        setIsRecovery(true);
+      }
+
+      setCheckingRecovery(false);
+    };
+
+    prepareRecoverySession();
+
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.get('type') === 'recovery') {
       setIsRecovery(true);
@@ -29,8 +68,11 @@ export default function ResetPassword() {
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,12 +100,20 @@ export default function ResetPassword() {
       if (error) throw error;
       toast({ title: '¡Contraseña actualizada!', description: 'Ya puedes iniciar sesión con tu nueva contraseña.' });
       navigate('/dashboard');
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'No se pudo actualizar la contraseña.', variant: 'destructive' });
+    } catch (error) {
+      toast({ title: 'Error', description: friendlyError(error), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
+
+  if (checkingRecovery) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!isRecovery) {
     return (
