@@ -23,6 +23,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  pendingSignupEmail: string | null;
   isAdmin: boolean;
   isEmailConfirmed: boolean;
   loading: boolean;
@@ -30,16 +31,26 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  clearPendingSignup: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const PENDING_SIGNUP_EMAIL_KEY = 'votox_pending_signup_email';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [pendingSignupEmail, setPendingSignupEmail] = useState<string | null>(() =>
+    localStorage.getItem(PENDING_SIGNUP_EMAIL_KEY)
+  );
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const clearPendingSignup = () => {
+    localStorage.removeItem(PENDING_SIGNUP_EMAIL_KEY);
+    setPendingSignupEmail(null);
+  };
 
   const fetchProfile = async (userId: string) => {
     const { data: profileData } = await supabase
@@ -89,6 +100,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          if (session.user.email_confirmed_at) {
+            clearPendingSignup();
+          }
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
@@ -104,6 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        if (session.user.email_confirmed_at) {
+          clearPendingSignup();
+        }
         fetchProfile(session.user.id);
       }
       setLoading(false);
@@ -115,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, username?: string, referralCode?: string, phone?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -123,6 +140,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: { username, referral_code: referralCode || null, phone: phone || null },
       },
     });
+
+    if (!error && data.user && !data.session) {
+      localStorage.setItem(PENDING_SIGNUP_EMAIL_KEY, email);
+      setPendingSignupEmail(email);
+    }
     
     return { error };
   };
@@ -132,6 +154,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
+
+    if (!error) {
+      clearPendingSignup();
+    }
     
     return { error };
   };
@@ -151,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       profile,
+      pendingSignupEmail,
       isAdmin,
       isEmailConfirmed,
       loading,
@@ -158,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
       refreshProfile,
+      clearPendingSignup,
     }}>
       {children}
     </AuthContext.Provider>

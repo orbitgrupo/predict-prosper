@@ -6,18 +6,19 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export function EmailConfirmationBanner() {
-  const { user, isEmailConfirmed } = useAuth();
+  const { user, isEmailConfirmed, pendingSignupEmail, clearPendingSignup } = useAuth();
   const [resending, setResending] = useState(false);
   const { toast } = useToast();
+  const email = user?.email || pendingSignupEmail;
 
-  if (!user || isEmailConfirmed) return null;
+  if (!email || isEmailConfirmed) return null;
 
   const handleResend = async () => {
     setResending(true);
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: user.email!,
+        email,
       });
       if (error) throw error;
       toast({
@@ -41,20 +42,27 @@ export function EmailConfirmationBanner() {
         <div className="flex items-center gap-2 text-sm">
           <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
           <p>
-            <span className="font-medium">Tu email no está confirmado.</span>{' '}
-            Revisa tu bandeja de entrada para verificar tu cuenta y poder interactuar en la plataforma.
+            <span className="font-medium">Confirma tu email para activar tu cuenta.</span>{' '}
+            Puedes explorar la pagina, pero no podras interactuar en la plataforma hasta verificar {email}.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="shrink-0 gap-2"
-          onClick={handleResend}
-          disabled={resending}
-        >
-          <Mail className="h-4 w-4" />
-          {resending ? 'Enviando...' : 'Reenviar correo'}
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleResend}
+            disabled={resending}
+          >
+            <Mail className="h-4 w-4" />
+            {resending ? 'Enviando...' : 'Reenviar correo'}
+          </Button>
+          {!user && (
+            <Button variant="ghost" size="sm" onClick={clearPendingSignup}>
+              Ocultar
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

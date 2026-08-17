@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/layout/Navbar';
+import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { MarketCard } from '@/components/markets/MarketCard';
 import { useMarkets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,6 +42,7 @@ export default function Index() {
   const activeMarkets = markets?.filter((m) => m.status === 'active').slice(0, 6) || [];
   return <div className="min-h-screen bg-background">
       <Navbar />
+      <EmailConfirmationBanner />
       
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">

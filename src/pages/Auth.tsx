@@ -191,7 +191,7 @@ export default function Auth() {
             title: '¡Cuenta creada!',
             description: 'Te hemos enviado un correo de confirmación. Revisa tu bandeja de entrada para verificar tu cuenta.',
           });
-          // Don't navigate - let user know to check email
+          navigate('/');
         }
       }
     } finally {
