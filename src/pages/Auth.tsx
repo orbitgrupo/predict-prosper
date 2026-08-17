@@ -54,7 +54,7 @@ export default function Auth() {
   // Track referral link click
   useEffect(() => {
     if (refCode) {
-      supabase.rpc('track_referral_click', { p_referral_code: refCode } as any).then();
+      supabase.rpc('track_referral_click', { p_referral_code: refCode }).then();
     }
   }, [refCode]);
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -105,7 +105,7 @@ export default function Auth() {
       if (isLogin) {
         loginSchema.parse({ email, password });
       } else {
-        const phoneRequired = (promoSettings as any)?.phone_required_on_signup ?? false;
+        const phoneRequired = promoSettings?.phone_required_on_signup ?? false;
         signupSchema.parse({ email, password, username, phone: phone.trim() });
         if (phoneRequired && !phone.trim()) {
           setErrors({ phone: 'El número telefónico es obligatorio' });
@@ -243,7 +243,7 @@ export default function Auth() {
             {!isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="phone">
-                  Teléfono {(promoSettings as any)?.phone_required_on_signup ? '*' : '(opcional)'}
+                  Teléfono {promoSettings?.phone_required_on_signup ? '*' : '(opcional)'}
                 </Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -256,7 +256,7 @@ export default function Auth() {
                     placeholder="+18095551234"
                     className="pl-9"
                     disabled={loading}
-                    required={(promoSettings as any)?.phone_required_on_signup ?? false}
+                    required={promoSettings?.phone_required_on_signup ?? false}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">Incluye el código de país.</p>

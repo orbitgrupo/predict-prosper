@@ -29,9 +29,9 @@ export function GeneralSettings() {
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
       } else {
-        setUsBettingEnabled((data as any).us_betting_enabled ?? false);
-        setEconomyMode((data as any).economy_mode === 'real_money' ? 'real_money' : 'points');
-        setPhoneRequired((data as any).phone_required_on_signup ?? false);
+        setUsBettingEnabled(data.us_betting_enabled ?? false);
+        setEconomyMode(data.economy_mode === 'real_money' ? 'real_money' : 'points');
+        setPhoneRequired(data.phone_required_on_signup ?? false);
       }
       setLoading(false);
     }
@@ -48,7 +48,7 @@ export function GeneralSettings() {
         economy_mode: economyMode,
         phone_required_on_signup: phoneRequired,
         updated_at: new Date().toISOString(),
-      } as any)
+      })
       .eq('id', 'default');
 
     setSaving(false);

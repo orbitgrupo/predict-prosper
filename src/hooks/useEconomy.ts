@@ -13,7 +13,7 @@ export function useEconomy() {
         .eq('id', 'default')
         .single();
       if (error) throw error;
-      return ((data as any).economy_mode || 'points') as EconomyMode;
+      return (data.economy_mode || 'points') as EconomyMode;
     },
     staleTime: 30_000,
   });
