@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Clock, TrendingUp, ImageIcon, ShieldCheck, ShieldOff } from 'lucide-react';
 import { Market } from '@/hooks/useMarkets';
+import { useEconomy } from '@/hooks/useEconomy';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -14,6 +15,7 @@ interface MarketCardProps {
 type OptionLike = { id: string; option_name: string; total_amount: number };
 
 export function MarketCard({ market }: MarketCardProps) {
+  const { formatAmount } = useEconomy();
   const hasOptions = market.options && market.options.length > 0;
   const options: OptionLike[] = hasOptions 
     ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
@@ -50,11 +52,13 @@ export function MarketCard({ market }: MarketCardProps) {
       <Card className="group h-full transition-all hover:shadow-lg hover:border-primary/20 overflow-hidden">
         {/* Market image */}
         {market.image_url ? (
-          <div className="aspect-[16/9] w-full overflow-hidden">
+          <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
             <img 
               src={market.image_url} 
               alt={market.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              className="block h-full w-full object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]"
             />
           </div>
         ) : (
@@ -122,7 +126,7 @@ export function MarketCard({ market }: MarketCardProps) {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
                 <TrendingUp className="h-3.5 w-3.5" />
-                <span>${totalVolume.toLocaleString('es-ES')}</span>
+                <span>{formatAmount(totalVolume)}</span>
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>

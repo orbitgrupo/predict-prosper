@@ -82,15 +82,14 @@ export function EditProfileDialog({ open, onOpenChange, profile }: EditProfileDi
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          username: username.trim(),
-          phone: phone.trim() || null
-        })
-        .eq('id', profile.id);
+      const { data, error } = await supabase.rpc('update_profile_basic' as any, {
+        p_username: username.trim(),
+        p_phone: phone.trim() || null,
+      } as any);
 
       if (error) throw error;
+      const result = data as { success: boolean; error?: string };
+      if (!result.success) throw new Error(result.error || 'No se pudo actualizar el perfil');
 
       await refreshProfile();
       toast.success('Perfil actualizado correctamente');

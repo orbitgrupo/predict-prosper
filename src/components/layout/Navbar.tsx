@@ -9,6 +9,7 @@ import { NotificationBell } from '@/components/layout/NotificationBell';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
+import { useEconomy } from '@/hooks/useEconomy';
 
 export function Navbar() {
   const {
@@ -18,6 +19,7 @@ export function Navbar() {
     signOut
   } = useAuth();
   const navigate = useNavigate();
+  const { formatAmount } = useEconomy();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -78,9 +80,7 @@ export function Navbar() {
                 {profile && <div className="hidden items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 sm:flex">
                     <Wallet className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-sm">
-                      ${profile.balance.toLocaleString('es-ES', {
-                  minimumFractionDigits: 2
-                })}
+                      {formatAmount(profile.balance)}
                     </span>
                   </div>}
 
@@ -169,7 +169,7 @@ export function Navbar() {
                       <div className="flex items-center gap-2 mx-4 mt-4 rounded-lg bg-secondary px-3 py-2.5">
                         <Wallet className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium text-sm">
-                          ${profile.balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          {formatAmount(profile.balance)}
                         </span>
                       </div>
                     )}

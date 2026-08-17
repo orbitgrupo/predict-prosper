@@ -16,6 +16,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
+import { GeneralSettings } from '@/components/admin/GeneralSettings';
 import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
 import { AuditLogsPanel } from '@/components/admin/AuditLogsPanel';
 import {
@@ -65,6 +66,8 @@ export default function Admin() {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
+  const [marketImage, setMarketImage] = useState<File | null>(null);
   const [newMarket, setNewMarket] = useState({
     title: '',
     description: '',
@@ -139,6 +142,37 @@ export default function Admin() {
     }
   }, [isAdmin]);
 
+  const handleMarketImageChange = (file: File | null) => {
+    if (!file) {
+      setMarketImage(null);
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Archivo no válido', description: 'Selecciona una imagen.', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Imagen demasiado grande', description: 'El tamaño máximo es 5 MB.', variant: 'destructive' });
+      return;
+    }
+    setMarketImage(file);
+  };
+
+  const uploadMarketImage = async () => {
+    if (!marketImage || !user) return null;
+    const extension = marketImage.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const path = user.id + '/markets/' + crypto.randomUUID() + '.' + extension;
+    const { error: uploadError } = await supabase.storage
+      .from('market-images')
+      .upload(path, marketImage, { contentType: marketImage.type, upsert: false });
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('market-images')
+      .getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const handleCreateMarket = async () => {
     if (!newMarket.title || !newMarket.closes_at) {
       toast({ title: 'Error', description: 'Título y fecha de cierre son requeridos.', variant: 'destructive' });
@@ -151,6 +185,8 @@ export default function Admin() {
     }
     setCreating(true);
     try {
+      const uploadedImageUrl = imageMode === 'upload' ? await uploadMarketImage() : null;
+      const imageUrl = uploadedImageUrl || (imageMode === 'url' ? newMarket.image_url.trim() : '') || null;
       const favoriteOpt = newMarket.favorite_option && newMarket.favorite_option !== 'none' ? newMarket.favorite_option : null;
       const { data: marketData, error: marketError } = await supabase
         .from('markets')
@@ -160,7 +196,7 @@ export default function Admin() {
           category: newMarket.category || null,
           closes_at: new Date(newMarket.closes_at).toISOString(),
           created_by: user?.id,
-          image_url: newMarket.image_url || null,
+          image_url: imageUrl,
           allow_cashout: newMarket.allow_cashout,
           favorite_option: favoriteOpt,
           favorite_probability: favoriteOpt ? newMarket.favorite_probability : 50,
@@ -177,6 +213,8 @@ export default function Admin() {
       toast({ title: 'Mercado creado', description: 'El mercado se ha creado correctamente.' });
       setCreateDialogOpen(false);
       setNewMarket({ title: '', description: '', category: '', closes_at: '', image_url: '', options: ['', ''], allow_cashout: true, favorite_option: '', favorite_probability: 60 });
+      setMarketImage(null);
+      setImageMode('upload');
       queryClient.invalidateQueries({ queryKey: ['markets'] });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -360,15 +398,33 @@ export default function Admin() {
                     onChange={(e) => setNewMarket({ ...newMarket, closes_at: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">URL de imagen</Label>
-                  <Input
-                    id="image_url"
-                    type="url"
-                    value={newMarket.image_url}
-                    onChange={(e) => setNewMarket({ ...newMarket, image_url: e.target.value })}
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                  />
+                <div className="space-y-3">
+                  <Label>Imagen del mercado</Label>
+                  <Tabs value={imageMode} onValueChange={(value) => setImageMode(value as 'upload' | 'url')}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="upload">Subir archivo</TabsTrigger>
+                      <TabsTrigger value="url">Usar URL</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="upload" className="mt-3 space-y-2">
+                      <Input
+                        id="market-image-file"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={(event) => handleMarketImageChange(event.target.files?.[0] || null)}
+                      />
+                      <p className="text-xs text-muted-foreground">JPG, PNG, WebP o GIF. Máximo 5 MB.</p>
+                      {marketImage && <p className="text-sm font-medium">{marketImage.name}</p>}
+                    </TabsContent>
+                    <TabsContent value="url" className="mt-3">
+                      <Input
+                        id="image_url"
+                        type="url"
+                        value={newMarket.image_url}
+                        onChange={(e) => setNewMarket({ ...newMarket, image_url: e.target.value })}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </div>
                 <div className="flex items-center justify-between rounded-lg border p-3">
                   <div>
@@ -561,6 +617,7 @@ export default function Admin() {
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
               <TabsTrigger value="activity" className="text-xs sm:text-sm">Actividades</TabsTrigger>
               <TabsTrigger value="promotion" className="text-xs sm:text-sm">Promoción</TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs sm:text-sm">Configuración</TabsTrigger>
               <TabsTrigger value="audit" className="text-xs sm:text-sm">Auditoría</TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
@@ -688,6 +745,10 @@ export default function Admin() {
 
           <TabsContent value="promotion" className="mt-4 sm:mt-6">
             <PromotionSettings />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-4 sm:mt-6">
+            <GeneralSettings />
           </TabsContent>
 
           <TabsContent value="audit" className="mt-4 sm:mt-6">

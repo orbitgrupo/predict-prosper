@@ -26,7 +26,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isEmailConfirmed: boolean;
   loading: boolean;
-  signUp: (email: string, password: string, username?: string, referralCode?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, username?: string, referralCode?: string, phone?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, username?: string, referralCode?: string) => {
+  const signUp = async (email: string, password: string, username?: string, referralCode?: string, phone?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { username, referral_code: referralCode || null },
+        data: { username, referral_code: referralCode || null, phone: phone || null },
       },
     });
     

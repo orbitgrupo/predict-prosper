@@ -4,6 +4,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBets } from '@/hooks/useMarkets';
+import { useEconomy } from '@/hooks/useEconomy';
 import { SuggestMarketDialog } from '@/components/dashboard/SuggestMarketDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const { user, profile, loading, isEmailConfirmed } = useAuth();
   const { data: bets, isLoading: betsLoading } = useUserBets(user?.id);
   const navigate = useNavigate();
+  const { formatAmount } = useEconomy();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -68,7 +70,7 @@ export default function Dashboard() {
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-muted-foreground">Saldo</p>
                   <p className="font-display text-lg sm:text-2xl font-bold">
-                    ${profile.balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    {formatAmount(profile.balance)}
                   </p>
                 </div>
               </div>
@@ -84,7 +86,7 @@ export default function Dashboard() {
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-muted-foreground">Ganancias</p>
                   <p className="font-display text-lg sm:text-2xl font-bold text-success">
-                    +${totalWinnings.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    +{formatAmount(totalWinnings)}
                   </p>
                 </div>
               </div>
@@ -116,7 +118,7 @@ export default function Dashboard() {
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-muted-foreground">Apostado</p>
                   <p className="font-display text-lg sm:text-2xl font-bold">
-                    ${totalBetAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    {formatAmount(totalBetAmount)}
                   </p>
                 </div>
               </div>
@@ -167,7 +169,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-medium text-sm">${Number(bet.amount).toFixed(2)}</p>
+                      <p className="font-medium text-sm">{formatAmount(Number(bet.amount))}</p>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         Pendiente
@@ -217,9 +219,9 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className={`font-medium text-sm ${bet.is_winner ? 'text-success' : 'text-muted-foreground'}`}>
-                        {bet.is_winner 
-                          ? `+$${Number(bet.payout_amount).toFixed(2)}` 
-                          : `-$${Number(bet.amount).toFixed(2)}`}
+                        {bet.is_winner
+                          ? '+' + formatAmount(Number(bet.payout_amount))
+                          : '-' + formatAmount(Number(bet.amount))}
                       </p>
                       <Badge variant={bet.is_winner ? 'default' : 'secondary'} className="text-xs">
                         {bet.is_winner ? 'Ganada' : 'Perdida'}

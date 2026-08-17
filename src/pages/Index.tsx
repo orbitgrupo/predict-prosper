@@ -53,7 +53,7 @@ export default function Index() {
                 Gana recompensas.
               </span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predice en los eventos del Pais y del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predice en los eventos del país y del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
             {!user && promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0 &&
           <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                 <Gift className="h-4 w-4" />
@@ -208,7 +208,7 @@ export default function Index() {
               </div>
               <span className="font-display font-bold">Votox</span>
             </div>
-            <p className="text-sm text-muted-foreground">© 2024 VoteX. Todos los derechos reservados.</p>
+            <p className="text-sm text-muted-foreground">© 2026 Votox. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

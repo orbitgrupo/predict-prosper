@@ -7,6 +7,7 @@ import { CashoutButton } from '@/components/markets/CashoutButton';
 import { CommentsSection } from '@/components/markets/CommentsSection';
 import { useMarket, useUserBets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
+import { useEconomy } from '@/hooks/useEconomy';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ export default function MarketDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: market, isLoading } = useMarket(id || '');
   const { user } = useAuth();
+  const { formatAmount } = useEconomy();
   const { data: userBets } = useUserBets(user?.id);
 
   const marketBets = userBets?.filter(bet => bet.market_id === id) || [];
@@ -85,11 +87,13 @@ export default function MarketDetail() {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Market image */}
             {market.image_url ? (
-              <div className="aspect-[16/9] w-full overflow-hidden rounded-xl">
+              <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-muted">
                 <img 
                   src={market.image_url} 
                   alt={market.title}
-                  className="h-full w-full object-cover"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  className="block h-full w-full object-contain object-center"
                 />
               </div>
             ) : (
@@ -183,7 +187,7 @@ export default function MarketDetail() {
                     <div className="text-center sm:text-left">
                       <p className="text-xs text-muted-foreground">Volumen</p>
                       <p className="font-display text-sm sm:text-xl font-bold">
-                        ${totalVolume.toLocaleString('es-ES')}
+                        {formatAmount(totalVolume)}
                       </p>
                     </div>
                   </div>
@@ -257,7 +261,7 @@ export default function MarketDetail() {
                             {bet.option}
                           </Badge>
                           <div className="min-w-0">
-                            <p className="font-medium text-sm">${Number(bet.amount).toFixed(2)}</p>
+                            <p className="font-medium text-sm">{formatAmount(Number(bet.amount))}</p>
                             <p className="text-xs text-muted-foreground">
                               {format(new Date(bet.created_at), 'dd MMM yyyy, HH:mm', { locale: es })}
                             </p>
@@ -265,7 +269,7 @@ export default function MarketDetail() {
                         </div>
                         {bet.is_winner !== null ? (
                           <Badge variant={bet.is_winner ? 'default' : 'secondary'} className="shrink-0 text-xs">
-                            {bet.is_winner ? `+$${Number(bet.payout_amount).toFixed(2)}` : bet.payout_amount ? `Retirado: $${Number(bet.payout_amount).toFixed(2)}` : 'Perdida'}
+                            {bet.is_winner ? '+' + formatAmount(Number(bet.payout_amount)) : bet.payout_amount ? 'Retirado: ' + formatAmount(Number(bet.payout_amount)) : 'Perdida'}
                           </Badge>
                         ) : (
                           <CashoutButton

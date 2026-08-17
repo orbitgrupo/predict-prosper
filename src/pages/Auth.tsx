@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, TrendingUp, Mail, Lock, User, Users, ShieldAlert } from 'lucide-react';
+import { Loader2, TrendingUp, Mail, Lock, User, Users, ShieldAlert, Phone } from 'lucide-react';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
@@ -28,6 +28,8 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   email: z.string().email('Email inválido'),
   password: strongPasswordSchema,
+  phone: z.string()
+    .refine((value) => !value || /^\+[1-9][0-9]{7,14}$/.test(value), 'Usa formato internacional, por ejemplo +18095551234'),
   username: z.string()
     .min(3, 'El nombre de usuario debe tener al menos 3 caracteres')
     .max(30, 'El nombre de usuario no puede superar 30 caracteres')
@@ -44,6 +46,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [phone, setPhone] = useState('');
   const [referralCode, setReferralCode] = useState(refCode);
   const [forgotEmail, setForgotEmail] = useState('');
   const [showForgot, setShowForgot] = useState(false);
@@ -102,7 +105,12 @@ export default function Auth() {
       if (isLogin) {
         loginSchema.parse({ email, password });
       } else {
-        signupSchema.parse({ email, password, username });
+        const phoneRequired = (promoSettings as any)?.phone_required_on_signup ?? false;
+        signupSchema.parse({ email, password, username, phone: phone.trim() });
+        if (phoneRequired && !phone.trim()) {
+          setErrors({ phone: 'El número telefónico es obligatorio' });
+          return false;
+        }
       }
       setErrors({});
       return true;
@@ -163,7 +171,7 @@ export default function Auth() {
           navigate('/dashboard');
         }
       } else {
-        const { error } = await signUp(email, password, username, referralCode || undefined);
+        const { error } = await signUp(email, password, username, referralCode || undefined, phone.trim() || undefined);
         if (error) {
           if (error.message.includes('already registered')) {
             toast({
@@ -232,6 +240,30 @@ export default function Auth() {
               </div>
             )}
             
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">
+                  Teléfono {(promoSettings as any)?.phone_required_on_signup ? '*' : '(opcional)'}
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/[\s()-]/g, ''))}
+                    placeholder="+18095551234"
+                    className="pl-9"
+                    disabled={loading}
+                    required={(promoSettings as any)?.phone_required_on_signup ?? false}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Incluye el código de país.</p>
+                {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
