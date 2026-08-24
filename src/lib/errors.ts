@@ -27,6 +27,10 @@ export function friendlyError(err: unknown): string {
   if (message.includes('Email not confirmed')) return 'Debes confirmar tu email antes de continuar.';
   if (message.includes('already registered')) return 'Este email ya tiene una cuenta registrada.';
   if (message.includes('Password should be')) return 'La contraseña no cumple los requisitos mínimos.';
+  if (message.includes('email rate limit')) return 'Ya se envió un correo recientemente. Espera unos minutos antes de pedir otro.';
+  if (message.includes('over_email_send_rate_limit')) return 'Ya se envió un correo recientemente. Espera unos minutos antes de pedir otro.';
+  if (message.includes('otp_expired')) return 'El enlace expiró. Solicita uno nuevo.';
+  if (message.includes('invalid request')) return 'El enlace no es válido o ya fue utilizado.';
   if (message.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
   if (message.includes('User not found')) return 'No se encontró una cuenta con esos datos.';
 

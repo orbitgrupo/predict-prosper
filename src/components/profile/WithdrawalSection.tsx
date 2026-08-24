@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { useEconomy } from '@/hooks/useEconomy';
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
   const { toast } = useToast();
   const { profile, refreshProfile } = useAuth();
   const queryClient = useQueryClient();
+  const { isRealMoney, formatAmount } = useEconomy();
 
   const [method, setMethod] = useState<string>('');
   const [amount, setAmount] = useState('');
@@ -62,6 +64,24 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
     (profile as any)?.is_age_verified === true;
 
   const hasPending = withdrawals?.some((w: any) => w.status === 'pending');
+
+  if (!isRealMoney) {
+    return (
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Banknote className="h-5 w-5" />
+            Retiros no disponibles
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            La plataforma está en modo puntos. Los puntos son internos, no representan dinero y no se pueden retirar ni canjear.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSubmit = async () => {
     const numAmount = Number(amount);
@@ -161,9 +181,9 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
           <div className="rounded-lg border bg-muted/30 p-3">
             <p className="text-sm text-muted-foreground">
               Saldo disponible:{' '}
-              <strong className="text-foreground text-lg">${profile?.balance?.toLocaleString('es-ES') ?? 0}</strong>
+              <strong className="text-foreground text-lg">{formatAmount(profile?.balance ?? 0)}</strong>
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Monto mínimo de retiro: $50</p>
+            <p className="text-xs text-muted-foreground mt-1">Monto mínimo de retiro: {formatAmount(50)}</p>
           </div>
 
           <div className="space-y-2">
@@ -284,7 +304,7 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">${Number(w.amount).toLocaleString('es-ES')}</p>
+                      <p className="font-medium">{formatAmount(Number(w.amount))}</p>
                       {getStatusBadge(w.status)}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">

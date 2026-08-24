@@ -81,12 +81,10 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
         .from('market-images')
         .upload(path, imageFile, { contentType: imageFile.type, upsert: false });
       if (upErr) throw upErr;
-      // bucket is private; create a long-lived signed URL (10 years)
-      const { data: signed, error: signErr } = await supabase.storage
+      const { data } = supabase.storage
         .from('market-images')
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (signErr) throw signErr;
-      return signed.signedUrl;
+        .getPublicUrl(path);
+      return data.publicUrl;
     } finally {
       setUploadingImage(false);
     }
@@ -233,7 +231,7 @@ export function SuggestMarketDialog({ userId, userBalance }: SuggestMarketDialog
             <Label>Imagen de portada (opcional)</Label>
             {imagePreview ? (
               <div className="relative rounded-lg overflow-hidden border bg-muted">
-                <img src={imagePreview} alt="Vista previa" className="w-full h-40 object-cover" />
+                <img src={imagePreview} alt="Vista previa" className="h-40 w-full bg-muted object-contain object-center" />
                 <Button
                   type="button"
                   variant="destructive"

@@ -1,9 +1,15 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
-export function RequireTerms({ children }: { children: React.ReactNode }) {
+interface RequireTermsProps {
+  children: React.ReactNode;
+  requireAuth?: boolean;
+}
+
+export function RequireTerms({ children, requireAuth = false }: RequireTermsProps) {
   const { user, profile, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -13,7 +19,10 @@ export function RequireTerms({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Only gate authenticated users who haven't accepted terms
+  if (requireAuth && !user) {
+    return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
+  }
+
   if (user && profile && !profile.accepted_terms) {
     return <Navigate to="/terms" replace />;
   }

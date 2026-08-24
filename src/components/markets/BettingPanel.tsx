@@ -8,6 +8,8 @@ import { usePlaceBet, Market } from '@/hooks/useMarkets';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, Star } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { useEconomy } from '@/hooks/useEconomy';
 
 interface BettingPanelProps {
   market: Market;
@@ -19,20 +21,37 @@ export function BettingPanel({ market }: BettingPanelProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
   const [isRestrictedLocation, setIsRestrictedLocation] = useState<boolean>(false);
+  const [checkingLocation, setCheckingLocation] = useState(true);
   const { user, profile, refreshProfile } = useAuth();
   const placeBet = usePlaceBet();
   const navigate = useNavigate();
+  const { formatAmount, isRealMoney } = useEconomy();
 
   useEffect(() => {
     const checkLocation = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        if (data.country_code === 'US' || data.country === 'US' || data.country_name === 'United States') {
-          setIsRestrictedLocation(true);
+        const { data: settings, error } = await supabase
+          .from('app_settings')
+          .select('*')
+          .eq('id', 'default')
+          .single();
+        if (error) throw error;
+
+        if (settings.us_betting_enabled) {
+          setIsRestrictedLocation(false);
+          return;
         }
+
+        const response = await fetch('https://ipapi.co/json/');
+        const data: { country_code?: string; country?: string; country_name?: string } = await response.json();
+        setIsRestrictedLocation(
+          data.country_code === 'US' || data.country === 'US' || data.country_name === 'United States'
+        );
       } catch (error) {
-        console.error('Error checking location:', error);
+        console.error('Error checking betting restrictions:', error);
+        setIsRestrictedLocation(true);
+      } finally {
+        setCheckingLocation(false);
       }
     };
     checkLocation();
@@ -48,8 +67,8 @@ export function BettingPanel({ market }: BettingPanelProps) {
 
   const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
   const hasBets = totalVolume > 0;
-  const favoriteOption = (market as any).favorite_option as string | null;
-  const favoriteProbability = (market as any).favorite_probability as number || 50;
+  const favoriteOption = market.favorite_option;
+  const favoriteProbability = market.favorite_probability || 50;
 
   const betAmount = parseFloat(amount) || 0;
   const potentialPayout = selectedOption 
@@ -204,13 +223,13 @@ export function BettingPanel({ market }: BettingPanelProps) {
         <div className="space-y-2">
           <label className="text-sm font-medium">Cantidad</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{isRealMoney ? '\u0024' : 'pts'}</span>
             <Input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="pl-7"
+              className={isRealMoney ? 'pl-7' : 'pl-11'}
               min="1"
               max={profile?.balance ?? undefined}
               step="0.01"
@@ -218,11 +237,11 @@ export function BettingPanel({ market }: BettingPanelProps) {
           </div>
           {profile && (
             <p className="text-xs text-muted-foreground">
-              Saldo disponible: ${profile.balance.toLocaleString('es-ES', { minimumFractionDigits: 2 })} · Mínimo $1
+              Saldo disponible: {formatAmount(profile.balance)} · Mínimo {formatAmount(1, 0)}
             </p>
           )}
           {amount && parseFloat(amount) > 0 && parseFloat(amount) < 1 && (
-            <p className="text-xs text-destructive">El monto mínimo de apuesta es $1</p>
+            <p className="text-xs text-destructive">El monto mínimo es {formatAmount(1, 0)}</p>
           )}
         </div>
 
@@ -236,7 +255,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
               className="flex-1"
               onClick={() => setAmount(quickAmount.toString())}
             >
-              ${quickAmount}
+              {formatAmount(quickAmount, 0)}
             </Button>
           ))}
         </div>
@@ -268,7 +287,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Pago potencial</span>
               <span className="font-bold text-success">
-                ${potentialPayout.toFixed(2)}
+                {formatAmount(potentialPayout)}
               </span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -279,7 +298,12 @@ export function BettingPanel({ market }: BettingPanelProps) {
         )}
 
         {/* Place bet button */}
-        {isRestrictedLocation ? (
+        {checkingLocation ? (
+          <Button className="w-full" size="lg" disabled>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Verificando disponibilidad...
+          </Button>
+        ) : isRestrictedLocation ? (
           <Alert variant="destructive" className="mt-4 bg-destructive/10">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>

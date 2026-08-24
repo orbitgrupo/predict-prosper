@@ -16,28 +16,37 @@ export type Database = {
     Tables: {
       app_settings: {
         Row: {
+          economy_mode: string
           id: string
+          phone_required_on_signup: boolean
           referral_bonus_referred: number
           referral_bonus_referrer: number
           referral_enabled: boolean
+          us_betting_enabled: boolean
           updated_at: string
           welcome_bonus_amount: number
           welcome_bonus_enabled: boolean
         }
         Insert: {
+          economy_mode?: string
           id?: string
+          phone_required_on_signup?: boolean
           referral_bonus_referred?: number
           referral_bonus_referrer?: number
           referral_enabled?: boolean
+          us_betting_enabled?: boolean
           updated_at?: string
           welcome_bonus_amount?: number
           welcome_bonus_enabled?: boolean
         }
         Update: {
+          economy_mode?: string
           id?: string
+          phone_required_on_signup?: boolean
           referral_bonus_referred?: number
           referral_bonus_referrer?: number
           referral_enabled?: boolean
+          us_betting_enabled?: boolean
           updated_at?: string
           welcome_bonus_amount?: number
           welcome_bonus_enabled?: boolean
@@ -429,6 +438,8 @@ export type Database = {
           is_age_verified: boolean | null
           is_blocked: boolean
           phone: string | null
+          cash_balance: number
+          points_balance: number
           referral_clicks: number
           referral_code: string
           referred_by: string | null
@@ -450,6 +461,8 @@ export type Database = {
           is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
+          cash_balance?: number
+          points_balance?: number
           referral_clicks?: number
           referral_code: string
           referred_by?: string | null
@@ -471,6 +484,8 @@ export type Database = {
           is_age_verified?: boolean | null
           is_blocked?: boolean
           phone?: string | null
+          cash_balance?: number
+          points_balance?: number
           referral_clicks?: number
           referral_code?: string
           referred_by?: string | null
@@ -650,6 +665,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_terms: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       admin_add_funds: {
         Args: { p_amount: number; p_user_id: string }
         Returns: Json
@@ -686,6 +705,14 @@ export type Database = {
         }
         Returns: Json
       }
+      set_age_confirmation: {
+        Args: { p_is_age_verified: boolean }
+        Returns: Json
+      }
+      submit_identity_document: {
+        Args: { p_file_path: string; p_side: string }
+        Returns: Json
+      }
       request_withdrawal: {
         Args: {
           p_account_holder?: string
@@ -696,6 +723,10 @@ export type Database = {
           p_paypal_email?: string
           p_user_id: string
         }
+        Returns: Json
+      }
+      update_profile_basic: {
+        Args: { p_phone?: string | null; p_username: string }
         Returns: Json
       }
       resolve_market: {

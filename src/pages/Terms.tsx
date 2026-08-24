@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
+import { useEconomy } from '@/hooks/useEconomy';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShieldCheck } from 'lucide-react';
@@ -15,20 +16,17 @@ export default function Terms() {
   const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isRealMoney } = useEconomy();
 
   const handleAccept = async () => {
     if (!user || !accepted) return;
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          accepted_terms: true, 
-          accepted_terms_at: new Date().toISOString() 
-        } as any)
-        .eq('id', user.id);
+      const { data, error } = await supabase.rpc('accept_terms' as any);
 
       if (error) throw error;
+      const result = data as { success: boolean; error?: string };
+      if (!result.success) throw new Error(result.error || 'No se pudieron aceptar los términos');
 
       await refreshProfile();
       toast({
@@ -96,7 +94,7 @@ export default function Terms() {
                 <li>Utilizar información privilegiada para obtener ventajas indebidas.</li>
                 <li>Realizar cualquier actividad que interfiera con el funcionamiento normal de la plataforma.</li>
                 <li>Intentar acceder a cuentas de otros usuarios sin autorización.</li>
-                <li><strong className="text-foreground">Restricción territorial:</strong> Por motivos legales, los usuarios que se encuentren dentro del territorio de los Estados Unidos de América no tienen permitido realizar apuestas. Pueden crear cuentas y visualizar el contenido, pero la función de apostar se encuentra deshabilitada.</li>
+                <li><strong className="text-foreground">Restricción territorial:</strong> Votox puede limitar la función de apostar en determinadas jurisdicciones según la normativa aplicable. La disponibilidad técnica de una función no constituye autorización legal para utilizarla.</li>
               </ul>
 
               <h2 className="text-lg font-semibold">6. Saldo y Transacciones</h2>
@@ -106,12 +104,16 @@ export default function Terms() {
                 resultar en una ganancia o pérdida respecto al monto original apostado.
               </p>
 
-              <h2 className="text-lg font-semibold">7. Retiros</h2>
-              <p className="text-sm text-muted-foreground">
-                Los retiros están sujetos a verificación de identidad y aprobación por parte del equipo administrativo. 
-                La plataforma se reserva el derecho de rechazar solicitudes de retiro que no cumplan con los requisitos 
-                de verificación establecidos.
-              </p>
+              <h2 className="text-lg font-semibold">7. Puntos, dinero y retiros</h2>
+              {isRealMoney ? (
+                <p className="text-sm text-muted-foreground">
+                  Los retiros están sujetos a verificación de identidad, aprobación administrativa y requisitos legales aplicables.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  La plataforma opera con puntos internos de prueba. Los puntos no representan dinero, no se venden y no pueden retirarse, transferirse ni canjearse por dinero, bienes o servicios.
+                </p>
+              )}
 
               <h2 className="text-lg font-semibold">8. Resolución de Mercados</h2>
               <p className="text-sm text-muted-foreground">

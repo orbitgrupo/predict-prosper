@@ -46,16 +46,14 @@ export function DocumentUploadSection({ profile, onDocumentsUpdated }: DocumentU
       if (uploadError) throw uploadError;
 
       // Store only the file path - the bucket is private and requires signed URLs for access
-      const updateData = type === 'front' 
-        ? { document_front_url: fileName, document_status: 'pending' }
-        : { document_back_url: fileName, document_status: 'pending' };
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', profile.id);
+      const { data: updateResult, error: updateError } = await supabase.rpc('submit_identity_document' as any, {
+        p_side: type,
+        p_file_path: fileName,
+      } as any);
 
       if (updateError) throw updateError;
+      const parsedUpdate = updateResult as { success: boolean; error?: string };
+      if (!parsedUpdate.success) throw new Error(parsedUpdate.error || 'No se pudo guardar el documento');
 
       toast.success(`Documento ${type === 'front' ? 'frontal' : 'trasero'} subido correctamente`);
       onDocumentsUpdated();
@@ -89,12 +87,13 @@ export function DocumentUploadSection({ profile, onDocumentsUpdated }: DocumentU
   const handleAgeVerificationChange = async (checked: boolean) => {
     setIsSavingAge(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_age_verified: checked })
-        .eq('id', profile.id);
+      const { data, error } = await supabase.rpc('set_age_confirmation' as any, {
+        p_is_age_verified: checked,
+      } as any);
 
       if (error) throw error;
+      const result = data as { success: boolean; error?: string };
+      if (!result.success) throw new Error(result.error || 'No se pudo guardar la confirmación');
 
       setIsAgeVerified(checked);
       onDocumentsUpdated();
