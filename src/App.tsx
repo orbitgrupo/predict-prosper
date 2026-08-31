@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Notifications from "./pages/Notifications";
 import Terms from "./pages/Terms";
+import Withdrawals from "./pages/Withdrawals";
 
 const queryClient = new QueryClient();
 
