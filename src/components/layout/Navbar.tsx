@@ -214,6 +214,11 @@ export function Navbar() {
                         <User className="h-4 w-4 text-muted-foreground" />
                         Perfil
                       </Link>
+                      <Link to="/withdrawals" onClick={closeMobileMenu}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary transition-colors">
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                        Retiros
+                      </Link>
                       <Link to="/notifications" onClick={closeMobileMenu}
                         className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary transition-colors">
                         <Bell className="h-4 w-4 text-muted-foreground" />
