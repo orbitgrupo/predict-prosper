@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Notifications from "./pages/Notifications";
 import Terms from "./pages/Terms";
+import Withdrawals from "./pages/Withdrawals";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,8 @@ const App = () => (
             <Route path="/admin" element={<RequireTerms><Admin /></RequireTerms>} />
             <Route path="/profile" element={<RequireTerms><Profile /></RequireTerms>} />
             <Route path="/notifications" element={<RequireTerms><Notifications /></RequireTerms>} />
+            <Route path="/withdrawals" element={<RequireTerms><Withdrawals /></RequireTerms>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

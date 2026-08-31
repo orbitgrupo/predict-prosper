@@ -2,7 +2,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, LayoutDashboard, Settings, LogOut, User, Wallet, Search, Bell, Menu, X } from 'lucide-react';
+import { TrendingUp, LayoutDashboard, Settings, LogOut, User, Wallet, Search, Bell, Menu, X, Banknote } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { NotificationBell } from '@/components/layout/NotificationBell';
@@ -117,6 +117,12 @@ export function Navbar() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
+                        <Link to="/withdrawals" className="cursor-pointer">
+                          <Banknote className="mr-2 h-4 w-4" />
+                          Retiros
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link to="/notifications" className="cursor-pointer">
                           <Bell className="mr-2 h-4 w-4" />
                           Notificaciones
@@ -207,6 +213,11 @@ export function Navbar() {
                         className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary transition-colors">
                         <User className="h-4 w-4 text-muted-foreground" />
                         Perfil
+                      </Link>
+                      <Link to="/withdrawals" onClick={closeMobileMenu}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary transition-colors">
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                        Retiros
                       </Link>
                       <Link to="/notifications" onClick={closeMobileMenu}
                         className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary transition-colors">

@@ -596,6 +596,8 @@ export type Database = {
           created_at: string
           id: string
           method: Database["public"]["Enums"]["withdrawal_method"]
+          paid_at: string | null
+          payment_reference: string | null
           paypal_email: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -612,6 +614,8 @@ export type Database = {
           created_at?: string
           id?: string
           method: Database["public"]["Enums"]["withdrawal_method"]
+          paid_at?: string | null
+          payment_reference?: string | null
           paypal_email?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -628,6 +632,8 @@ export type Database = {
           created_at?: string
           id?: string
           method?: Database["public"]["Enums"]["withdrawal_method"]
+          paid_at?: string | null
+          payment_reference?: string | null
           paypal_email?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -664,6 +670,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mark_withdrawal_paid: {
+        Args: { p_reference?: string; p_withdrawal_id: string }
+        Returns: Json
       }
       place_bet: {
         Args: {

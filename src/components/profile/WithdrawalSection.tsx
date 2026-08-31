@@ -105,8 +105,15 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (w: any) => {
+    if (w.status === 'approved' && w.paid_at) {
+      return (
+        <Badge className="gap-1 bg-emerald-600">
+          <Banknote className="h-3 w-3" /> Transferido
+        </Badge>
+      );
+    }
+    switch (w.status) {
       case 'pending':
         return (
           <Badge variant="secondary" className="gap-1">
@@ -126,7 +133,7 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
           </Badge>
         );
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge>{w.status}</Badge>;
     }
   };
 
