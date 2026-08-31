@@ -447,6 +447,28 @@ export function SuggestionsManagement() {
                 </p>
               </div>
 
+              {/* Cover image preview */}
+              <div className="space-y-2">
+                <Label>Imagen de portada</Label>
+                {selectedSuggestion.image_url ? (
+                  <img
+                    src={selectedSuggestion.image_url}
+                    alt={`Portada sugerida para ${selectedSuggestion.title}`}
+                    className="aspect-[16/9] w-full rounded-lg object-cover border"
+                  />
+                ) : (
+                  <div className="aspect-[16/9] w-full rounded-lg bg-muted border flex flex-col items-center justify-center gap-2">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-xs text-muted-foreground">Sin imagen de portada</p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Al aprobar, esta imagen se usará como portada del mercado.
+                </p>
+              </div>
+
+
+
               <div className="space-y-2">
                 <Label htmlFor="edit-title">Título</Label>
                 <Input
