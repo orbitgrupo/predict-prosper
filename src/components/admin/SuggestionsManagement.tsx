@@ -39,6 +39,7 @@ import {
   Search,
   Lightbulb,
   Plus,
+  ImageIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -362,13 +363,27 @@ export function SuggestionsManagement() {
                 {filteredSuggestions.map((suggestion) => (
                   <TableRow key={suggestion.id}>
                     <TableCell>
-                      <div>
-                        <p className="font-medium line-clamp-1">{suggestion.title}</p>
-                        {suggestion.category && (
-                          <Badge variant="outline" className="text-xs mt-1">
-                            {suggestion.category}
-                          </Badge>
+                      <div className="flex items-center gap-3">
+                        {suggestion.image_url ? (
+                          <img
+                            src={suggestion.image_url}
+                            alt={`Portada de ${suggestion.title}`}
+                            loading="lazy"
+                            className="h-10 w-16 shrink-0 rounded-md object-cover border"
+                          />
+                        ) : (
+                          <div className="h-10 w-16 shrink-0 rounded-md bg-muted border flex items-center justify-center">
+                            <ImageIcon className="h-4 w-4 text-muted-foreground/50" />
+                          </div>
                         )}
+                        <div className="min-w-0">
+                          <p className="font-medium line-clamp-1">{suggestion.title}</p>
+                          {suggestion.category && (
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {suggestion.category}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -431,6 +446,28 @@ export function SuggestionsManagement() {
                   Predicción del usuario: <Badge>{selectedSuggestion.selected_option}</Badge>
                 </p>
               </div>
+
+              {/* Cover image preview */}
+              <div className="space-y-2">
+                <Label>Imagen de portada</Label>
+                {selectedSuggestion.image_url ? (
+                  <img
+                    src={selectedSuggestion.image_url}
+                    alt={`Portada sugerida para ${selectedSuggestion.title}`}
+                    className="aspect-[16/9] w-full rounded-lg object-cover border"
+                  />
+                ) : (
+                  <div className="aspect-[16/9] w-full rounded-lg bg-muted border flex flex-col items-center justify-center gap-2">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-xs text-muted-foreground">Sin imagen de portada</p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Al aprobar, esta imagen se usará como portada del mercado.
+                </p>
+              </div>
+
+
 
               <div className="space-y-2">
                 <Label htmlFor="edit-title">Título</Label>
