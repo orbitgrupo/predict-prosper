@@ -363,13 +363,27 @@ export function SuggestionsManagement() {
                 {filteredSuggestions.map((suggestion) => (
                   <TableRow key={suggestion.id}>
                     <TableCell>
-                      <div>
-                        <p className="font-medium line-clamp-1">{suggestion.title}</p>
-                        {suggestion.category && (
-                          <Badge variant="outline" className="text-xs mt-1">
-                            {suggestion.category}
-                          </Badge>
+                      <div className="flex items-center gap-3">
+                        {suggestion.image_url ? (
+                          <img
+                            src={suggestion.image_url}
+                            alt={`Portada de ${suggestion.title}`}
+                            loading="lazy"
+                            className="h-10 w-16 shrink-0 rounded-md object-cover border"
+                          />
+                        ) : (
+                          <div className="h-10 w-16 shrink-0 rounded-md bg-muted border flex items-center justify-center">
+                            <ImageIcon className="h-4 w-4 text-muted-foreground/50" />
+                          </div>
                         )}
+                        <div className="min-w-0">
+                          <p className="font-medium line-clamp-1">{suggestion.title}</p>
+                          {suggestion.category && (
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {suggestion.category}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
