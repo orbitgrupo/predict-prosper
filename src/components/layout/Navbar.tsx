@@ -117,6 +117,12 @@ export function Navbar() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
+                        <Link to="/withdrawals" className="cursor-pointer">
+                          <Banknote className="mr-2 h-4 w-4" />
+                          Retiros
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link to="/notifications" className="cursor-pointer">
                           <Bell className="mr-2 h-4 w-4" />
                           Notificaciones
