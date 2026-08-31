@@ -40,6 +40,8 @@ const App = () => (
             <Route path="/admin" element={<RequireTerms><Admin /></RequireTerms>} />
             <Route path="/profile" element={<RequireTerms><Profile /></RequireTerms>} />
             <Route path="/notifications" element={<RequireTerms><Notifications /></RequireTerms>} />
+            <Route path="/withdrawals" element={<RequireTerms><Withdrawals /></RequireTerms>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
