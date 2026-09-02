@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -367,6 +368,60 @@ export function WithdrawalManagement() {
                   'Confirmar aprobación'
                 ) : (
                   'Confirmar rechazo'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mark as paid dialog */}
+      <Dialog
+        open={!!payRequest}
+        onOpenChange={(open) => {
+          if (!open) setPayRequest(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Marcar como transferido</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="rounded-lg border p-3 text-sm">
+              <p>
+                <strong>Monto:</strong> ${Number(payRequest?.amount || 0).toLocaleString('es-ES')}
+              </p>
+              <p>
+                <strong>Usuario:</strong>{' '}
+                {payRequest?.profiles?.username || payRequest?.profiles?.email}
+              </p>
+              <p>
+                <strong>Método:</strong>{' '}
+                {payRequest?.method === 'bank_transfer' ? 'Transferencia bancaria' : 'PayPal'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Referencia de pago (opcional)</label>
+              <Input
+                value={paymentReference}
+                onChange={(e) => setPaymentReference(e.target.value)}
+                placeholder="Ej: TRX-928374 o ID de PayPal"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setPayRequest(null)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleMarkPaid} disabled={processing} className="gap-1">
+                {processing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Confirmar transferencia
+                  </>
                 )}
               </Button>
             </div>
