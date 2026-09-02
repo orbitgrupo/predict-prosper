@@ -22,7 +22,9 @@ import {
   Banknote,
   CreditCard,
   Send,
+  Eye,
 } from 'lucide-react';
+
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
