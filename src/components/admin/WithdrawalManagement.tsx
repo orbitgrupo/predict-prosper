@@ -32,6 +32,39 @@ export function WithdrawalManagement() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [action, setAction] = useState<'approve' | 'reject' | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
+  const [payRequest, setPayRequest] = useState<any>(null);
+  const [paymentReference, setPaymentReference] = useState('');
+
+  const handleMarkPaid = async () => {
+    if (!payRequest) return;
+    setProcessing(true);
+    try {
+      const { data, error } = await supabase.rpc('mark_withdrawal_paid', {
+        p_withdrawal_id: payRequest.id,
+        p_reference: paymentReference || null,
+      } as any);
+      if (error) throw error;
+      const result = data as any;
+      if (!result.success) throw new Error(result.error);
+
+      await logAction('mark_withdrawal_paid', 'withdrawal', payRequest.id, {
+        amount: payRequest.amount,
+        method: payRequest.method,
+        reference: paymentReference || null,
+      });
+      toast({
+        title: 'Retiro transferido',
+        description: 'La solicitud fue marcada como transferida y el usuario notificado.',
+      });
+      setPayRequest(null);
+      setPaymentReference('');
+      queryClient.invalidateQueries({ queryKey: ['admin_withdrawals'] });
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ['admin_withdrawals'],
