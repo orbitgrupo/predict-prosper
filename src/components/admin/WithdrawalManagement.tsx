@@ -246,8 +246,9 @@ export function WithdrawalManagement() {
                 <XCircle className="h-3.5 w-3.5" />
                 Rechazar
               </Button>
-            </div>
+            </>
           )}
+          </div>
         </div>
       </CardContent>
     </Card>
