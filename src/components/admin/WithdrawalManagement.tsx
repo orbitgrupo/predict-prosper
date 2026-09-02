@@ -442,6 +442,104 @@ export function WithdrawalManagement() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Detail dialog */}
+      <Dialog open={!!detailRequest} onOpenChange={(open) => { if (!open) setDetailRequest(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Detalle de la solicitud</DialogTitle>
+          </DialogHeader>
+          {detailRequest && (
+            <div className="space-y-3 pt-2 text-sm">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-bold text-lg">
+                  ${Number(detailRequest.amount).toLocaleString('es-ES')}
+                </p>
+                {getStatusBadge(detailRequest.status, detailRequest.paid_at)}
+              </div>
+
+              <div className="rounded-lg border p-3 space-y-1">
+                <p><strong>Usuario:</strong> {detailRequest.profiles?.username || '—'}</p>
+                <p><strong>Email:</strong> {detailRequest.profiles?.email || '—'}</p>
+                <p><strong>Identidad:</strong> {detailRequest.profiles?.document_status || 'sin verificar'}</p>
+                <p><strong>Mayor de 18:</strong> {detailRequest.profiles?.is_age_verified ? 'Sí' : 'No'}</p>
+              </div>
+
+              <div className="rounded-lg border p-3 space-y-1">
+                <p><strong>Método:</strong> {detailRequest.method === 'bank_transfer' ? 'Transferencia bancaria' : 'PayPal'}</p>
+                {detailRequest.method === 'bank_transfer' ? (
+                  <>
+                    <p><strong>Banco:</strong> {detailRequest.bank_name}</p>
+                    <p><strong>Cuenta:</strong> <span className="font-mono">{detailRequest.account_number}</span></p>
+                    <p><strong>Titular:</strong> {detailRequest.account_holder}</p>
+                  </>
+                ) : (
+                  <p><strong>PayPal:</strong> {detailRequest.paypal_email}</p>
+                )}
+              </div>
+
+              <div className="rounded-lg border p-3 space-y-1 text-muted-foreground">
+                <p>Solicitado: {format(new Date(detailRequest.created_at), "d MMM yyyy, HH:mm", { locale: es })}</p>
+                {detailRequest.reviewed_at && (
+                  <p>Revisado: {format(new Date(detailRequest.reviewed_at), "d MMM yyyy, HH:mm", { locale: es })}</p>
+                )}
+                {detailRequest.paid_at && (
+                  <p>Transferido: {format(new Date(detailRequest.paid_at), "d MMM yyyy, HH:mm", { locale: es })}</p>
+                )}
+                {detailRequest.payment_reference && <p>Referencia: {detailRequest.payment_reference}</p>}
+                {detailRequest.admin_notes && <p>Notas: {detailRequest.admin_notes}</p>}
+              </div>
+
+              <div className="flex gap-2 justify-end flex-wrap">
+                {detailRequest.status === 'pending' && (
+                  <>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedRequest(detailRequest);
+                        setAction('approve');
+                        setAdminNotes('');
+                        setDetailRequest(null);
+                      }}
+                      className="gap-1"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5" /> Aprobar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        setSelectedRequest(detailRequest);
+                        setAction('reject');
+                        setAdminNotes('');
+                        setDetailRequest(null);
+                      }}
+                      className="gap-1"
+                    >
+                      <XCircle className="h-3.5 w-3.5" /> Rechazar
+                    </Button>
+                  </>
+                )}
+                {detailRequest.status === 'approved' && !detailRequest.paid_at && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1"
+                    onClick={() => {
+                      setPayRequest(detailRequest);
+                      setPaymentReference('');
+                      setDetailRequest(null);
+                    }}
+                  >
+                    <Send className="h-3.5 w-3.5" /> Marcar como transferido
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
