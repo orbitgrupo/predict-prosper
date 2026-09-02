@@ -159,7 +159,7 @@ export function WithdrawalManagement() {
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <p className="font-bold text-lg">${Number(req.amount).toLocaleString('es-ES')}</p>
-              {getStatusBadge(req.status)}
+              {getStatusBadge(req.status, req.paid_at)}
               <Badge variant="outline" className="gap-1">
                 {req.method === 'bank_transfer' ? (
                   <>
@@ -195,10 +195,32 @@ export function WithdrawalManagement() {
             {req.admin_notes && (
               <p className="text-xs text-muted-foreground mt-1">Notas: {req.admin_notes}</p>
             )}
+
+            {req.paid_at && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Transferido el {format(new Date(req.paid_at), "d MMM yyyy, HH:mm", { locale: es })}
+                {req.payment_reference ? ` • Ref: ${req.payment_reference}` : ''}
+              </p>
+            )}
           </div>
 
+          <div className="flex gap-2 shrink-0">
+            {!showActions && req.status === 'approved' && !req.paid_at && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1"
+                onClick={() => {
+                  setPayRequest(req);
+                  setPaymentReference('');
+                }}
+              >
+                <Send className="h-3.5 w-3.5" />
+                Marcar como transferido
+              </Button>
+            )}
           {showActions && (
-            <div className="flex gap-2 shrink-0">
+            <>
               <Button
                 size="sm"
                 onClick={() => {
