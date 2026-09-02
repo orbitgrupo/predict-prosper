@@ -38,6 +38,8 @@ export function WithdrawalManagement() {
   const [adminNotes, setAdminNotes] = useState('');
   const [payRequest, setPayRequest] = useState<any>(null);
   const [paymentReference, setPaymentReference] = useState('');
+  const [detailRequest, setDetailRequest] = useState<any>(null);
+
 
   const handleMarkPaid = async () => {
     if (!payRequest) return;
