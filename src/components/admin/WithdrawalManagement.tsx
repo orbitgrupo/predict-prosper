@@ -205,7 +205,16 @@ export function WithdrawalManagement() {
             )}
           </div>
 
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0 flex-wrap justify-end">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="gap-1"
+              onClick={() => setDetailRequest(req)}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Ver
+            </Button>
             {!showActions && req.status === 'approved' && !req.paid_at && (
               <Button
                 size="sm"
@@ -220,6 +229,7 @@ export function WithdrawalManagement() {
                 Marcar como transferido
               </Button>
             )}
+
           {showActions && (
             <>
               <Button
