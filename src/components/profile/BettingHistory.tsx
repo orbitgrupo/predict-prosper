@@ -78,18 +78,33 @@ export function BettingHistory({ userId }: BettingHistoryProps) {
                       {format(new Date(bet.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
                     </p>
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm text-muted-foreground">Apostado</p>
+                  <div className="text-right ml-4 shrink-0">
+                    <p className="text-xs text-muted-foreground">Apostado</p>
                     <p className="font-display font-bold">
                       ${Number(bet.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                     </p>
-                    {bet.is_winner !== null && (
-                      <p className={`text-sm font-medium ${bet.is_winner ? 'text-success' : 'text-destructive'}`}>
-                        {bet.is_winner 
-                          ? `+$${Number(bet.payout_amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}` 
-                          : 'Perdido'}
-                      </p>
-                    )}
+                    {bet.is_winner !== null && (() => {
+                      const staked = Number(bet.amount) || 0;
+                      const payout = bet.is_winner ? Number(bet.payout_amount) || 0 : 0;
+                      const profit = payout - staked;
+                      const pct = staked > 0 ? (profit / staked) * 100 : 0;
+                      const positive = profit >= 0;
+                      return (
+                        <div className="mt-1 space-y-0.5">
+                          <p className="text-xs text-muted-foreground">
+                            Recibido: ${payout.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          </p>
+                          <p className={`text-sm font-semibold ${positive ? 'text-success' : 'text-destructive'}`}>
+                            {positive ? '+' : '-'}$
+                            {Math.abs(profit).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          </p>
+                          <p className={`text-xs font-medium ${positive ? 'text-success' : 'text-destructive'}`}>
+                            {positive ? '+' : ''}
+                            {pct.toLocaleString('es-ES', { maximumFractionDigits: 1 })}%
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </Link>
               ))}

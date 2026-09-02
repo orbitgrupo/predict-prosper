@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +21,7 @@ import {
   Clock,
   Banknote,
   CreditCard,
+  Send,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -32,6 +34,39 @@ export function WithdrawalManagement() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [action, setAction] = useState<'approve' | 'reject' | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
+  const [payRequest, setPayRequest] = useState<any>(null);
+  const [paymentReference, setPaymentReference] = useState('');
+
+  const handleMarkPaid = async () => {
+    if (!payRequest) return;
+    setProcessing(true);
+    try {
+      const { data, error } = await supabase.rpc('mark_withdrawal_paid', {
+        p_withdrawal_id: payRequest.id,
+        p_reference: paymentReference || null,
+      } as any);
+      if (error) throw error;
+      const result = data as any;
+      if (!result.success) throw new Error(result.error);
+
+      await logAction('mark_withdrawal_paid', 'withdrawal', payRequest.id, {
+        amount: payRequest.amount,
+        method: payRequest.method,
+        reference: paymentReference || null,
+      });
+      toast({
+        title: 'Retiro transferido',
+        description: 'La solicitud fue marcada como transferida y el usuario notificado.',
+      });
+      setPayRequest(null);
+      setPaymentReference('');
+      queryClient.invalidateQueries({ queryKey: ['admin_withdrawals'] });
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ['admin_withdrawals'],
@@ -86,7 +121,14 @@ export function WithdrawalManagement() {
   const pendingRequests = requests?.filter((r: any) => r.status === 'pending') || [];
   const processedRequests = requests?.filter((r: any) => r.status !== 'pending') || [];
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, paidAt?: string | null) => {
+    if (status === 'approved' && paidAt) {
+      return (
+        <Badge className="gap-1 bg-blue-600">
+          <Send className="h-3 w-3" /> Transferido
+        </Badge>
+      );
+    }
     switch (status) {
       case 'pending':
         return (
@@ -118,7 +160,7 @@ export function WithdrawalManagement() {
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <p className="font-bold text-lg">${Number(req.amount).toLocaleString('es-ES')}</p>
-              {getStatusBadge(req.status)}
+              {getStatusBadge(req.status, req.paid_at)}
               <Badge variant="outline" className="gap-1">
                 {req.method === 'bank_transfer' ? (
                   <>
@@ -154,10 +196,32 @@ export function WithdrawalManagement() {
             {req.admin_notes && (
               <p className="text-xs text-muted-foreground mt-1">Notas: {req.admin_notes}</p>
             )}
+
+            {req.paid_at && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Transferido el {format(new Date(req.paid_at), "d MMM yyyy, HH:mm", { locale: es })}
+                {req.payment_reference ? ` • Ref: ${req.payment_reference}` : ''}
+              </p>
+            )}
           </div>
 
+          <div className="flex gap-2 shrink-0">
+            {!showActions && req.status === 'approved' && !req.paid_at && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1"
+                onClick={() => {
+                  setPayRequest(req);
+                  setPaymentReference('');
+                }}
+              >
+                <Send className="h-3.5 w-3.5" />
+                Marcar como transferido
+              </Button>
+            )}
           {showActions && (
-            <div className="flex gap-2 shrink-0">
+            <>
               <Button
                 size="sm"
                 onClick={() => {
@@ -183,8 +247,9 @@ export function WithdrawalManagement() {
                 <XCircle className="h-3.5 w-3.5" />
                 Rechazar
               </Button>
-            </div>
+            </>
           )}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -303,6 +368,60 @@ export function WithdrawalManagement() {
                   'Confirmar aprobación'
                 ) : (
                   'Confirmar rechazo'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mark as paid dialog */}
+      <Dialog
+        open={!!payRequest}
+        onOpenChange={(open) => {
+          if (!open) setPayRequest(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Marcar como transferido</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="rounded-lg border p-3 text-sm">
+              <p>
+                <strong>Monto:</strong> ${Number(payRequest?.amount || 0).toLocaleString('es-ES')}
+              </p>
+              <p>
+                <strong>Usuario:</strong>{' '}
+                {payRequest?.profiles?.username || payRequest?.profiles?.email}
+              </p>
+              <p>
+                <strong>Método:</strong>{' '}
+                {payRequest?.method === 'bank_transfer' ? 'Transferencia bancaria' : 'PayPal'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Referencia de pago (opcional)</label>
+              <Input
+                value={paymentReference}
+                onChange={(e) => setPaymentReference(e.target.value)}
+                placeholder="Ej: TRX-928374 o ID de PayPal"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setPayRequest(null)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleMarkPaid} disabled={processing} className="gap-1">
+                {processing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Confirmar transferencia
+                  </>
                 )}
               </Button>
             </div>
