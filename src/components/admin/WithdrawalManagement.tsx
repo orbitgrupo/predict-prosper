@@ -20,6 +20,7 @@ import {
   Clock,
   Banknote,
   CreditCard,
+  Send,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -119,7 +120,14 @@ export function WithdrawalManagement() {
   const pendingRequests = requests?.filter((r: any) => r.status === 'pending') || [];
   const processedRequests = requests?.filter((r: any) => r.status !== 'pending') || [];
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, paidAt?: string | null) => {
+    if (status === 'approved' && paidAt) {
+      return (
+        <Badge className="gap-1 bg-blue-600">
+          <Send className="h-3 w-3" /> Transferido
+        </Badge>
+      );
+    }
     switch (status) {
       case 'pending':
         return (
