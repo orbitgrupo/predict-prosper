@@ -682,6 +682,11 @@ export default function Admin() {
             <UserManagement />
           </TabsContent>
 
+          <TabsContent value="data" className="mt-4 sm:mt-6">
+            <DataManagement />
+          </TabsContent>
+
+
           <TabsContent value="activity" className="mt-4 sm:mt-6">
             <ActivityHistory />
           </TabsContent>
