@@ -559,6 +559,8 @@ export default function Admin() {
               <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Sugerencias</TabsTrigger>
               <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
+              <TabsTrigger value="data" className="text-xs sm:text-sm">Datos</TabsTrigger>
+
               <TabsTrigger value="activity" className="text-xs sm:text-sm">Actividades</TabsTrigger>
               <TabsTrigger value="promotion" className="text-xs sm:text-sm">Promoción</TabsTrigger>
               <TabsTrigger value="audit" className="text-xs sm:text-sm">Auditoría</TabsTrigger>
