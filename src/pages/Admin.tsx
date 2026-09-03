@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
+import { DataManagement } from '@/components/admin/DataManagement';
+
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
 import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
@@ -559,6 +561,8 @@ export default function Admin() {
               <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Sugerencias</TabsTrigger>
               <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
+              <TabsTrigger value="data" className="text-xs sm:text-sm">Datos</TabsTrigger>
+
               <TabsTrigger value="activity" className="text-xs sm:text-sm">Actividades</TabsTrigger>
               <TabsTrigger value="promotion" className="text-xs sm:text-sm">Promoción</TabsTrigger>
               <TabsTrigger value="audit" className="text-xs sm:text-sm">Auditoría</TabsTrigger>
@@ -681,6 +685,11 @@ export default function Admin() {
           <TabsContent value="users" className="mt-4 sm:mt-6">
             <UserManagement />
           </TabsContent>
+
+          <TabsContent value="data" className="mt-4 sm:mt-6">
+            <DataManagement />
+          </TabsContent>
+
 
           <TabsContent value="activity" className="mt-4 sm:mt-6">
             <ActivityHistory />

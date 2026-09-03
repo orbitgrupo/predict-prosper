@@ -274,6 +274,7 @@ export type Database = {
           description: string | null
           fee_amount: number
           id: string
+          image_url: string | null
           options: Json
           reviewed_at: string | null
           reviewed_by: string | null
@@ -291,6 +292,7 @@ export type Database = {
           description?: string | null
           fee_amount?: number
           id?: string
+          image_url?: string | null
           options?: Json
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -308,6 +310,7 @@ export type Database = {
           description?: string | null
           fee_amount?: number
           id?: string
+          image_url?: string | null
           options?: Json
           reviewed_at?: string | null
           reviewed_by?: string | null
