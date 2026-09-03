@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
+import { DataManagement } from '@/components/admin/DataManagement';
+
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
 import { WithdrawalManagement } from '@/components/admin/WithdrawalManagement';
