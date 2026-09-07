@@ -586,7 +586,77 @@ export function UserManagement() {
             </div>
           ) : (
             <div className="space-y-6 overflow-y-auto flex-1 pr-2">
+              {/* Balance summary */}
+              <div className="flex flex-wrap items-center gap-4 rounded-lg border bg-muted/30 p-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Balance actual</p>
+                  <p className="font-mono text-lg font-semibold">
+                    ${Number(selectedUser?.balance ?? 0).toLocaleString('es-ES')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total retirado (transferido)</p>
+                  <p className="font-mono text-lg font-semibold">
+                    ${userHistory.withdrawals
+                      .filter((w) => w.status === 'approved' && w.paid_at)
+                      .reduce((s, w) => s + Number(w.amount), 0)
+                      .toLocaleString('es-ES')}
+                  </p>
+                </div>
+                <div className="ml-auto">
+                  {verificationBadge(
+                    selectedUser?.document_status ?? null,
+                    selectedUser?.is_age_verified ?? null
+                  )}
+                </div>
+              </div>
+
+              {/* Withdrawals */}
+              <div>
+                <h4 className="font-medium mb-3 flex items-center gap-2">
+                  <Banknote className="h-4 w-4" /> Retiros
+                </h4>
+                {userHistory.withdrawals.length > 0 ? (
+                  <div className="space-y-2">
+                    {userHistory.withdrawals.map((w) => (
+                      <div key={w.id} className="flex items-start justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="text-sm font-medium font-mono">
+                            ${Number(w.amount).toLocaleString('es-ES')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {w.method === 'bank_transfer' ? 'Transferencia bancaria' : 'PayPal'} •{' '}
+                            {format(new Date(w.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
+                          </p>
+                          {w.paid_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Transferido el {format(new Date(w.paid_at), "dd MMM yyyy", { locale: es })}
+                              {w.payment_reference ? ` • Ref: ${w.payment_reference}` : ''}
+                            </p>
+                          )}
+                          {w.admin_notes && (
+                            <p className="text-xs text-muted-foreground">Nota: {w.admin_notes}</p>
+                          )}
+                        </div>
+                        {w.status === 'approved' && w.paid_at ? (
+                          <Badge className="bg-emerald-600">Transferido</Badge>
+                        ) : w.status === 'approved' ? (
+                          <Badge className="bg-green-600">Aprobado</Badge>
+                        ) : w.status === 'rejected' ? (
+                          <Badge variant="destructive">Rechazado</Badge>
+                        ) : (
+                          <Badge variant="secondary">Pendiente</Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sin retiros.</p>
+                )}
+              </div>
+
               {/* Transactions */}
+
               <div>
                 <h4 className="font-medium mb-3">Transacciones</h4>
                 {userHistory.transactions.length > 0 ? (
