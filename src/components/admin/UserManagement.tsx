@@ -28,6 +28,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { 
@@ -37,10 +44,15 @@ import {
   Ban,
   CheckCircle,
   History,
-  User
+  User,
+  ShieldCheck,
+  ShieldAlert,
+  Clock,
+  Banknote,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 
 interface Profile {
   id: string;
