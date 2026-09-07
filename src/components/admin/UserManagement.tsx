@@ -113,6 +113,7 @@ export function UserManagement() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   
@@ -127,7 +128,8 @@ export function UserManagement() {
   const [userHistory, setUserHistory] = useState<{
     transactions: Transaction[];
     bets: Bet[];
-  }>({ transactions: [], bets: [] });
+    withdrawals: Withdrawal[];
+  }>({ transactions: [], bets: [], withdrawals: [] });
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Detail dialog
@@ -138,7 +140,7 @@ export function UserManagement() {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, verificationFilter]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -154,6 +156,17 @@ export function UserManagement() {
     if (searchTerm) {
       query = query.or(`email.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
     }
+
+    if (verificationFilter === 'approved') {
+      query = query.eq('document_status', 'approved');
+    } else if (verificationFilter === 'pending') {
+      query = query.eq('document_status', 'pending');
+    } else if (verificationFilter === 'rejected') {
+      query = query.eq('document_status', 'rejected');
+    } else if (verificationFilter === 'none') {
+      query = query.is('document_status', null);
+    }
+
 
     const { data, error, count } = await query.range(from, to);
     
