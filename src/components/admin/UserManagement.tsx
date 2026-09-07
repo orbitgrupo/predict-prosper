@@ -28,6 +28,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { 
@@ -37,10 +44,15 @@ import {
   Ban,
   CheckCircle,
   History,
-  User
+  User,
+  ShieldCheck,
+  ShieldAlert,
+  Clock,
+  Banknote,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 
 interface Profile {
   id: string;
@@ -82,12 +94,26 @@ interface Bet {
 
 const USERS_PER_PAGE = 10;
 
+interface Withdrawal {
+  id: string;
+  amount: number;
+  method: string;
+  status: string;
+  paid_at: string | null;
+  payment_reference: string | null;
+  admin_notes: string | null;
+  created_at: string;
+}
+
+
+
 export function UserManagement() {
   const { toast } = useToast();
   const { logAction } = useAuditLog();
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   
@@ -102,7 +128,8 @@ export function UserManagement() {
   const [userHistory, setUserHistory] = useState<{
     transactions: Transaction[];
     bets: Bet[];
-  }>({ transactions: [], bets: [] });
+    withdrawals: Withdrawal[];
+  }>({ transactions: [], bets: [], withdrawals: [] });
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Detail dialog
@@ -113,7 +140,7 @@ export function UserManagement() {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, verificationFilter]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -129,6 +156,17 @@ export function UserManagement() {
     if (searchTerm) {
       query = query.or(`email.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
     }
+
+    if (verificationFilter === 'approved') {
+      query = query.eq('document_status', 'approved');
+    } else if (verificationFilter === 'pending') {
+      query = query.eq('document_status', 'pending');
+    } else if (verificationFilter === 'rejected') {
+      query = query.eq('document_status', 'rejected');
+    } else if (verificationFilter === 'none') {
+      query = query.is('document_status', null);
+    }
+
 
     const { data, error, count } = await query.range(from, to);
     
@@ -242,10 +280,20 @@ export function UserManagement() {
         .order('created_at', { ascending: false })
         .limit(50);
 
+      // Fetch withdrawal requests
+      const { data: withdrawals } = await supabase
+        .from('withdrawal_requests' as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
       setUserHistory({
         transactions: transactions || [],
         bets: (bets || []) as Bet[],
+        withdrawals: (withdrawals || []) as unknown as Withdrawal[],
       });
+
     } catch (error) {
       toast({
         title: 'Error',
@@ -278,7 +326,32 @@ export function UserManagement() {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, verificationFilter]);
+
+  const verificationBadge = (status: string | null, ageVerified: boolean | null) => {
+    if (status === 'approved' && ageVerified) {
+      return (
+        <Badge variant="outline" className="gap-1 text-success border-success">
+          <ShieldCheck className="h-3 w-3" /> Verificado
+        </Badge>
+      );
+    }
+    if (status === 'pending') {
+      return (
+        <Badge variant="secondary" className="gap-1">
+          <Clock className="h-3 w-3" /> En revisión
+        </Badge>
+      );
+    }
+    if (status === 'rejected') {
+      return (
+        <Badge variant="destructive" className="gap-1">
+          <ShieldAlert className="h-3 w-3" /> Rechazado
+        </Badge>
+      );
+    }
+    return <Badge variant="outline" className="text-muted-foreground">Sin documentos</Badge>;
+  };
 
   if (loading) {
     return (
@@ -290,15 +363,29 @@ export function UserManagement() {
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por email o nombre de usuario..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search + filter */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por email o nombre de usuario..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={verificationFilter} onValueChange={setVerificationFilter}>
+          <SelectTrigger className="w-full sm:w-56">
+            <SelectValue placeholder="Verificación" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toda la verificación</SelectItem>
+            <SelectItem value="approved">Verificados</SelectItem>
+            <SelectItem value="pending">En revisión</SelectItem>
+            <SelectItem value="rejected">Rechazados</SelectItem>
+            <SelectItem value="none">Sin documentos</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Users table */}
@@ -309,6 +396,7 @@ export function UserManagement() {
               <TableRow>
                 <TableHead>Usuario</TableHead>
                 <TableHead>Balance</TableHead>
+                <TableHead>Verificación</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Registro</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -335,6 +423,9 @@ export function UserManagement() {
                       </span>
                     </TableCell>
                     <TableCell>
+                      {verificationBadge(user.document_status, user.is_age_verified)}
+                    </TableCell>
+                    <TableCell>
                       {user.is_blocked ? (
                         <Badge variant="destructive">Bloqueado</Badge>
                       ) : (
@@ -344,6 +435,7 @@ export function UserManagement() {
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "dd MMM yyyy", { locale: es })}
                     </TableCell>
+
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-2">
                         <Button
@@ -380,7 +472,7 @@ export function UserManagement() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     No se encontraron usuarios.
                   </TableCell>
                 </TableRow>
@@ -494,7 +586,77 @@ export function UserManagement() {
             </div>
           ) : (
             <div className="space-y-6 overflow-y-auto flex-1 pr-2">
+              {/* Balance summary */}
+              <div className="flex flex-wrap items-center gap-4 rounded-lg border bg-muted/30 p-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Balance actual</p>
+                  <p className="font-mono text-lg font-semibold">
+                    ${Number(selectedUser?.balance ?? 0).toLocaleString('es-ES')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total retirado (transferido)</p>
+                  <p className="font-mono text-lg font-semibold">
+                    ${userHistory.withdrawals
+                      .filter((w) => w.status === 'approved' && w.paid_at)
+                      .reduce((s, w) => s + Number(w.amount), 0)
+                      .toLocaleString('es-ES')}
+                  </p>
+                </div>
+                <div className="ml-auto">
+                  {verificationBadge(
+                    selectedUser?.document_status ?? null,
+                    selectedUser?.is_age_verified ?? null
+                  )}
+                </div>
+              </div>
+
+              {/* Withdrawals */}
+              <div>
+                <h4 className="font-medium mb-3 flex items-center gap-2">
+                  <Banknote className="h-4 w-4" /> Retiros
+                </h4>
+                {userHistory.withdrawals.length > 0 ? (
+                  <div className="space-y-2">
+                    {userHistory.withdrawals.map((w) => (
+                      <div key={w.id} className="flex items-start justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="text-sm font-medium font-mono">
+                            ${Number(w.amount).toLocaleString('es-ES')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {w.method === 'bank_transfer' ? 'Transferencia bancaria' : 'PayPal'} •{' '}
+                            {format(new Date(w.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
+                          </p>
+                          {w.paid_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Transferido el {format(new Date(w.paid_at), "dd MMM yyyy", { locale: es })}
+                              {w.payment_reference ? ` • Ref: ${w.payment_reference}` : ''}
+                            </p>
+                          )}
+                          {w.admin_notes && (
+                            <p className="text-xs text-muted-foreground">Nota: {w.admin_notes}</p>
+                          )}
+                        </div>
+                        {w.status === 'approved' && w.paid_at ? (
+                          <Badge className="bg-emerald-600">Transferido</Badge>
+                        ) : w.status === 'approved' ? (
+                          <Badge className="bg-green-600">Aprobado</Badge>
+                        ) : w.status === 'rejected' ? (
+                          <Badge variant="destructive">Rechazado</Badge>
+                        ) : (
+                          <Badge variant="secondary">Pendiente</Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sin retiros.</p>
+                )}
+              </div>
+
               {/* Transactions */}
+
               <div>
                 <h4 className="font-medium mb-3">Transacciones</h4>
                 {userHistory.transactions.length > 0 ? (
