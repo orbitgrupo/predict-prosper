@@ -280,10 +280,20 @@ export function UserManagement() {
         .order('created_at', { ascending: false })
         .limit(50);
 
+      // Fetch withdrawal requests
+      const { data: withdrawals } = await supabase
+        .from('withdrawal_requests' as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
       setUserHistory({
         transactions: transactions || [],
         bets: (bets || []) as Bet[],
+        withdrawals: (withdrawals || []) as unknown as Withdrawal[],
       });
+
     } catch (error) {
       toast({
         title: 'Error',
