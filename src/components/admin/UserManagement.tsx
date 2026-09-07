@@ -326,7 +326,32 @@ export function UserManagement() {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, verificationFilter]);
+
+  const verificationBadge = (status: string | null, ageVerified: boolean | null) => {
+    if (status === 'approved' && ageVerified) {
+      return (
+        <Badge variant="outline" className="gap-1 text-success border-success">
+          <ShieldCheck className="h-3 w-3" /> Verificado
+        </Badge>
+      );
+    }
+    if (status === 'pending') {
+      return (
+        <Badge variant="secondary" className="gap-1">
+          <Clock className="h-3 w-3" /> En revisión
+        </Badge>
+      );
+    }
+    if (status === 'rejected') {
+      return (
+        <Badge variant="destructive" className="gap-1">
+          <ShieldAlert className="h-3 w-3" /> Rechazado
+        </Badge>
+      );
+    }
+    return <Badge variant="outline" className="text-muted-foreground">Sin documentos</Badge>;
+  };
 
   if (loading) {
     return (
@@ -338,15 +363,29 @@ export function UserManagement() {
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por email o nombre de usuario..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search + filter */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por email o nombre de usuario..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={verificationFilter} onValueChange={setVerificationFilter}>
+          <SelectTrigger className="w-full sm:w-56">
+            <SelectValue placeholder="Verificación" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toda la verificación</SelectItem>
+            <SelectItem value="approved">Verificados</SelectItem>
+            <SelectItem value="pending">En revisión</SelectItem>
+            <SelectItem value="rejected">Rechazados</SelectItem>
+            <SelectItem value="none">Sin documentos</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Users table */}
@@ -357,6 +396,7 @@ export function UserManagement() {
               <TableRow>
                 <TableHead>Usuario</TableHead>
                 <TableHead>Balance</TableHead>
+                <TableHead>Verificación</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Registro</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -383,6 +423,9 @@ export function UserManagement() {
                       </span>
                     </TableCell>
                     <TableCell>
+                      {verificationBadge(user.document_status, user.is_age_verified)}
+                    </TableCell>
+                    <TableCell>
                       {user.is_blocked ? (
                         <Badge variant="destructive">Bloqueado</Badge>
                       ) : (
@@ -392,6 +435,7 @@ export function UserManagement() {
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "dd MMM yyyy", { locale: es })}
                     </TableCell>
+
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-2">
                         <Button
