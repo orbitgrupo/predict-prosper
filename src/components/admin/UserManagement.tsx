@@ -94,6 +94,19 @@ interface Bet {
 
 const USERS_PER_PAGE = 10;
 
+interface Withdrawal {
+  id: string;
+  amount: number;
+  method: string;
+  status: string;
+  paid_at: string | null;
+  payment_reference: string | null;
+  admin_notes: string | null;
+  created_at: string;
+}
+
+
+
 export function UserManagement() {
   const { toast } = useToast();
   const { logAction } = useAuditLog();
