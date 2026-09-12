@@ -9,6 +9,7 @@ import { TransactionHistory } from '@/components/profile/TransactionHistory';
 import { BettingHistory } from '@/components/profile/BettingHistory';
 import { ReferralSection } from '@/components/profile/ReferralSection';
 import { WithdrawalSection } from '@/components/profile/WithdrawalSection';
+import { SupportChatSection } from '@/components/profile/SupportChatSection';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -64,6 +65,7 @@ export default function Profile() {
                   <TabsTrigger value="bets" className="text-xs sm:text-sm">Apuestas</TabsTrigger>
                   <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
                   <TabsTrigger value="referrals" className="text-xs sm:text-sm">Referidos</TabsTrigger>
+                  <TabsTrigger value="support" className="text-xs sm:text-sm">Soporte</TabsTrigger>
                 </TabsList>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
@@ -78,6 +80,9 @@ export default function Profile() {
               </TabsContent>
               <TabsContent value="referrals" className="mt-4">
                 <ReferralSection userId={user.id} referralCode={profile.referral_code} referralClicks={profile.referral_clicks} />
+              </TabsContent>
+              <TabsContent value="support" className="mt-4">
+                <SupportChatSection userId={user.id} />
               </TabsContent>
             </Tabs>
           </div>
