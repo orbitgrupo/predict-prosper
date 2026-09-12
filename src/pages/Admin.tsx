@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { DataManagement } from '@/components/admin/DataManagement';
+import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
+import { SupportChat } from '@/components/admin/SupportChat';
 
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
@@ -554,9 +556,11 @@ export default function Admin() {
           </Card>
         </div>
 
-        <Tabs defaultValue="markets">
+        <Tabs defaultValue="dashboard">
           <ScrollArea className="w-full">
             <TabsList className="w-max">
+              <TabsTrigger value="dashboard" className="text-xs sm:text-sm">Dashboard</TabsTrigger>
+              <TabsTrigger value="support" className="text-xs sm:text-sm">Soporte</TabsTrigger>
               <TabsTrigger value="markets" className="text-xs sm:text-sm">Mercados</TabsTrigger>
               <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Sugerencias</TabsTrigger>
               <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
@@ -569,6 +573,14 @@ export default function Admin() {
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
+
+          <TabsContent value="dashboard" className="mt-4 sm:mt-6">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="support" className="mt-4 sm:mt-6">
+            <SupportChat />
+          </TabsContent>
 
           <TabsContent value="markets" className="mt-4 sm:mt-6">
             <Tabs defaultValue="active">
