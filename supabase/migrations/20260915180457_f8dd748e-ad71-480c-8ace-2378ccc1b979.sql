@@ -1,0 +1,1 @@
+ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS us_betting_blocked boolean NOT NULL DEFAULT true;

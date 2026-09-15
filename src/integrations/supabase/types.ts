@@ -21,6 +21,7 @@ export type Database = {
           referral_bonus_referrer: number
           referral_enabled: boolean
           updated_at: string
+          us_betting_blocked: boolean
           welcome_bonus_amount: number
           welcome_bonus_enabled: boolean
         }
@@ -30,6 +31,7 @@ export type Database = {
           referral_bonus_referrer?: number
           referral_enabled?: boolean
           updated_at?: string
+          us_betting_blocked?: boolean
           welcome_bonus_amount?: number
           welcome_bonus_enabled?: boolean
         }
@@ -39,6 +41,7 @@ export type Database = {
           referral_bonus_referrer?: number
           referral_enabled?: boolean
           updated_at?: string
+          us_betting_blocked?: boolean
           welcome_bonus_amount?: number
           welcome_bonus_enabled?: boolean
         }
