@@ -8,6 +8,7 @@ import { usePlaceBet, Market } from '@/hooks/useMarkets';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, Star } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BettingPanelProps {
   market: Market;
@@ -26,6 +27,18 @@ export function BettingPanel({ market }: BettingPanelProps) {
   useEffect(() => {
     const checkLocation = async () => {
       try {
+        // Verificar si el bloqueo de EE. UU. está activo en la configuración global
+        const { data: settings } = await supabase
+          .from('app_settings')
+          .select('us_betting_blocked')
+          .eq('id', 'default')
+          .maybeSingle();
+
+        if ((settings as any)?.us_betting_blocked === false) {
+          setIsRestrictedLocation(false);
+          return;
+        }
+
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         if (data.country_code === 'US' || data.country === 'US' || data.country_name === 'United States') {
