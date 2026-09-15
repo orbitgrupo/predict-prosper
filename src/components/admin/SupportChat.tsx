@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, MessageSquare, Search } from 'lucide-react';
+import { Loader2, Send, MessageSquare, Search, ArrowLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -31,6 +31,7 @@ interface Conversation {
   lastMessage: string;
   lastAt: string;
   unread: number;
+  total: number;
 }
 
 export function SupportChat() {
@@ -103,11 +104,13 @@ export function SupportChat() {
           lastMessage: m.content,
           lastAt: m.created_at,
           unread: unreadInc,
+          total: 1,
         });
       } else {
         existing.lastMessage = m.content;
         existing.lastAt = m.created_at;
         existing.unread += unreadInc;
+        existing.total += 1;
       }
     }
     const list = Array.from(map.values()).sort((a, b) => b.lastAt.localeCompare(a.lastAt));
@@ -124,7 +127,7 @@ export function SupportChat() {
   );
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (activeUser) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [thread.length, activeUser]);
 
   // Marcar como leídos los mensajes del usuario abierto
@@ -172,81 +175,41 @@ export function SupportChat() {
     );
   }
 
-  return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="lg:col-span-1">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-primary" />
-            Conversaciones
-          </CardTitle>
-          <div className="relative mt-2">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por email o usuario"
-              className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+  // Pantalla de conversación abierta
+  if (activeUser) {
+    const prof = profiles[activeUser];
+    return (
+      <Card className="flex flex-col">
+        <CardHeader className="pb-3 border-b">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setActiveUser(null)}
+              aria-label="Volver a la lista de conversaciones"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="min-w-0">
+              <CardTitle className="text-base truncate">
+                {prof?.username || prof?.email || 'Conversación'}
+              </CardTitle>
+              {prof?.username && (
+                <p className="text-xs text-muted-foreground truncate">{prof.email}</p>
+              )}
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-[420px]">
-            {conversations.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">Todavía no hay mensajes de soporte.</p>
-            ) : (
-              <ul className="divide-y">
-                {conversations.map((c) => (
-                  <li key={c.userId}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveUser(c.userId)}
-                      className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/60 ${
-                        activeUser === c.userId ? 'bg-muted' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium truncate">
-                          {c.username || c.email}
-                        </span>
-                        {c.unread > 0 && (
-                          <Badge className="shrink-0">{c.unread}</Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">{c.lastMessage}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {format(new Date(c.lastAt), "dd MMM yyyy, HH:mm", { locale: es })}
-                      </p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
-
-      <Card className="lg:col-span-2 flex flex-col">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base truncate">
-            {activeUser
-              ? profiles[activeUser]?.username || profiles[activeUser]?.email || 'Conversación'
-              : 'Selecciona una conversación'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col gap-3">
-          <ScrollArea className="h-[340px] pr-3">
-            {!activeUser ? (
+        <CardContent className="flex flex-col gap-3 pt-4">
+          <ScrollArea className="h-[460px] pr-3">
+            {thread.length === 0 ? (
               <p className="text-sm text-muted-foreground py-20 text-center">
-                Elige a una persona de la lista para leer y responder sus mensajes.
+                Esta conversación aún no tiene mensajes.
               </p>
             ) : (
               <div className="space-y-3">
                 {thread.map((m) => (
-                  <div
-                    key={m.id}
-                    className={`flex ${m.is_admin ? 'justify-end' : 'justify-start'}`}
-                  >
+                  <div key={m.id} className={`flex ${m.is_admin ? 'justify-end' : 'justify-start'}`}>
                     <div
                       className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
                         m.is_admin
@@ -270,8 +233,8 @@ export function SupportChat() {
             <Textarea
               value={reply}
               onChange={(e) => setReply(e.target.value)}
-              placeholder={activeUser ? 'Escribe tu respuesta...' : 'Selecciona una conversación'}
-              disabled={!activeUser || sending}
+              placeholder="Escribe tu respuesta..."
+              disabled={sending}
               rows={2}
               className="resize-none"
               onKeyDown={(e) => {
@@ -281,12 +244,63 @@ export function SupportChat() {
                 }
               }}
             />
-            <Button onClick={handleSend} disabled={!activeUser || sending || !reply.trim()} size="icon">
+            <Button onClick={handleSend} disabled={sending || !reply.trim()} size="icon">
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
+    );
+  }
+
+  // Pantalla de listado
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-primary" />
+          Conversaciones de soporte
+        </CardTitle>
+        <div className="relative mt-2">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por email o usuario"
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {conversations.length === 0 ? (
+          <p className="p-4 text-sm text-muted-foreground">Todavía no hay mensajes de soporte.</p>
+        ) : (
+          <ul className="divide-y">
+            {conversations.map((c) => (
+              <li key={c.userId}>
+                <button
+                  type="button"
+                  onClick={() => setActiveUser(c.userId)}
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-muted/60 flex items-center gap-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium truncate">{c.username || c.email}</span>
+                      {c.unread > 0 && <Badge className="shrink-0">{c.unread}</Badge>}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{c.lastMessage}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {c.total} mensaje{c.total === 1 ? '' : 's'} ·{' '}
+                      {format(new Date(c.lastAt), 'dd MMM yyyy, HH:mm', { locale: es })}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }
