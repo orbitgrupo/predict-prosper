@@ -162,6 +162,35 @@ export function PromotionSettings() {
         </CardContent>
       </Card>
 
+      {/* Restricción geográfica */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Predicciones en Estados Unidos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label htmlFor="us-toggle" className="text-base font-medium">
+                {usBlocked ? 'Bloqueadas' : 'Activas'}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {usBlocked
+                  ? 'Las personas que se conectan desde Estados Unidos no pueden participar en las predicciones.'
+                  : 'Las personas que se conectan desde Estados Unidos sí pueden participar en las predicciones.'}
+              </p>
+            </div>
+            <Switch
+              id="us-toggle"
+              checked={!usBlocked}
+              onCheckedChange={(v) => setUsBlocked(!v)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
         {saving ? (
           <>
