@@ -73,7 +73,19 @@ export function DataManagement() {
   const [deleteRow, setDeleteRow] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const attachProfiles = async (list: Row[]): Promise<Row[]> => {
+    const ids = Array.from(new Set((list || []).map((r: any) => r.user_id).filter(Boolean)));
+    if (ids.length === 0) return list || [];
+    const { data: profs } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .in('id', ids as string[]);
+    const map = new Map((profs || []).map((p: any) => [p.id, p]));
+    return (list || []).map((r: any) => ({ ...r, profiles: map.get(r.user_id) || null }));
+  };
+
   const fetchRows = useCallback(async () => {
+
     setLoading(true);
     try {
       let data: Row[] | null = null;
@@ -91,20 +103,21 @@ export function DataManagement() {
       } else if (tab === 'bets') {
         const res = await supabase
           .from('bets')
-          .select('*, markets(title), profiles:user_id(email)')
+          .select('*, markets(title)')
           .order('created_at', { ascending: false })
           .limit(PAGE_SIZE);
         if (res.error) throw res.error;
-        data = res.data as Row[];
+        data = await attachProfiles(res.data as Row[]);
       } else {
         const res = await supabase
           .from('transactions')
-          .select('*, profiles:user_id(email)')
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(PAGE_SIZE);
         if (res.error) throw res.error;
-        data = res.data as Row[];
+        data = await attachProfiles(res.data as Row[]);
       }
+
 
       setRows(data || []);
     } catch (error: any) {
