@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Gift, Users } from 'lucide-react';
+import { Loader2, Gift, Users, Globe } from 'lucide-react';
 
 export function PromotionSettings() {
   const { toast } = useToast();
@@ -23,6 +23,9 @@ export function PromotionSettings() {
   const [referralBonusReferrer, setReferralBonusReferrer] = useState(50);
   const [referralBonusReferred, setReferralBonusReferred] = useState(25);
 
+  // Restricción geográfica (EE. UU.)
+  const [usBlocked, setUsBlocked] = useState(true);
+
   useEffect(() => {
     async function fetch() {
       const { data } = await supabase
@@ -36,6 +39,7 @@ export function PromotionSettings() {
         setReferralEnabled((data as any).referral_enabled ?? true);
         setReferralBonusReferrer((data as any).referral_bonus_referrer ?? 50);
         setReferralBonusReferred((data as any).referral_bonus_referred ?? 25);
+        setUsBlocked((data as any).us_betting_blocked ?? true);
       }
       setLoading(false);
     }
@@ -53,6 +57,7 @@ export function PromotionSettings() {
           referral_enabled: referralEnabled,
           referral_bonus_referrer: referralBonusReferrer,
           referral_bonus_referred: referralBonusReferred,
+          us_betting_blocked: usBlocked,
           updated_at: new Date().toISOString(),
         } as any)
         .eq('id', 'default');
@@ -153,6 +158,35 @@ export function PromotionSettings() {
               />
               <p className="text-xs text-muted-foreground">Créditos que recibe el nuevo usuario invitado.</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Restricción geográfica */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Predicciones en Estados Unidos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <Label htmlFor="us-toggle" className="text-base font-medium">
+                {usBlocked ? 'Bloqueadas' : 'Activas'}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {usBlocked
+                  ? 'Las personas que se conectan desde Estados Unidos no pueden participar en las predicciones.'
+                  : 'Las personas que se conectan desde Estados Unidos sí pueden participar en las predicciones.'}
+              </p>
+            </div>
+            <Switch
+              id="us-toggle"
+              checked={!usBlocked}
+              onCheckedChange={(v) => setUsBlocked(!v)}
+            />
           </div>
         </CardContent>
       </Card>
