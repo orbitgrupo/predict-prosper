@@ -583,6 +583,10 @@ export default function Admin() {
             <SupportChat />
           </TabsContent>
 
+          <TabsContent value="published" className="mt-4 sm:mt-6">
+            <PublishedMarkets />
+          </TabsContent>
+
           <TabsContent value="markets" className="mt-4 sm:mt-6">
             <Tabs defaultValue="active">
               <TabsList>
