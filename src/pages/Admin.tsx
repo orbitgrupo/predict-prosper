@@ -17,6 +17,7 @@ import { ActivityHistory } from '@/components/admin/ActivityHistory';
 import { DataManagement } from '@/components/admin/DataManagement';
 import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import { SupportChat } from '@/components/admin/SupportChat';
+import { PublishedMarkets } from '@/components/admin/PublishedMarkets';
 
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
