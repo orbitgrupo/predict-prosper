@@ -562,6 +562,7 @@ export default function Admin() {
               <TabsTrigger value="dashboard" className="text-xs sm:text-sm">Dashboard</TabsTrigger>
               <TabsTrigger value="support" className="text-xs sm:text-sm">Soporte</TabsTrigger>
               <TabsTrigger value="markets" className="text-xs sm:text-sm">Mercados</TabsTrigger>
+              <TabsTrigger value="published" className="text-xs sm:text-sm">Publicados</TabsTrigger>
               <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Sugerencias</TabsTrigger>
               <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
