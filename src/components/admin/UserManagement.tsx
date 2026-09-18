@@ -138,6 +138,29 @@ export function UserManagement() {
   const [detailEmailConfirmed, setDetailEmailConfirmed] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
+  // Published markets per user
+  const [marketStats, setMarketStats] = useState<Record<string, { active: number; total: number }>>({});
+
+  const fetchMarketStats = async (ids: string[]) => {
+    if (ids.length === 0) {
+      setMarketStats({});
+      return;
+    }
+    const { data } = await supabase
+      .from('markets')
+      .select('created_by, status')
+      .in('created_by', ids);
+    const stats: Record<string, { active: number; total: number }> = {};
+    (data || []).forEach((m: any) => {
+      if (!m.created_by) return;
+      const entry = stats[m.created_by] || { active: 0, total: 0 };
+      entry.total += 1;
+      if (m.status === 'active') entry.active += 1;
+      stats[m.created_by] = entry;
+    });
+    setMarketStats(stats);
+  };
+
   useEffect(() => {
     fetchUsers();
   }, [currentPage, searchTerm, verificationFilter]);
