@@ -202,6 +202,7 @@ export function UserManagement() {
     } else {
       setUsers(data || []);
       setTotalCount(count || 0);
+      fetchMarketStats((data || []).map((u: any) => u.id));
     }
     setLoading(false);
   };
