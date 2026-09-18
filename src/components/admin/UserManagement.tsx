@@ -138,6 +138,29 @@ export function UserManagement() {
   const [detailEmailConfirmed, setDetailEmailConfirmed] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
+  // Published markets per user
+  const [marketStats, setMarketStats] = useState<Record<string, { active: number; total: number }>>({});
+
+  const fetchMarketStats = async (ids: string[]) => {
+    if (ids.length === 0) {
+      setMarketStats({});
+      return;
+    }
+    const { data } = await supabase
+      .from('markets')
+      .select('created_by, status')
+      .in('created_by', ids);
+    const stats: Record<string, { active: number; total: number }> = {};
+    (data || []).forEach((m: any) => {
+      if (!m.created_by) return;
+      const entry = stats[m.created_by] || { active: 0, total: 0 };
+      entry.total += 1;
+      if (m.status === 'active') entry.active += 1;
+      stats[m.created_by] = entry;
+    });
+    setMarketStats(stats);
+  };
+
   useEffect(() => {
     fetchUsers();
   }, [currentPage, searchTerm, verificationFilter]);
@@ -179,6 +202,7 @@ export function UserManagement() {
     } else {
       setUsers(data || []);
       setTotalCount(count || 0);
+      fetchMarketStats((data || []).map((u: any) => u.id));
     }
     setLoading(false);
   };
@@ -398,6 +422,7 @@ export function UserManagement() {
                 <TableHead>Balance</TableHead>
                 <TableHead>Verificación</TableHead>
                 <TableHead>Estado</TableHead>
+                <TableHead>Mercados</TableHead>
                 <TableHead>Registro</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -430,6 +455,22 @@ export function UserManagement() {
                         <Badge variant="destructive">Bloqueado</Badge>
                       ) : (
                         <Badge variant="outline" className="text-success border-success">Activo</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {marketStats[user.id]?.total ? (
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="border-success text-success">
+                            {marketStats[user.id].active} publicados
+                          </Badge>
+                          {marketStats[user.id].total - marketStats[user.id].active > 0 && (
+                            <Badge variant="secondary">
+                              {marketStats[user.id].total - marketStats[user.id].active} inactivos
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -472,7 +513,7 @@ export function UserManagement() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     No se encontraron usuarios.
                   </TableCell>
                 </TableRow>
