@@ -422,6 +422,7 @@ export function UserManagement() {
                 <TableHead>Balance</TableHead>
                 <TableHead>Verificación</TableHead>
                 <TableHead>Estado</TableHead>
+                <TableHead>Mercados</TableHead>
                 <TableHead>Registro</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
