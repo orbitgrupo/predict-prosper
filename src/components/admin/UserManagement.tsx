@@ -513,7 +513,7 @@ export function UserManagement() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     No se encontraron usuarios.
                   </TableCell>
                 </TableRow>
