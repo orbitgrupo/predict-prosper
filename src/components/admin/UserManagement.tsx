@@ -457,6 +457,22 @@ export function UserManagement() {
                         <Badge variant="outline" className="text-success border-success">Activo</Badge>
                       )}
                     </TableCell>
+                    <TableCell>
+                      {marketStats[user.id]?.total ? (
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="border-success text-success">
+                            {marketStats[user.id].active} publicados
+                          </Badge>
+                          {marketStats[user.id].total - marketStats[user.id].active > 0 && (
+                            <Badge variant="secondary">
+                              {marketStats[user.id].total - marketStats[user.id].active} inactivos
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "dd MMM yyyy", { locale: es })}
                     </TableCell>
