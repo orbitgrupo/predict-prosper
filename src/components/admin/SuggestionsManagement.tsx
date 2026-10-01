@@ -226,6 +226,10 @@ export function SuggestionsManagement() {
       if (updateError) throw updateError;
 
       await logAction('approve_suggestion', 'market_suggestion', selectedSuggestion.id, { title: editForm.title });
+      await logAction('approve_market', 'markets', marketData.id, {
+        title: editForm.title,
+        reason: editForm.admin_notes || 'Aprobado desde sugerencia',
+      });
       toast({
         title: 'Sugerencia aprobada',
         description: 'El mercado ha sido creado exitosamente.',
