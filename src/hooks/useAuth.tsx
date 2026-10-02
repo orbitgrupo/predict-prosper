@@ -90,21 +90,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (session?.user) {
           setTimeout(() => {
-            fetchProfile(session.user.id);
+            fetchProfile(session.user.id).finally(() => setLoading(false));
           }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        await fetchProfile(session.user.id).catch(() => {});
       }
       setLoading(false);
     });
