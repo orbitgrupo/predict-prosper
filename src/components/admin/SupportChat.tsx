@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, MessageSquare, Search, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Send, MessageSquare, Search, ArrowLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -44,6 +44,7 @@ export function SupportChat() {
   const [search, setSearch] = useState('');
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
+  const [statuses, setStatuses] = useState<Record<string, string>>({});
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
@@ -59,6 +60,10 @@ export function SupportChat() {
     }
 
     const msgs = (data ?? []) as unknown as SupportMessage[];
+    const { data: convs } = await supabase.from('support_conversations' as any).select('user_id, status');
+    const st: Record<string, string> = {};
+    for (const c of (convs ?? []) as any[]) st[c.user_id] = c.status;
+    setStatuses(st);
     setMessages(msgs);
 
     const ids = Array.from(new Set(msgs.map((m) => m.user_id)));
@@ -83,6 +88,7 @@ export function SupportChat() {
         { event: '*', schema: 'public', table: 'support_messages' },
         () => load()
       )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_conversations' }, () => load())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -164,6 +170,24 @@ export function SupportChat() {
       return;
     }
     setReply('');
+    await supabase.from('support_conversations' as any).upsert({ user_id: activeUser, status: 'open', closed_at: null, closed_by: null, updated_at: new Date().toISOString() });
+    load();
+  };
+
+  const handleClose = async () => {
+    if (!user || !activeUser) return;
+    setSending(true);
+    await supabase.from('support_messages' as any).insert({
+      user_id: activeUser, sender_id: user.id, is_admin: true,
+      content: 'Conversación cerrada por soporte. Si necesitas algo más, escríbenos de nuevo.',
+      read_by_admin: true, read_by_user: false,
+    });
+    const { error } = await supabase.from('support_conversations' as any).upsert({
+      user_id: activeUser, status: 'closed', closed_at: new Date().toISOString(), closed_by: user.id, updated_at: new Date().toISOString(),
+    });
+    setSending(false);
+    if (error) { toast({ title: 'Error', description: friendlyError(error), variant: 'destructive' }); return; }
+    toast({ title: 'Conversación cerrada' });
     load();
   };
 
@@ -196,6 +220,15 @@ export function SupportChat() {
               </CardTitle>
               {prof?.username && (
                 <p className="text-xs text-muted-foreground truncate">{prof.email}</p>
+              )}
+            </div>
+            <div className="ml-auto">
+              {statuses[activeUser] === 'closed' ? (
+                <Badge variant="secondary">Cerrada</Badge>
+              ) : (
+                <Button variant="outline" size="sm" onClick={handleClose} disabled={sending}>
+                  <CheckCircle2 className="mr-1 h-4 w-4" /> Cerrar conversación
+                </Button>
               )}
             </div>
           </div>
@@ -287,6 +320,7 @@ export function SupportChat() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium truncate">{c.username || c.email}</span>
                       {c.unread > 0 && <Badge className="shrink-0">{c.unread}</Badge>}
+                      {statuses[c.userId] === 'closed' && <Badge variant="secondary" className="shrink-0">Cerrada</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{c.lastMessage}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
