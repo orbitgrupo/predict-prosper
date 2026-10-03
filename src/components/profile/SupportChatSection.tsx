@@ -30,6 +30,7 @@ export function SupportChatSection({ userId }: SupportChatSectionProps) {
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [closed, setClosed] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
@@ -44,6 +45,8 @@ export function SupportChatSection({ userId }: SupportChatSectionProps) {
     } else {
       setMessages((data ?? []) as unknown as SupportMessage[]);
     }
+    const { data: conv } = await supabase.from('support_conversations' as any).select('status').eq('user_id', userId).maybeSingle();
+    setClosed((conv as any)?.status === 'closed');
     setLoading(false);
   };
 
@@ -56,6 +59,7 @@ export function SupportChatSection({ userId }: SupportChatSectionProps) {
         { event: '*', schema: 'public', table: 'support_messages', filter: `user_id=eq.${userId}` },
         () => load()
       )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_conversations', filter: `user_id=eq.${userId}` }, () => load())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -84,6 +88,7 @@ export function SupportChatSection({ userId }: SupportChatSectionProps) {
       return;
     }
     setText('');
+    await supabase.from('support_conversations' as any).upsert({ user_id: userId, status: 'open', closed_at: null, closed_by: null, updated_at: new Date().toISOString() });
     load();
   };
 
@@ -136,6 +141,11 @@ export function SupportChatSection({ userId }: SupportChatSectionProps) {
           </ScrollArea>
         )}
 
+        {closed && (
+          <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+            Esta conversación fue cerrada por soporte. Escribe un nuevo mensaje para reabrirla.
+          </p>
+        )}
         <div className="flex items-end gap-2">
           <Textarea
             value={text}
