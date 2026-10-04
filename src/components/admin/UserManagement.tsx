@@ -728,7 +728,7 @@ export function UserManagement() {
 
               {/* Bets */}
               <div>
-                <h4 className="font-medium mb-3">Apuestas</h4>
+                <h4 className="font-medium mb-3">Predicciones</h4>
                 {userHistory.bets.length > 0 ? (
                   <div className="space-y-2">
                     {userHistory.bets.map((bet) => (
@@ -751,7 +751,7 @@ export function UserManagement() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Sin apuestas.</p>
+                  <p className="text-sm text-muted-foreground">Sin predicciones.</p>
                 )}
               </div>
             </div>

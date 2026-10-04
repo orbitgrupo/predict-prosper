@@ -127,14 +127,14 @@ export default function Dashboard() {
         {/* Active bets */}
         <Card className="mb-6 sm:mb-8">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6">
-            <CardTitle className="text-base sm:text-lg">Apuestas activas</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Predicciones activas</CardTitle>
             <div className="flex gap-2">
               {isEmailConfirmed && (
                 <SuggestMarketDialog userId={user.id} userBalance={profile.balance} />
               )}
               <Link to="/markets">
                 <Button variant="outline" size="sm" className="gap-2 text-xs sm:text-sm">
-                  {isEmailConfirmed ? 'Nueva apuesta' : 'Ver mercados'}
+                  {isEmailConfirmed ? 'Nueva predicción' : 'Ver mercados'}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -179,7 +179,7 @@ export default function Dashboard() {
             ) : (
               <div className="py-8 text-center">
                 <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
-                <p className="mt-4 text-sm text-muted-foreground">No tienes apuestas activas.</p>
+                <p className="mt-4 text-sm text-muted-foreground">No tienes predicciones activas.</p>
                 <Link to="/markets">
                   <Button className="mt-4" size="sm">Explorar mercados</Button>
                 </Link>
@@ -192,7 +192,7 @@ export default function Dashboard() {
         {completedBets.length > 0 && (
           <Card>
             <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="text-base sm:text-lg">Historial de apuestas</CardTitle>
+              <CardTitle className="text-base sm:text-lg">Historial de predicciones</CardTitle>
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
               <div className="space-y-3">

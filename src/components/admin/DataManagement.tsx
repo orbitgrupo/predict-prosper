@@ -312,7 +312,7 @@ export function DataManagement() {
           <TabsList className="w-max">
             <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
             <TabsTrigger value="profiles" className="text-xs sm:text-sm">Perfiles</TabsTrigger>
-            <TabsTrigger value="bets" className="text-xs sm:text-sm">Apuestas</TabsTrigger>
+            <TabsTrigger value="bets" className="text-xs sm:text-sm">Predicciones</TabsTrigger>
             <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transacciones</TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />

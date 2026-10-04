@@ -139,8 +139,8 @@ export function MarketCard({ market }: MarketCardProps) {
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[200px] text-center text-xs">
                   {market.allow_cashout
-                    ? 'Puedes retirar tu apuesta antes de que cierre el mercado y recibir su valor actual.'
-                    : 'No es posible retirar tu apuesta anticipadamente en este mercado. Debes esperar al resultado final.'}
+                    ? 'Puedes retirar tu predicción antes de que cierre el mercado y recibir su valor actual.'
+                    : 'No es posible retirar tu predicción anticipadamente en este mercado. Debes esperar al resultado final.'}
                 </TooltipContent>
               </Tooltip>
             </div>

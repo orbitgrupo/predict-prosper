@@ -133,14 +133,14 @@ export function AnalyticsDashboard() {
     }, {})
   ).map(([name, value]) => ({ name, Mercados: value }));
 
-  // Apuestas por día (últimos 30)
+  // Predicciones por día (últimos 30)
   const betsByDay = days.map(({ key, label }) => {
     const dayBets = data.bets.filter(
       (b) => format(new Date(b.created_at), 'yyyy-MM-dd') === key
     );
     return {
       label,
-      Apuestas: dayBets.length,
+      Predicciones: dayBets.length,
       Volumen: dayBets.reduce((acc, b) => acc + Number(b.amount), 0),
     };
   });
@@ -263,7 +263,7 @@ export function AnalyticsDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base sm:text-lg">Apuestas y volumen (30 días)</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Predicciones y volumen (30 días)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
@@ -278,7 +278,7 @@ export function AnalyticsDashboard() {
                   <Line
                     yAxisId="left"
                     type="monotone"
-                    dataKey="Apuestas"
+                    dataKey="Predicciones"
                     stroke="hsl(var(--primary))"
                     strokeWidth={2.5}
                     dot={false}

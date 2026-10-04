@@ -52,7 +52,7 @@ export function BettingHistory({ userId }: BettingHistoryProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Historial de apuestas</CardTitle>
+        <CardTitle className="text-lg">Historial de predicciones</CardTitle>
       </CardHeader>
       <CardContent>
         {bets && bets.length > 0 ? (
@@ -114,7 +114,7 @@ export function BettingHistory({ userId }: BettingHistoryProps) {
           <div className="py-12 text-center">
             <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground" />
             <p className="mt-4 text-muted-foreground">
-              No has realizado ninguna apuesta todavía.
+              No has realizado ninguna predicción todavía.
             </p>
             <Link to="/markets">
               <button className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">

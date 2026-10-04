@@ -62,7 +62,7 @@ export default function Profile() {
               <ScrollArea className="w-full">
                 <TabsList className="w-max">
                   <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transacciones</TabsTrigger>
-                  <TabsTrigger value="bets" className="text-xs sm:text-sm">Apuestas</TabsTrigger>
+                  <TabsTrigger value="bets" className="text-xs sm:text-sm">Predicciones</TabsTrigger>
                   <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
                   <TabsTrigger value="referrals" className="text-xs sm:text-sm">Referidos</TabsTrigger>
                   <TabsTrigger value="support" className="text-xs sm:text-sm">Soporte</TabsTrigger>

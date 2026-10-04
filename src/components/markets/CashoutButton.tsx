@@ -60,7 +60,7 @@ export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt
       setOpen(false);
       toast({
         title: 'Retiro exitoso',
-        description: `Recibiste $${Number(result.cashout_value).toFixed(2)} por tu apuesta.`,
+        description: `Recibiste $${Number(result.cashout_value).toFixed(2)} por tu predicción.`,
       });
     },
     onError: (error: Error) => {
@@ -84,14 +84,14 @@ export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Retirar apuesta</DialogTitle>
+          <DialogTitle>Retirar predicción</DialogTitle>
           <DialogDescription>
             Puedes retirarte del mercado y recibir el valor actual de tu posición basado en las probabilidades actuales.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-4">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Apuesta original</span>
+            <span className="text-muted-foreground">Predicción original</span>
             <span className="font-medium">${bet.amount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm">

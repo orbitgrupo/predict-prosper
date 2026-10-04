@@ -378,7 +378,7 @@ export default function Admin() {
                 <div className="flex items-center justify-between rounded-lg border p-3">
                   <div>
                     <Label htmlFor="allow_cashout" className="text-sm font-medium">Permitir retiro (cashout)</Label>
-                    <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus apuestas mientras el mercado esté activo.</p>
+                    <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus predicciones mientras el mercado esté activo.</p>
                   </div>
                   <Switch
                     id="allow_cashout"
@@ -822,7 +822,7 @@ export default function Admin() {
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <div>
                   <Label htmlFor="edit-allow_cashout" className="text-sm font-medium">Permitir retiro (cashout)</Label>
-                  <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus apuestas mientras el mercado esté activo.</p>
+                  <p className="text-xs text-muted-foreground">Los usuarios podrán retirar sus predicciones mientras el mercado esté activo.</p>
                 </div>
                 <Switch
                   id="edit-allow_cashout"
