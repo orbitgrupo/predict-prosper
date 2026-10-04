@@ -37,7 +37,12 @@ export function GameMarketView({ market, options }: { market: { id: string; titl
   const teams = [...options].sort((a, b) => b.total_amount - a.total_amount).slice(0, 2);
   const total = options.reduce((s, o) => s + o.total_amount, 0);
   const pct = (o: Opt) => (total > 0 ? (o.total_amount / total) * 100 : 100 / options.length);
-  const colors = Object.fromEntries(options.map((o, i) => [o.option_name, teamColor(o.option_name, i)]));
+  const colors: Record<string, string> = Object.fromEntries(options.map((o, i) => [o.option_name, teamColor(o.option_name, i)]));
+  const rgb = (h: string) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  if (teams[1]) {
+    const [a, b] = [rgb(colors[teams[0].option_name]), rgb(colors[teams[1].option_name])];
+    if (Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < 120) colors[teams[1].option_name] = a[0] > 150 ? '#0B2545' : '#F5A623';
+  }
 
   const { data: snaps } = useQuery({
     queryKey: ['market-snapshots', market.id],
