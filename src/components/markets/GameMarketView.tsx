@@ -54,7 +54,7 @@ export function GameMarketView({ market, options }: { market: { id: string; titl
   (snaps ?? []).forEach(s => { (grouped[s.created_at] ??= {})[s.option_name] = Number(s.probability); });
   let data = Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([t, p]) => ({ t, ...p }));
   const now = Object.fromEntries(teams.map(o => [o.option_name, pct(o)]));
-  data = data.length ? [...data, { t: 'now', ...now }] : [{ t: 'a', ...Object.fromEntries(teams.map(() => ['', 50])), ...Object.fromEntries(teams.map(o => [o.option_name, 100 / options.length])) }, { t: 'now', ...now }];
+  data = data.length ? [...data, { t: 'now', ...now }] : [{ t: 'start', ...now }, { t: 'now', ...now }];
 
   const fmt = (n: number) => `$${Number(n).toLocaleString('es-ES', { maximumFractionDigits: 0 })}`;
 
