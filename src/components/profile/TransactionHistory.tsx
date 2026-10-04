@@ -61,7 +61,7 @@ export function TransactionHistory({ userId }: TransactionHistoryProps) {
       case 'bonus':
         return <Badge variant="secondary" className="bg-primary/10 text-primary">Bono</Badge>;
       case 'bet':
-        return <Badge variant="secondary" className="bg-warning/10 text-warning">Apuesta</Badge>;
+        return <Badge variant="secondary" className="bg-warning/10 text-warning">Predicción</Badge>;
       case 'payout':
         return <Badge variant="secondary" className="bg-success/10 text-success">Pago</Badge>;
       case 'deposit':

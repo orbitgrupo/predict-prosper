@@ -31,14 +31,14 @@ export function ProfileStats({ userId }: ProfileStatsProps) {
 
   const stats = [
     {
-      label: 'Total de apuestas',
+      label: 'Total de predicciones',
       value: totalBets.toString(),
       icon: Target,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },
     {
-      label: 'Apuestas ganadas',
+      label: 'Predicciones ganadas',
       value: wonBets.length.toString(),
       icon: Trophy,
       color: 'text-success',

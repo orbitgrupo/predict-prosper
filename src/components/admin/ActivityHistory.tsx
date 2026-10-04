@@ -179,7 +179,7 @@ export function ActivityHistory() {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'bet':
-        return 'Apuesta';
+        return 'Predicción';
       case 'payout':
         return 'Ganancia';
       case 'bonus':
@@ -212,7 +212,7 @@ export function ActivityHistory() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="bet">Apuestas</SelectItem>
+            <SelectItem value="bet">Predicciones</SelectItem>
             <SelectItem value="payout">Ganancias</SelectItem>
             <SelectItem value="bonus">Bonos</SelectItem>
             <SelectItem value="deposit">Depósitos</SelectItem>

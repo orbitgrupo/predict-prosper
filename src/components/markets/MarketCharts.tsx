@@ -89,7 +89,7 @@ export function MarketCharts({ marketId, options }: MarketChartsProps) {
           </div>
         ) : lineData.length === 0 ? (
           <p className="text-center text-muted-foreground py-12 text-sm">
-            Aún no hay actividad. La gráfica se actualizará conforme se realicen apuestas.
+            Aún no hay actividad. La gráfica se actualizará conforme se realicen predicciones.
           </p>
         ) : (
           <div className="h-[320px]">

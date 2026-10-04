@@ -233,14 +233,14 @@ export default function MarketDetail() {
             {marketBets.length > 0 && (
               <Card>
                 <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="text-base sm:text-lg">Tus apuestas</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Tus predicciones</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
                   {!(market.allow_cashout ?? true) && market.status === 'active' && (
                     <div className="flex items-start gap-2 rounded-lg bg-muted p-3 mb-3">
                       <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                       <p className="text-xs text-muted-foreground">
-                        El retiro de apuestas no está disponible para este mercado. Tus apuestas se mantendrán hasta que el mercado sea resuelto.
+                        El retiro de predicciones no está disponible para este mercado. Tus predicciones se mantendrán hasta que el mercado sea resuelto.
                       </p>
                     </div>
                   )}

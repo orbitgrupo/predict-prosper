@@ -96,12 +96,12 @@ export default function Terms() {
                 <li>Utilizar información privilegiada para obtener ventajas indebidas.</li>
                 <li>Realizar cualquier actividad que interfiera con el funcionamiento normal de la plataforma.</li>
                 <li>Intentar acceder a cuentas de otros usuarios sin autorización.</li>
-                <li><strong className="text-foreground">Restricción territorial:</strong> Por motivos legales, los usuarios que se encuentren dentro del territorio de los Estados Unidos de América no tienen permitido realizar apuestas. Pueden crear cuentas y visualizar el contenido, pero la función de apostar se encuentra deshabilitada.</li>
+                <li><strong className="text-foreground">Restricción territorial:</strong> Por motivos legales, los usuarios que se encuentren dentro del territorio de los Estados Unidos de América no tienen permitido realizar predicciones. Pueden crear cuentas y visualizar el contenido, pero la función de apostar se encuentra deshabilitada.</li>
               </ul>
 
               <h2 className="text-lg font-semibold">6. Saldo y Transacciones</h2>
               <p className="text-sm text-muted-foreground">
-                Las apuestas realizadas son finales una vez confirmadas, salvo en mercados donde el retiro anticipado 
+                Las predicciones realizadas son finales una vez confirmadas, salvo en mercados donde el retiro anticipado 
                 (cashout) esté habilitado. El valor del cashout se calcula según las probabilidades del momento y puede 
                 resultar en una ganancia o pérdida respecto al monto original apostado.
               </p>

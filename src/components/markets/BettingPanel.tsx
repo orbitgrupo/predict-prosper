@@ -123,8 +123,8 @@ export function BettingPanel({ market }: BettingPanelProps) {
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground">
             {isExpired && market.status === 'active'
-              ? 'Este mercado ha expirado y ya no acepta apuestas.'
-              : 'Este mercado ya no acepta apuestas.'}
+              ? 'Este mercado ha expirado y ya no acepta predicciones.'
+              : 'Este mercado ya no acepta predicciones.'}
           </p>
           {market.resolved_option && (
             <p className="mt-2 font-medium">
@@ -159,7 +159,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
         <CardContent className="py-8 text-center">
           <p className="mb-2 font-medium">Email no confirmado</p>
           <p className="text-sm text-muted-foreground">
-            Confirma tu email para poder realizar apuestas.
+            Confirma tu email para poder realizar predicciones.
           </p>
         </CardContent>
       </Card>
@@ -169,7 +169,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Realizar apuesta</CardTitle>
+        <CardTitle className="text-lg">Realizar predicción</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Option buttons */}
@@ -235,7 +235,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
             </p>
           )}
           {amount && parseFloat(amount) > 0 && parseFloat(amount) < 1 && (
-            <p className="text-xs text-destructive">El monto mínimo de apuesta es $1</p>
+            <p className="text-xs text-destructive">El monto mínimo de predicción es $1</p>
           )}
         </div>
 
@@ -296,7 +296,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
           <Alert variant="destructive" className="mt-4 bg-destructive/10">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Por restricciones legales, las apuestas no están permitidas desde Estados Unidos.
+              Por restricciones legales, las predicciones no están permitidas desde Estados Unidos.
             </AlertDescription>
           </Alert>
         ) : (
@@ -312,7 +312,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
                 Procesando...
               </>
             ) : (
-              'Confirmar apuesta'
+              'Confirmar predicción'
             )}
           </Button>
         )}

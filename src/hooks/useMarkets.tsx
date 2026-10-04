@@ -128,7 +128,7 @@ export function usePlaceBet() {
       const result = data as { success: boolean; error?: string; bet_id?: string };
       
       if (!result.success) {
-        throw new Error(result.error || 'Error al realizar la apuesta');
+        throw new Error(result.error || 'Error al realizar la predicción');
       }
 
       return true;
@@ -137,8 +137,8 @@ export function usePlaceBet() {
       queryClient.invalidateQueries({ queryKey: ['markets'] });
       queryClient.invalidateQueries({ queryKey: ['bets'] });
       toast({
-        title: 'Apuesta realizada',
-        description: 'Tu apuesta se ha registrado correctamente.',
+        title: 'Predicción realizada',
+        description: 'Tu predicción se ha registrado correctamente.',
       });
     },
     onError: (error: Error) => {
