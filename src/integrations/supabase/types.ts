@@ -743,6 +743,15 @@ export type Database = {
         Args: { p_bet_id: string; p_user_id: string }
         Returns: Json
       }
+      get_recent_market_bets: {
+        Args: { p_limit?: number; p_market_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          id: string
+          option: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
