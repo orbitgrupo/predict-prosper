@@ -4,6 +4,7 @@ import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBa
 import { BettingPanel } from '@/components/markets/BettingPanel';
 import { MarketCharts } from '@/components/markets/MarketCharts';
 import { CashoutButton } from '@/components/markets/CashoutButton';
+import { GameMarketView, isBaseballMarket } from '@/components/markets/GameMarketView';
 import { CommentsSection } from '@/components/markets/CommentsSection';
 import { useMarket, useUserBets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
@@ -83,6 +84,9 @@ export default function MarketDetail() {
         <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            {isBaseballMarket(market) ? (
+              <GameMarketView market={market} options={options} />
+            ) : (<>
             {/* Market image */}
             {market.image_url ? (
               <div className="aspect-[16/9] w-full overflow-hidden rounded-xl">
@@ -127,13 +131,15 @@ export default function MarketDetail() {
               )}
             </div>
 
+            </>)}
+
             {/* Mobile betting panel */}
             <div className="lg:hidden">
               <BettingPanel market={market} />
             </div>
 
             {/* Market Charts */}
-            <MarketCharts marketId={market.id} options={options} />
+            {!isBaseballMarket(market) && <MarketCharts marketId={market.id} options={options} />}
 
             {/* Probability chart */}
             <Card>
