@@ -8,6 +8,7 @@ import { ProfileStats } from '@/components/profile/ProfileStats';
 import { TransactionHistory } from '@/components/profile/TransactionHistory';
 import { BettingHistory } from '@/components/profile/BettingHistory';
 import { MyPredictions } from '@/components/profile/MyPredictions';
+import { PredictionInsights } from '@/components/profile/PredictionInsights';
 import { ReferralSection } from '@/components/profile/ReferralSection';
 import { WithdrawalSection } from '@/components/profile/WithdrawalSection';
 import { SupportChatSection } from '@/components/profile/SupportChatSection';
@@ -63,6 +64,7 @@ export default function Profile() {
               <ScrollArea className="w-full">
                 <TabsList className="w-max">
                   <TabsTrigger value="mine" className="text-xs sm:text-sm">Mis predicciones</TabsTrigger>
+                  <TabsTrigger value="insights" className="text-xs sm:text-sm">Análisis</TabsTrigger>
                   <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transacciones</TabsTrigger>
                   <TabsTrigger value="bets" className="text-xs sm:text-sm">Predicciones</TabsTrigger>
                   <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
@@ -73,6 +75,9 @@ export default function Profile() {
               </ScrollArea>
               <TabsContent value="mine" className="mt-4">
                 <MyPredictions userId={user.id} />
+              </TabsContent>
+              <TabsContent value="insights" className="mt-4">
+                <PredictionInsights userId={user.id} />
               </TabsContent>
               <TabsContent value="transactions" className="mt-4">
                 <TransactionHistory userId={user.id} />
