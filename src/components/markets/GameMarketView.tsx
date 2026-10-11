@@ -33,7 +33,24 @@ export function isBaseballMarket(m: { title: string; category?: string | null; d
 
 const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
-export function GameMarketView({ market, options }: { market: { id: string; title: string; category?: string | null }; options: Opt[] }) {
+type Live = { state: string; detail: string; inning: string; away: { abbr: string; name: string; runs: number }; home: { abbr: string; name: string; runs: number }; balls: number; strikes: number; outs: number; play?: string };
+
+async function fetchLive(pk: number): Promise<Live> {
+  const d = await (await fetch(`https://statsapi.mlb.com/api/v1.1/game/${pk}/feed/live`)).json();
+  const g = d.gameData, l = d.liveData.linescore ?? {};
+  const team = (side: 'away' | 'home') => ({ abbr: g.teams[side].abbreviation, name: g.teams[side].teamName, runs: l.teams?.[side]?.runs ?? 0 });
+  return {
+    state: g.status.abstractGameState, detail: g.status.detailedState,
+    inning: l.currentInning ? `${l.inningHalf === 'Top' ? 'Alta' : 'Baja'} ${l.currentInningOrdinal}` : '',
+    away: team('away'), home: team('home'), balls: l.balls ?? 0, strikes: l.strikes ?? 0, outs: l.outs ?? 0,
+    play: d.liveData.plays?.currentPlay?.result?.description,
+  };
+}
+
+export function GameMarketView({ market, options }: { market: { id: string; title: string; category?: string | null; mlb_game_pk?: number | null; status?: string; closes_at?: string }; options: Opt[] }) {
+  const pk = market.mlb_game_pk ?? null;
+  const { data: live } = useQuery({ queryKey: ['mlb-live', pk], queryFn: () => fetchLive(pk!), enabled: !!pk, refetchInterval: (q) => (q.state.data?.state === 'Final' ? false : 10000) });
+  const finished = live ? live.state === 'Final' : market.status !== 'active' || (market.closes_at ? new Date(market.closes_at) < new Date() && !pk : false);
   const teams = [...options].sort((a, b) => b.total_amount - a.total_amount).slice(0, 2);
   const total = options.reduce((s, o) => s + o.total_amount, 0);
   const pct = (o: Opt) => (total > 0 ? (o.total_amount / total) * 100 : 100 / options.length);
@@ -78,14 +95,33 @@ export function GameMarketView({ market, options }: { market: { id: string; titl
             </div>
           ))}
           <div className="order-2 flex flex-col items-center">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-destructive">
-              <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" /> EN VIVO
-            </span>
+            {live && live.state !== 'Preview' && (
+              <span className="font-display text-3xl font-black tabular-nums">{live.away.runs} – {live.home.runs}</span>
+            )}
+            {finished ? (
+              <span className="text-xs font-semibold text-muted-foreground">FINALIZADO</span>
+            ) : live?.state === 'Live' ? (
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-destructive">
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" /> EN VIVO · {live.inning}
+              </span>
+            ) : live ? (
+              <span className="text-xs font-semibold text-muted-foreground">{live.detail === 'Pre-Game' || live.detail === 'Scheduled' ? 'Por comenzar' : live.detail}</span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-destructive">
+                <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" /> EN VIVO
+              </span>
+            )}
+            {live?.state === 'Live' && (
+              <span className="text-[11px] text-muted-foreground mt-1">B {live.balls} · S {live.strikes} · O {live.outs}</span>
+            )}
             <span className="text-xs text-muted-foreground mt-1">{fmt(total)} vol.</span>
           </div>
         </div>
       </div>
 
+      {live?.play && (
+        <p className="border-t border-dashed px-4 py-2 text-center text-sm text-muted-foreground">⚾ {live.play}</p>
+      )}
       <div className="relative h-72 border-t border-dashed">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 30, right: 110, left: 0, bottom: 20 }}>
