@@ -1,0 +1,1 @@
+ALTER TABLE public.markets ADD COLUMN IF NOT EXISTS mlb_game_pk integer;

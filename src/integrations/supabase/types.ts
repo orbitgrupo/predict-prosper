@@ -337,6 +337,7 @@ export type Database = {
           favorite_probability: number | null
           id: string
           image_url: string | null
+          mlb_game_pk: number | null
           resolved_option: string | null
           status: Database["public"]["Enums"]["market_status"]
           title: string
@@ -355,6 +356,7 @@ export type Database = {
           favorite_probability?: number | null
           id?: string
           image_url?: string | null
+          mlb_game_pk?: number | null
           resolved_option?: string | null
           status?: Database["public"]["Enums"]["market_status"]
           title: string
@@ -373,6 +375,7 @@ export type Database = {
           favorite_probability?: number | null
           id?: string
           image_url?: string | null
+          mlb_game_pk?: number | null
           resolved_option?: string | null
           status?: Database["public"]["Enums"]["market_status"]
           title?: string
