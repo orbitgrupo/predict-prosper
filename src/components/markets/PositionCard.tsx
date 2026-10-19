@@ -10,16 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { usePlaceBet, type MarketOption } from '@/hooks/useMarkets';
+import { usePlaceBet } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
-import { calcPositionValue, optionProbability } from '@/lib/cashout';
+import { calcPositionValue, entryPriceCents, optionProbability, sharesOf } from '@/lib/cashout';
 import { findLidomTeamByName } from '@/data/lidomTeams';
 import { teamColor } from './GameMarketView';
 import { CashoutButton } from './CashoutButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Loader2, Plus, Swords } from 'lucide-react';
+import { Loader2, Plus, Swords, TrendingDown, TrendingUp } from 'lucide-react';
 
 interface PositionCardProps {
   bet: {
@@ -51,10 +51,12 @@ export function PositionCard({ bet, marketOptions, marketStatus, marketClosesAt,
 
   const stake = Number(bet.amount);
   const potential = bet.potential_payout ? Number(bet.potential_payout) : null;
+  const shares = sharesOf(stake, potential);
   const currentPct = optionProbability(bet.option, marketOptions);
-  const costPct = potential && potential > 0 ? stake / potential : 0.5;
+  const entryCents = entryPriceCents(stake, potential);
   const liveValue = calcPositionValue(stake, potential, currentPct);
   const pnl = liveValue - stake;
+  const pnlPct = stake > 0 ? (pnl / stake) * 100 : 0;
   const toWin = potential ?? stake * 2;
 
   const otherOptions = marketOptions.filter((o) => o.option_name !== bet.option);
@@ -109,7 +111,7 @@ export function PositionCard({ bet, marketOptions, marketStatus, marketClosesAt,
         <div className="min-w-0 flex-1">
           <p className="font-bold truncate">{bet.option}</p>
           <p className="text-xs text-muted-foreground">
-            {format(new Date(bet.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
+            {shares.toFixed(2)} acc. · {format(new Date(bet.created_at), "dd MMM yyyy, HH:mm", { locale: es })}
           </p>
         </div>
         {bet.is_winner !== null && (
@@ -121,25 +123,31 @@ export function PositionCard({ bet, marketOptions, marketStatus, marketClosesAt,
 
       <div className="border-t border-dashed" />
 
-      {/* Costo / Actual / Por ganar */}
-      <div className="grid grid-cols-3 gap-2 text-center">
+      {/* Valor actual / Costo / Por ganar */}
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs text-muted-foreground">Costo {(costPct * 100).toFixed(0)}%</p>
-          <p className="text-lg font-bold">${stake.toFixed(2)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">Actual {(currentPct * 100).toFixed(0)}%</p>
-          <p className={`text-lg font-bold ${pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
-            ${liveValue.toFixed(2)}{' '}
-            <span className="text-xs font-semibold">
-              ({pnl >= 0 ? '+' : ''}{pnl.toFixed(2)})
-            </span>
+          <p className="text-xs text-muted-foreground">Valor actual · {(currentPct * 100).toFixed(0)}%</p>
+          <p className="text-3xl font-black tracking-tight">${liveValue.toFixed(2)}</p>
+          <p className={`flex items-center gap-1 text-sm font-semibold ${pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
+            {pnl >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+            {pnl >= 0 ? '+' : ''}{pnl.toFixed(2)} ({pnl >= 0 ? '+' : ''}{pnlPct.toFixed(0)}%)
           </p>
         </div>
-        <div>
-          <p className="text-xs text-muted-foreground">Por ganar</p>
-          <p className="text-lg font-bold">${toWin.toFixed(2)}</p>
+        <div className="text-right space-y-2 shrink-0">
+          <div>
+            <p className="text-xs text-muted-foreground">Costo</p>
+            <p className="text-lg font-bold">${stake.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Por ganar</p>
+            <p className="text-lg font-bold">${toWin.toFixed(2)}</p>
+          </div>
         </div>
+      </div>
+
+      <div className="flex justify-between text-sm border-t border-dashed pt-3">
+        <span className="text-muted-foreground">Precio prom. de entrada</span>
+        <span className="font-semibold">{entryCents.toFixed(2)}¢</span>
       </div>
 
       {active && mode === null && (
@@ -178,7 +186,9 @@ export function PositionCard({ bet, marketOptions, marketStatus, marketClosesAt,
             <Label className="font-semibold">
               {mode === 'more' ? `Agregar a ${bet.option}` : 'Apostar en contra'}
             </Label>
-            {(currentPct * 100).toFixed(0)}%
+            <span className="text-sm text-muted-foreground">
+              {(optionProbability(mode === 'more' ? bet.option : againstDefault, marketOptions) * 100).toFixed(0)}%
+            </span>
           </div>
           {mode === 'against' && otherOptions.length > 1 && (
             <Select value={againstOption} onValueChange={setAgainstOption}>
@@ -212,6 +222,14 @@ export function PositionCard({ bet, marketOptions, marketStatus, marketClosesAt,
               <p className="text-xs text-destructive">Saldo insuficiente.</p>
             )}
           </div>
+          {betAmount >= 1 && (
+            <div className="flex justify-between rounded-lg bg-secondary px-3 py-2 text-sm">
+              <span className="text-muted-foreground">Para ganar</span>
+              <span className="font-bold text-green-600 dark:text-green-400">
+                ${(betAmount / Math.max(optionProbability(mode === 'more' ? bet.option : againstDefault, marketOptions), 0.01)).toFixed(2)}
+              </span>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" onClick={() => setMode(null)}>
               Cancelar

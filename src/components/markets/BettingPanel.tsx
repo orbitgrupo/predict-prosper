@@ -275,17 +275,19 @@ export function BettingPanel({ market }: BettingPanelProps) {
           </div>
         )}
 
-        {/* Potential payout */}
+        {/* To win (estilo Polymarket) */}
         {selectedOption && betAmount > 0 && (
-          <div className="rounded-lg bg-secondary p-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Pago potencial</span>
-              <span className="font-bold text-success">
+          <div className="rounded-lg bg-secondary p-3 space-y-1">
+            <div className="flex justify-between items-baseline">
+              <span className="text-sm text-muted-foreground">Para ganar</span>
+              <span className="text-2xl font-black text-green-600 dark:text-green-400">
                 ${potentialPayout.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Si gana "{selectedOption}"</span>
+              <span>
+                Precio prom. {potentialPayout > 0 ? ((betAmount / potentialPayout) * 100).toFixed(2) : '--'}&cent;
+              </span>
               <span>+{((potentialPayout / betAmount - 1) * 100).toFixed(0)}%</span>
             </div>
           </div>
