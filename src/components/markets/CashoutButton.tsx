@@ -20,9 +20,10 @@ interface CashoutButtonProps {
   marketStatus: string;
   marketClosesAt: string;
   allowCashout: boolean;
+  triggerClassName?: string;
 }
 
-export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt, allowCashout }: CashoutButtonProps) {
+export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt, allowCashout, triggerClassName }: CashoutButtonProps) {
   const [open, setOpen] = useState(false);
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
@@ -72,7 +73,7 @@ export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
+        <Button variant="outline" className={`gap-1.5 ${triggerClassName ?? ''}`}>
           <LogOut className="h-3.5 w-3.5" />
           Retirar
         </Button>

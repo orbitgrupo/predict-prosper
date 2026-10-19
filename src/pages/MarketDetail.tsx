@@ -3,11 +3,10 @@ import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { BettingPanel } from '@/components/markets/BettingPanel';
 import { MarketCharts } from '@/components/markets/MarketCharts';
-import { CashoutButton } from '@/components/markets/CashoutButton';
+import { PositionCard } from '@/components/markets/PositionCard';
 import { GameMarketView, isBaseballMarket } from '@/components/markets/GameMarketView';
 import { CommentsSection } from '@/components/markets/CommentsSection';
 import { useMarket, useUserBets, useLiveOptions } from '@/hooks/useMarkets';
-import { calcPositionValue, optionProbability } from '@/lib/cashout';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -235,7 +234,7 @@ export default function MarketDetail() {
             {marketBets.length > 0 && (
               <Card>
                 <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="text-base sm:text-lg">Tus predicciones</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Tus posiciones</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
                   {!(market.allow_cashout ?? true) && market.status === 'active' && (
@@ -247,63 +246,25 @@ export default function MarketDetail() {
                     </div>
                   )}
                   <div className="space-y-3">
-                    {marketBets.map((bet) => {
-                      const prob = optionProbability(bet.option, options);
-                      const liveValue = calcPositionValue(
-                        Number(bet.amount),
-                        bet.potential_payout ? Number(bet.potential_payout) : null,
-                        prob,
-                      );
-                      const pnl = liveValue - Number(bet.amount);
-                      return (
-                      <div
+                    {marketBets.map((bet) => (
+                      <PositionCard
                         key={bet.id}
-                        className="flex items-center justify-between rounded-lg bg-secondary p-3 sm:p-4 gap-3"
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                          <Badge 
-                            className={`shrink-0 text-xs ${
-                              bet.option.toLowerCase() === 'yes' || bet.option.toLowerCase() === 'sí'
-                                ? 'bg-yes'
-                                : bet.option.toLowerCase() === 'no'
-                                ? 'bg-no'
-                                : ''
-                            }`}
-                          >
-                            {bet.option}
-                          </Badge>
-                          <div className="min-w-0">
-                            <p className="font-medium text-sm">${Number(bet.amount).toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {format(new Date(bet.created_at), 'dd MMM yyyy, HH:mm', { locale: es })}
-                            </p>
-                            <p className={`text-xs font-semibold ${pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
-                              Valor actual: ${liveValue.toFixed(2)} ({pnl >= 0 ? '+' : ''}{pnl.toFixed(2)})
-                            </p>
-                          </div>
-                        </div>
-                        {bet.is_winner !== null ? (
-                          <Badge variant={bet.is_winner ? 'default' : 'secondary'} className="shrink-0 text-xs">
-                            {bet.is_winner ? `+$${Number(bet.payout_amount).toFixed(2)}` : bet.payout_amount ? `Retirado: $${Number(bet.payout_amount).toFixed(2)}` : 'Perdida'}
-                          </Badge>
-                        ) : (
-                          <CashoutButton
-                            bet={{
-                              id: bet.id,
-                              option: bet.option,
-                              amount: Number(bet.amount),
-                              potential_payout: bet.potential_payout ? Number(bet.potential_payout) : null,
-                              is_winner: bet.is_winner,
-                            }}
-                            marketOptions={options}
-                            marketStatus={market.status}
-                            marketClosesAt={market.closes_at}
-                            allowCashout={market.allow_cashout ?? true}
-                          />
-                        )}
-                      </div>
-                    );
-                    })}
+                        bet={{
+                          id: bet.id,
+                          market_id: bet.market_id,
+                          option: bet.option,
+                          amount: Number(bet.amount),
+                          potential_payout: bet.potential_payout ? Number(bet.potential_payout) : null,
+                          is_winner: bet.is_winner,
+                          payout_amount: bet.payout_amount ? Number(bet.payout_amount) : null,
+                          created_at: bet.created_at,
+                        }}
+                        marketOptions={options}
+                        marketStatus={market.status}
+                        marketClosesAt={market.closes_at}
+                        allowCashout={market.allow_cashout ?? true}
+                      />
+                    ))}
                   </div>
                 </CardContent>
               </Card>
