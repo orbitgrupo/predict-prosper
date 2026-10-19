@@ -1,161 +1,123 @@
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Clock, TrendingUp, ImageIcon, ShieldCheck, ShieldOff } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { Market } from '@/hooks/useMarkets';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface MarketCardProps {
   market: Market;
 }
 
-type OptionLike = { id: string; option_name: string; total_amount: number };
+interface RowOption {
+  id: string;
+  name: string;
+  amount: number;
+}
+
+function initial(name: string) {
+  const c = name.trim().charAt(0);
+  return c ? c.toUpperCase() : '?';
+}
 
 export function MarketCard({ market }: MarketCardProps) {
-  const hasOptions = market.options && market.options.length > 0;
-  const options: OptionLike[] = hasOptions 
-    ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
-    : [
-        { id: 'yes', option_name: 'Sí', total_amount: Number(market.total_yes_amount) },
-        { id: 'no', option_name: 'No', total_amount: Number(market.total_no_amount) }
-      ];
-  
-  const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
-  const topTwoOptions = [...options]
-    .sort((a, b) => b.total_amount - a.total_amount)
-    .slice(0, 2);
-  
-  const option1 = topTwoOptions[0];
-  const option2 = topTwoOptions[1];
-  const option1Percentage = totalVolume > 0 
-    ? (option1?.total_amount || 0) / totalVolume * 100 
-    : 50;
-  const option2Percentage = totalVolume > 0 
-    ? (option2?.total_amount || 0) / totalVolume * 100 
-    : 50;
+  const rows: RowOption[] =
+    market.options && market.options.length > 0
+      ? market.options.map((o) => ({
+          id: o.id,
+          name: o.option_name,
+          amount: Number(o.total_amount),
+        }))
+      : [
+          { id: 'yes', name: 'Sí', amount: Number(market.total_yes_amount) },
+          { id: 'no', name: 'No', amount: Number(market.total_no_amount) },
+        ];
 
-  const isExpired = new Date(market.closes_at) < new Date();
-  const statusLabel = market.status === 'resolved' 
-    ? 'Resuelto' 
-    : market.status === 'closed' 
-      ? 'Cerrado' 
-      : isExpired 
-        ? 'Expirado' 
-        : 'Activo';
+  const total = rows.reduce((s, r) => s + r.amount, 0);
+  const withProb = rows.map((r) => ({
+    ...r,
+    prob: total > 0 ? r.amount / total : 1 / rows.length,
+  }));
+  const top = [...withProb].sort((a, b) => b.prob - a.prob).slice(0, 2);
+
+  let closesLabel = '';
+  try {
+    closesLabel = format(new Date(market.closes_at), "d MMM", { locale: es });
+  } catch {
+    closesLabel = '';
+  }
 
   return (
-    <Link to={`/market/${market.id}`}>
-      <Card className="group h-full transition-all hover:shadow-lg hover:border-primary/20 overflow-hidden">
-        {/* Market image */}
+    <Link
+      to={`/market/${market.id}`}
+      className="group flex flex-col rounded-2xl border bg-card p-4 transition-shadow hover:shadow-md sm:p-5"
+    >
+      {/* Event header */}
+      <div className="flex items-start gap-3">
         {market.image_url ? (
-          <div className="aspect-[16/9] w-full overflow-hidden">
-            <img 
-              src={market.image_url} 
-              alt={market.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          </div>
+          <img
+            src={market.image_url}
+            alt=""
+            className="h-10 w-10 shrink-0 rounded-full object-cover"
+          />
         ) : (
-          <div className="aspect-[16/9] w-full bg-muted flex items-center justify-center">
-            <ImageIcon className="h-12 w-12 text-muted-foreground/40" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
           </div>
         )}
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-display text-lg font-semibold leading-tight group-hover:text-primary transition-colors">
-              {market.title}
-            </h3>
-            <Badge 
-              variant={market.status === 'active' && !isExpired ? 'default' : 'secondary'}
-              className="shrink-0"
-            >
-              {statusLabel}
-            </Badge>
-          </div>
-          {market.category && (
-            <Badge variant="outline" className="w-fit text-xs">
-              {market.category}
-            </Badge>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {market.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {market.description}
-            </p>
-          )}
+        <div className="min-w-0">
+          <h3 className="font-semibold leading-snug line-clamp-2 group-hover:underline">
+            {market.title}
+          </h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {closesLabel}
+            {market.category ? ` · ${market.category}` : ''}
+          </p>
+        </div>
+      </div>
 
-          {/* Probability bar */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm font-medium">
-              <span className={option1?.option_name.toLowerCase() === 'sí' || option1?.option_name.toLowerCase() === 'yes' ? 'text-yes' : ''}>
-                {option1?.option_name} {option1Percentage.toFixed(0)}%
-              </span>
-              <span className={option2?.option_name.toLowerCase() === 'no' ? 'text-no' : ''}>
-                {option2?.option_name} {option2Percentage.toFixed(0)}%
-              </span>
-            </div>
-            <div className="flex h-3 overflow-hidden rounded-full bg-secondary">
-              <div 
-                className={`transition-all duration-500 ${
-                  option1?.option_name.toLowerCase() === 'sí' || option1?.option_name.toLowerCase() === 'yes'
-                    ? 'bg-yes'
-                    : 'bg-primary'
-                }`}
-                style={{ width: `${option1Percentage}%` }}
-              />
-              <div 
-                className={`transition-all duration-500 ${
-                  option2?.option_name.toLowerCase() === 'no'
-                    ? 'bg-no'
-                    : 'bg-secondary-foreground'
-                }`}
-                style={{ width: `${option2Percentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-3.5 w-3.5" />
-                <span>${totalVolume.toLocaleString('es-ES')}</span>
+      {/* Outcome rows */}
+      <div className="mt-4 space-y-3">
+        {top.map((r, i) => (
+          <div key={r.id}>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                {initial(r.name)}
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 cursor-help">
-                    {market.allow_cashout ? (
-                      <ShieldCheck className="h-3.5 w-3.5 text-yes" />
-                    ) : (
-                      <ShieldOff className="h-3.5 w-3.5 text-destructive" />
-                    )}
-                    <span className={market.allow_cashout ? 'text-yes' : 'text-destructive'}>
-                      {market.allow_cashout ? 'Cashout' : 'Sin cashout'}
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-[200px] text-center text-xs">
-                  {market.allow_cashout
-                    ? 'Puedes retirar tu predicción antes de que cierre el mercado y recibir su valor actual.'
-                    : 'No es posible retirar tu predicción anticipadamente en este mercado. Debes esperar al resultado final.'}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              <span>
-                {formatDistanceToNow(new Date(market.closes_at), { 
-                  addSuffix: true, 
-                  locale: es 
-                })}
+              <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                {r.name}
+              </span>
+              <span className="text-sm tabular-nums text-muted-foreground">
+                {r.prob > 0 ? `${(1 / r.prob).toFixed(2)}x` : '—'}
+              </span>
+              <span
+                className={`min-w-[3.5rem] rounded-lg px-2 py-1 text-center text-sm font-semibold tabular-nums ${
+                  i === 0 ? 'bg-yes text-white' : 'border text-muted-foreground'
+                }`}
+              >
+                {Math.round(r.prob * 100)}%
               </span>
             </div>
+            <div className="ml-[2.375rem] mt-1.5 h-[3px] overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full rounded-full ${
+                  i === 0 ? 'bg-yes' : 'bg-muted-foreground/50'
+                }`}
+                style={{ width: `${Math.round(r.prob * 100)}%` }}
+              />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+        <span>
+          {rows.length} {rows.length === 1 ? 'opción' : 'opciones'}
+        </span>
+        <span className="tabular-nums">
+          ${total.toLocaleString('es-ES')} vol.
+        </span>
+      </div>
     </Link>
   );
 }

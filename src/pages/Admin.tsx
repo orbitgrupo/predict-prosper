@@ -18,6 +18,7 @@ import { DataManagement } from '@/components/admin/DataManagement';
 import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import { SupportChat } from '@/components/admin/SupportChat';
 import { PublishedMarkets } from '@/components/admin/PublishedMarkets';
+import { LidomQuickCreate } from '@/components/admin/LidomQuickCreate';
 
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
@@ -53,7 +54,8 @@ import {
   Pencil,
   UserPlus,
   Gift,
-  Star
+  Star,
+  Trophy
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -69,6 +71,7 @@ export default function Admin() {
   const queryClient = useQueryClient();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [lidomDialogOpen, setLidomDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newMarket, setNewMarket] = useState({
     title: '',
@@ -475,6 +478,22 @@ export default function Admin() {
                     'Crear mercado'
                   )}
                 </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={lidomDialogOpen} onOpenChange={setLidomDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="secondary" className="gap-2 w-full sm:w-auto">
+                <Trophy className="h-4 w-4" />
+                Partido LIDOM
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[85vh] flex flex-col max-w-[95vw] sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Crear predicción LIDOM</DialogTitle>
+              </DialogHeader>
+              <div className="overflow-y-auto flex-1 pr-2 pt-2">
+                <LidomQuickCreate onCreated={() => setLidomDialogOpen(false)} />
               </div>
             </DialogContent>
           </Dialog>
