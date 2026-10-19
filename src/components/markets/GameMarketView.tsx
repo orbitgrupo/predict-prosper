@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, YAxis, ResponsiveContainer } from 'recharts';
+import { findLidomTeamByName } from '@/data/lidomTeams';
 
 type Opt = { id: string; option_name: string; total_amount: number };
 
@@ -86,14 +87,21 @@ export function GameMarketView({ market, options }: { market: { id: string; titl
         <p className="text-sm text-muted-foreground">Béisbol{market.category ? ` • ${market.category}` : ''}</p>
         <h2 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight">{market.title}</h2>
         <div className="flex items-center justify-between py-5">
-          {teams.map((t, i) => (
-            <div key={t.id} className={`flex flex-col items-center gap-2 ${i === 1 ? 'order-3' : ''}`}>
-              <div className="h-16 w-16 rounded-full flex items-center justify-center text-xl font-black shadow-lg ring-4 ring-background" style={{ backgroundColor: colors[t.option_name], color: '#fff' }}>
-                {initials(t.option_name)}
+          {teams.map((t, i) => {
+            const logo = findLidomTeamByName(t.option_name);
+            return (
+              <div key={t.id} className={`flex flex-col items-center gap-2 ${i === 1 ? 'order-3' : ''}`}>
+                {logo ? (
+                  <img src={logo.logo} alt={t.option_name} className="h-16 w-16 rounded-full object-cover shadow-lg ring-4 ring-background bg-white" />
+                ) : (
+                  <div className="h-16 w-16 rounded-full flex items-center justify-center text-xl font-black shadow-lg ring-4 ring-background" style={{ backgroundColor: colors[t.option_name], color: '#fff' }}>
+                    {initials(t.option_name)}
+                  </div>
+                )}
+                <span className="text-sm font-semibold">{t.option_name}</span>
               </div>
-              <span className="text-sm font-semibold">{t.option_name}</span>
-            </div>
-          ))}
+            );
+          })}
           <div className="order-2 flex flex-col items-center">
             {live && live.state !== 'Preview' && (
               <span className="font-display text-3xl font-black tabular-nums">{live.away.runs} – {live.home.runs}</span>

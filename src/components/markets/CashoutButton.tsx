@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { calcPositionValue, optionProbability } from '@/lib/cashout';
 import { Loader2, LogOut } from 'lucide-react';
 
 interface CashoutButtonProps {
@@ -30,15 +31,9 @@ export function CashoutButton({ bet, marketOptions, marketStatus, marketClosesAt
   const isExpired = new Date(marketClosesAt) <= new Date();
   const canCashout = marketStatus === 'active' && !isExpired && bet.is_winner === null && allowCashout;
 
-  // Calculate current cashout value
-  const totalVolume = marketOptions.reduce((sum, o) => sum + o.total_amount, 0);
-  const optionTotal = marketOptions.find(o => o.option_name === bet.option)?.total_amount || 0;
-  const currentProbability = totalVolume > 0 ? optionTotal / totalVolume : 0;
-  const cashoutValue = Math.round(bet.amount * (1 + (1 - currentProbability)) * 100) / 100;
-  const cappedValue = bet.potential_payout && cashoutValue > bet.potential_payout 
-    ? bet.potential_payout 
-    : cashoutValue;
-  const finalValue = Math.max(cappedValue, bet.amount * 0.01);
+  // Valor actual de la posición: sube si tu equipo va ganando, baja si va perdiendo
+  const currentProbability = optionProbability(bet.option, marketOptions);
+  const finalValue = calcPositionValue(bet.amount, bet.potential_payout, currentProbability);
   const profitLoss = finalValue - bet.amount;
 
   const cashout = useMutation({

@@ -6,7 +6,8 @@ import { MarketCharts } from '@/components/markets/MarketCharts';
 import { CashoutButton } from '@/components/markets/CashoutButton';
 import { GameMarketView, isBaseballMarket } from '@/components/markets/GameMarketView';
 import { CommentsSection } from '@/components/markets/CommentsSection';
-import { useMarket, useUserBets } from '@/hooks/useMarkets';
+import { useMarket, useUserBets, useLiveOptions } from '@/hooks/useMarkets';
+import { calcPositionValue, optionProbability } from '@/lib/cashout';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,7 @@ export default function MarketDetail() {
   const { data: market, isLoading } = useMarket(id || '');
   const { user } = useAuth();
   const { data: userBets } = useUserBets(user?.id);
+  const liveOpts = useLiveOptions(market?.id, market?.options ?? []);
 
   const marketBets = userBets?.filter(bet => bet.market_id === id) || [];
 
@@ -53,9 +55,9 @@ export default function MarketDetail() {
 
   type OptionLike = { id: string; option_name: string; total_amount: number };
   
-  const hasOptions = market.options && market.options.length > 0;
-  const options: OptionLike[] = hasOptions 
-    ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
+  const sourceOptions = liveOpts.length > 0 ? liveOpts : (market.options ?? []);
+  const options: OptionLike[] = sourceOptions.length > 0
+    ? sourceOptions.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
     : [
         { id: 'yes', option_name: 'Sí', total_amount: Number(market.total_yes_amount) },
         { id: 'no', option_name: 'No', total_amount: Number(market.total_no_amount) }
@@ -135,7 +137,7 @@ export default function MarketDetail() {
 
             {/* Mobile betting panel */}
             <div className="lg:hidden">
-              <BettingPanel market={market} />
+              <BettingPanel market={{ ...market, options: liveOpts.length > 0 ? liveOpts : market.options }} />
             </div>
 
             {/* Market Charts */}
@@ -245,8 +247,16 @@ export default function MarketDetail() {
                     </div>
                   )}
                   <div className="space-y-3">
-                    {marketBets.map((bet) => (
-                      <div 
+                    {marketBets.map((bet) => {
+                      const prob = optionProbability(bet.option, options);
+                      const liveValue = calcPositionValue(
+                        Number(bet.amount),
+                        bet.potential_payout ? Number(bet.potential_payout) : null,
+                        prob,
+                      );
+                      const pnl = liveValue - Number(bet.amount);
+                      return (
+                      <div
                         key={bet.id}
                         className="flex items-center justify-between rounded-lg bg-secondary p-3 sm:p-4 gap-3"
                       >
@@ -266,6 +276,9 @@ export default function MarketDetail() {
                             <p className="font-medium text-sm">${Number(bet.amount).toFixed(2)}</p>
                             <p className="text-xs text-muted-foreground">
                               {format(new Date(bet.created_at), 'dd MMM yyyy, HH:mm', { locale: es })}
+                            </p>
+                            <p className={`text-xs font-semibold ${pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
+                              Valor actual: ${liveValue.toFixed(2)} ({pnl >= 0 ? '+' : ''}{pnl.toFixed(2)})
                             </p>
                           </div>
                         </div>
@@ -289,7 +302,8 @@ export default function MarketDetail() {
                           />
                         )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -327,7 +341,7 @@ export default function MarketDetail() {
           {/* Desktop sidebar */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-24">
-              <BettingPanel market={market} />
+              <BettingPanel market={{ ...market, options: liveOpts.length > 0 ? liveOpts : market.options }} />
             </div>
           </div>
         </div>

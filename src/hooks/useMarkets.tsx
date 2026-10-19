@@ -150,3 +150,23 @@ export function usePlaceBet() {
     },
   });
 }
+
+/** Opciones con montos actualizados cada 4s (volumen y % en vivo). */
+export function useLiveOptions(marketId: string | undefined, fallback: MarketOption[] = []) {
+  const { data } = useQuery({
+    queryKey: ["market-options-live", marketId],
+    queryFn: async () => {
+      if (!marketId) return fallback;
+      const { data, error } = await supabase
+        .from("market_options")
+        .select("*")
+        .eq("market_id", marketId);
+      if (error) throw error;
+      return (data ?? []) as MarketOption[];
+    },
+    enabled: !!marketId,
+    refetchInterval: 4000,
+    placeholderData: fallback,
+  });
+  return data && data.length > 0 ? data : fallback;
+}
