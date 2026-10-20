@@ -19,6 +19,7 @@ import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import { SupportChat } from '@/components/admin/SupportChat';
 import { PublishedMarkets } from '@/components/admin/PublishedMarkets';
 import { LidomQuickCreate } from '@/components/admin/LidomQuickCreate';
+import { ListSkeleton, PageSkeleton } from '@/components/skeletons';
 
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
 import { PromotionSettings } from '@/components/admin/PromotionSettings';
@@ -290,9 +291,7 @@ export default function Admin() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <PageSkeleton />
       </div>
     );
   }
@@ -616,9 +615,7 @@ export default function Admin() {
 
               <TabsContent value="active" className="mt-4 sm:mt-6">
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
+                  <ListSkeleton rows={4} />
                 ) : activeMarkets.length > 0 ? (
                   <div className="space-y-3 sm:space-y-4">
                     {activeMarkets.map((market) => (

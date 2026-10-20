@@ -130,11 +130,11 @@
 
 @layer utilities {
   .gradient-yes {
-    @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
+    @apply bg-emerald-600;
   }
   
   .gradient-no {
-    @apply bg-gradient-to-r from-rose-500 to-rose-600;
+    @apply bg-rose-600;
   }
 
   .glass {

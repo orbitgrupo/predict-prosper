@@ -4,6 +4,7 @@ import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBa
 import { BettingPanel } from '@/components/markets/BettingPanel';
 import { MarketCharts } from '@/components/markets/MarketCharts';
 import { PositionCard } from '@/components/markets/PositionCard';
+import { MarketDetailSkeleton } from '@/components/skeletons';
 import { GameMarketView, isBaseballMarket } from '@/components/markets/GameMarketView';
 import { CommentsSection } from '@/components/markets/CommentsSection';
 import { useMarket, useUserBets, useLiveOptions } from '@/hooks/useMarkets';
@@ -11,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, TrendingUp, Users, Loader2, ImageIcon, Info } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, Users, ImageIcon, Info } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -28,9 +29,7 @@ export default function MarketDetail() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <MarketDetailSkeleton />
       </div>
     );
   }

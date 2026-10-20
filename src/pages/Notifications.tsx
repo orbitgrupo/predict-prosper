@@ -7,7 +7,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Bell, CheckCircle, XCircle, Info, Check } from 'lucide-react';
+import { ListSkeleton } from '@/components/skeletons';
+import { Bell, CheckCircle, XCircle, Info, Check } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -64,9 +65,9 @@ export default function Notifications() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <main className="container mx-auto px-4 py-6 sm:py-8">
+          <ListSkeleton rows={5} />
+        </main>
       </div>
     );
   }
@@ -96,9 +97,7 @@ export default function Notifications() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <ListSkeleton rows={5} />
         ) : !notifications || notifications.length === 0 ? (
           <Card>
             <CardContent className="py-12 sm:py-16 text-center">

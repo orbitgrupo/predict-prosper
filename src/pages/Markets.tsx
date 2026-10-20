@@ -3,8 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { MarketCard } from '@/components/markets/MarketCard';
+import { MarketCardSkeleton } from '@/components/skeletons';
 import { useMarkets } from '@/hooks/useMarkets';
-import { Loader2, SearchX } from 'lucide-react';
+import { SearchX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = ['Todos', 'Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento'];
@@ -57,8 +58,10 @@ export default function Markets() {
         {/* Results */}
         <div className="mt-6">
           {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="grid gap-4 md:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <MarketCardSkeleton key={i} />
+              ))}
             </div>
           ) : filteredMarkets.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">

@@ -4,6 +4,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { ProfileInfo } from '@/components/profile/ProfileInfo';
+import { PageSkeleton } from '@/components/skeletons';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { TransactionHistory } from '@/components/profile/TransactionHistory';
 import { BettingHistory } from '@/components/profile/BettingHistory';
@@ -12,7 +13,7 @@ import { PredictionInsights } from '@/components/profile/PredictionInsights';
 import { ReferralSection } from '@/components/profile/ReferralSection';
 import { WithdrawalSection } from '@/components/profile/WithdrawalSection';
 import { SupportChatSection } from '@/components/profile/SupportChatSection';
-import { Loader2 } from 'lucide-react';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
@@ -30,9 +31,7 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <PageSkeleton />
       </div>
     );
   }

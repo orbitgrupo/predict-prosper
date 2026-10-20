@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { CardRowsSkeleton } from '@/components/skeletons';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -274,9 +275,7 @@ export function WithdrawalSection({ userId }: WithdrawalSectionProps) {
 
       {/* Withdrawal history */}
       {isLoading ? (
-        <div className="flex justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </div>
+        <CardRowsSkeleton rows={3} />
       ) : withdrawals && withdrawals.length > 0 ? (
         <Card>
           <CardHeader>

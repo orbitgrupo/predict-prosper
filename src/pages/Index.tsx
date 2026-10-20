@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/layout/Navbar';
 import { MarketCard } from '@/components/markets/MarketCard';
+import { MarketCardSkeleton } from '@/components/skeletons';
 import { useMarkets } from '@/hooks/useMarkets';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Loader2, Gift, Users, Activity } from 'lucide-react';
+import { TrendingUp, Zap, Shield, BarChart3, ArrowRight, Gift, Users, Activity } from 'lucide-react';
 
 export default function Index() {
   const { data: markets, isLoading } = useMarkets();
@@ -44,16 +45,15 @@ export default function Index() {
       
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-success/5" />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
               Predice el futuro.{' '}
-              <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+              <span className="text-primary">
                 Gana recompensas.
               </span>
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Predice en los eventos del Pais y del mundo real. Política, deportes, tecnología y más. Usa tu conocimiento para ganar.</p>
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">Deportes —incluida la LIDOM—, política, tecnología y los eventos de los que todos hablan. El precio marca la probabilidad en vivo: si aciertas, cada acción ganadora vale $1.</p>
             {!user && promoSettings?.welcome_bonus_enabled && promoSettings.welcome_bonus_amount > 0 &&
           <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                 <Gift className="h-4 w-4" />
@@ -162,8 +162,10 @@ export default function Index() {
             </Link>
           </div>
 
-          {isLoading ? <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          {isLoading ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <MarketCardSkeleton key={i} />
+              ))}
             </div> : activeMarkets.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {activeMarkets.map((market) => <MarketCard key={market.id} market={market} />)}
             </div> : <div className="rounded-xl border bg-card p-12 text-center">
@@ -179,7 +181,7 @@ export default function Index() {
       </section>
 
       {/* CTA */}
-      {!user && <section className="border-t bg-gradient-to-r from-primary/5 via-background to-success/5 py-16 lg:py-24">
+      {!user && <section className="border-t bg-secondary/30 py-16 lg:py-24">
           <div className="container mx-auto px-4 text-center">
             <h2 className="font-display text-2xl font-bold lg:text-3xl">
               ¿Listo para empezar?

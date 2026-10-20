@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowDownLeft, ArrowUpRight, Gift, Loader2, Receipt } from 'lucide-react';
+import { CardRowsSkeleton } from '@/components/skeletons';
+import { ArrowDownLeft, ArrowUpRight, Gift, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -74,8 +75,8 @@ export function TransactionHistory({ userId }: TransactionHistoryProps) {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <CardContent className="py-6">
+          <CardRowsSkeleton rows={4} />
         </CardContent>
       </Card>
     );

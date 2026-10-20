@@ -4,7 +4,8 @@ import { useUserBets } from '@/hooks/useMarkets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Target } from 'lucide-react';
+import { CardRowsSkeleton } from '@/components/skeletons';
+import { Target } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -44,7 +45,7 @@ export function MyPredictions({ userId }: { userId: string }) {
   const losses = settled.filter(r => r.profit < 0).reduce((s, r) => s - r.profit, 0);
   const net = gains - losses;
 
-  if (isLoading) return <Card><CardContent className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></CardContent></Card>;
+  if (isLoading) return <Card><CardContent className="py-6"><CardRowsSkeleton rows={4} /></CardContent></Card>;
 
   return (
     <Card>

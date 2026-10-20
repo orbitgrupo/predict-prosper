@@ -5,10 +5,11 @@ import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBa
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBets } from '@/hooks/useMarkets';
 import { SuggestMarketDialog } from '@/components/dashboard/SuggestMarketDialog';
+import { CardRowsSkeleton, DashboardSkeleton } from '@/components/skeletons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Wallet, TrendingUp, Clock, ArrowRight, Loader2, Trophy, Target } from 'lucide-react';
+import { Wallet, TrendingUp, Clock, ArrowRight, Trophy, Target } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -27,9 +28,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -142,9 +141,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
             {betsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
+              <CardRowsSkeleton rows={3} />
             ) : activeBets.length > 0 ? (
               <div className="space-y-3">
                 {activeBets.slice(0, 5).map((bet: any) => (

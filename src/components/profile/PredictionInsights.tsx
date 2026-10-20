@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useUserBets } from '@/hooks/useMarkets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { CardRowsSkeleton } from '@/components/skeletons';
+
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 
 type Row = { label: string; count: number; staked: number; net: number };
@@ -88,7 +89,7 @@ export function PredictionInsights({ userId }: { userId: string }) {
     };
   }, [bets]);
 
-  if (isLoading) return <Card><CardContent className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></CardContent></Card>;
+  if (isLoading) return <Card><CardContent className="py-6"><CardRowsSkeleton rows={4} /></CardContent></Card>;
   if (!bets?.length) return <Card><CardContent className="py-12 text-center text-muted-foreground">Aún no tienes predicciones para analizar.</CardContent></Card>;
 
   return (

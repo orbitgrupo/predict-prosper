@@ -5,8 +5,9 @@ import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBa
 import { useAuth } from '@/hooks/useAuth';
 import { DocumentUploadSection } from '@/components/profile/DocumentUploadSection';
 import { WithdrawalSection } from '@/components/profile/WithdrawalSection';
+import { PageSkeleton } from '@/components/skeletons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ShieldCheck, Banknote, CheckCircle2, Circle } from 'lucide-react';
+import { ShieldCheck, Banknote, CheckCircle2, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function Step({
@@ -54,9 +55,7 @@ export default function Withdrawals() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <PageSkeleton />
       </div>
     );
   }
