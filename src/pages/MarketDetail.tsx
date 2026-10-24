@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { EmailConfirmationBanner } from '@/components/layout/EmailConfirmationBanner';
@@ -5,6 +6,7 @@ import { BettingPanel } from '@/components/markets/BettingPanel';
 import { MarketCharts } from '@/components/markets/MarketCharts';
 import { PositionCard } from '@/components/markets/PositionCard';
 import { MarketDetailSkeleton } from '@/components/skeletons';
+import { calcPositionValue, optionProbability } from '@/lib/cashout';
 import { GameMarketView, isBaseballMarket } from '@/components/markets/GameMarketView';
 import { CommentsSection } from '@/components/markets/CommentsSection';
 import { useMarket, useUserBets, useLiveOptions } from '@/hooks/useMarkets';
@@ -12,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Clock, TrendingUp, Users, ImageIcon, Info } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Clock, TrendingUp, Users, ImageIcon, Info } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -24,6 +26,7 @@ export default function MarketDetail() {
   const liveOpts = useLiveOptions(market?.id, market?.options ?? []);
 
   const marketBets = userBets?.filter(bet => bet.market_id === id) || [];
+  const [positionsOpen, setPositionsOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -69,6 +72,17 @@ export default function MarketDetail() {
     : 0;
   
   const isExpired = new Date(market.closes_at) < new Date();
+
+  const positionsLive = marketBets.reduce(
+    (s, b) => s + calcPositionValue(
+      Number(b.amount),
+      b.potential_payout ? Number(b.potential_payout) : null,
+      optionProbability(b.option, options),
+    ),
+    0,
+  );
+  const positionsTotal = marketBets.reduce((s, b) => s + Number(b.amount), 0);
+  const positionsPnl = positionsLive - positionsTotal;
 
   return (
     <div className="min-h-screen bg-background">
@@ -233,8 +247,31 @@ export default function MarketDetail() {
             {marketBets.length > 0 && (
               <Card>
                 <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="text-base sm:text-lg">Tus posiciones</CardTitle>
+                  <button
+                    type="button"
+                    onClick={() => setPositionsOpen((v) => !v)}
+                    aria-expanded={positionsOpen}
+                    className="flex w-full items-center justify-between gap-2 text-left"
+                  >
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <span className="font-display text-base font-semibold sm:text-lg">Tus posiciones</span>
+                      <span className="text-xs text-muted-foreground">
+                        {marketBets.length} {marketBets.length === 1 ? 'posición' : 'posiciones'}
+                      </span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="text-sm tabular-nums">
+                        <span className="font-semibold">${positionsLive.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        {' '}
+                        <span className={positionsPnl >= 0 ? 'text-success' : 'text-destructive'}>
+                          ({positionsPnl >= 0 ? '+' : ''}${positionsPnl.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                        </span>
+                      </span>
+                      <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${positionsOpen ? 'rotate-180' : ''}`} />
+                    </span>
+                  </button>
                 </CardHeader>
+                {positionsOpen && (
                 <CardContent className="px-4 sm:px-6">
                   {!(market.allow_cashout ?? true) && market.status === 'active' && (
                     <div className="flex items-start gap-2 rounded-lg bg-muted p-3 mb-3">
@@ -266,6 +303,7 @@ export default function MarketDetail() {
                     ))}
                   </div>
                 </CardContent>
+                )}
               </Card>
             )}
 
