@@ -63,6 +63,9 @@ export function BettingPanel({ market }: BettingPanelProps) {
       ];
 
   const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
+  const hasBets = totalVolume > 0;
+  const favoriteOption = (market as any).favorite_option as string | null;
+  const favoriteProbability = (market as any).favorite_probability as number || 50;
   // Lotería: tablero multi-selección (00-99)
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -145,10 +148,6 @@ export function BettingPanel({ market }: BettingPanelProps) {
     }
     setPlacingAll(false);
   };
-
-  const hasBets = totalVolume > 0;
-  const favoriteOption = (market as any).favorite_option as string | null;
-  const favoriteProbability = (market as any).favorite_probability as number || 50;
 
   const betAmount = parseFloat(amount) || 0;
   const potentialPayout = selectedOption 
