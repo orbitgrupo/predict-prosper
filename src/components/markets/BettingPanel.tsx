@@ -51,6 +51,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
     checkLocation();
   }, []);
 
+  const isLottery = market.category === 'Lotería';
   const hasOptions = market.options && market.options.length > 0;
   const options: OptionLike[] = hasOptions 
     ? market.options.map(o => ({ id: o.id, option_name: o.option_name, total_amount: Number(o.total_amount) }))
@@ -173,7 +174,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Option buttons */}
-        <div className={`grid gap-3 ${options.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className={`grid ${isLottery ? 'grid-cols-5 sm:grid-cols-10 gap-2' : `gap-3 ${options.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}`}>
           {options.map((option) => {
             const percentage = hasBets 
               ? (option.total_amount / totalVolume) * 100 
@@ -188,7 +189,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
               <Button
                 key={option.id}
                 variant={selectedOption === option.option_name ? 'default' : 'outline'}
-                className={`h-16 flex-col gap-1 relative ${
+                className={`${isLottery ? 'h-12 flex-col gap-0' : 'h-16 flex-col gap-1'} relative ${
                   selectedOption === option.option_name
                     ? isYes
                       ? 'bg-yes hover:bg-yes/90 text-yes-foreground'
@@ -206,8 +207,8 @@ export function BettingPanel({ market }: BettingPanelProps) {
                 {isFavorite && (
                   <Star className="absolute top-1 right-1 h-3.5 w-3.5 fill-warning text-warning" />
                 )}
-                <span className="text-lg font-bold">{option.option_name}</span>
-                <span className="text-xs opacity-80">{percentage.toFixed(1)}%</span>
+                <span className={isLottery ? 'text-base font-bold leading-tight' : 'text-lg font-bold'}>{option.option_name}</span>
+                <span className={isLottery ? 'text-[10px] leading-tight opacity-80' : 'text-xs opacity-80'}>{percentage.toFixed(1)}%</span>
               </Button>
             );
           })}

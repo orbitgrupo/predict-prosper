@@ -63,7 +63,7 @@ interface MarketSuggestion {
   profiles?: { email: string; username: string | null };
 }
 
-const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Otro'];
+const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Lotería', 'Otro'];
 
 export function SuggestionsManagement() {
   const { user } = useAuth();

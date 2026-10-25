@@ -64,7 +64,11 @@ export default function MarketDetail() {
         { id: 'no', option_name: 'No', total_amount: Number(market.total_no_amount) }
       ];
   
+  const isLottery = market.category === 'Lotería';
   const totalVolume = options.reduce((sum, opt) => sum + opt.total_amount, 0);
+  const displayOptions = isLottery
+    ? [...options].sort((a, b) => b.total_amount - a.total_amount || a.option_name.localeCompare(b.option_name)).slice(0, 10)
+    : options;
   const topOption = options.reduce((max, opt) => 
     opt.total_amount > max.total_amount ? opt : max, options[0]);
   const topPercentage = totalVolume > 0 
@@ -110,7 +114,7 @@ export default function MarketDetail() {
                   className="h-full w-full object-cover"
                 />
               </div>
-            ) : (
+            ) : isLottery ? null : (
               <div className="aspect-[16/9] w-full bg-muted rounded-xl flex items-center justify-center">
                 <ImageIcon className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/40" />
               </div>
@@ -153,16 +157,16 @@ export default function MarketDetail() {
             </div>
 
             {/* Market Charts */}
-            {!isBaseballMarket(market) && <MarketCharts marketId={market.id} options={options} />}
+            {!isBaseballMarket(market) && !isLottery && <MarketCharts marketId={market.id} options={options} />}
 
             {/* Probability chart */}
             <Card>
               <CardHeader className="px-4 sm:px-6">
-                <CardTitle className="text-base sm:text-lg">Probabilidad actual</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{isLottery ? 'Números más jugados' : 'Probabilidad actual'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 px-4 sm:px-6">
                 <div className="space-y-2">
-                  {options.map((option) => {
+                  {displayOptions.map((option) => {
                     const percentage = totalVolume > 0 
                       ? (option.total_amount / totalVolume) * 100 
                       : 100 / options.length;
@@ -189,6 +193,9 @@ export default function MarketDetail() {
                     );
                   })}
                 </div>
+                {isLottery && (
+                  <p className="text-xs text-muted-foreground pt-1">Mostrando los 10 números con más apuestas de 100. Todos los números están en el panel de predicción.</p>
+                )}
               </CardContent>
             </Card>
 

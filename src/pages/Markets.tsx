@@ -8,7 +8,7 @@ import { useMarkets } from '@/hooks/useMarkets';
 import { SearchX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const CATEGORIES = ['Todos', 'Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento'];
+const CATEGORIES = ['Todos', 'Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Lotería'];
 
 export default function Markets() {
   const { data: markets, isLoading } = useMarkets();

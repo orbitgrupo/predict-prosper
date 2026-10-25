@@ -19,6 +19,7 @@ import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import { SupportChat } from '@/components/admin/SupportChat';
 import { PublishedMarkets } from '@/components/admin/PublishedMarkets';
 import { LidomQuickCreate } from '@/components/admin/LidomQuickCreate';
+import { LotteryQuickCreate } from '@/components/admin/LotteryQuickCreate';
 import { ListSkeleton, PageSkeleton } from '@/components/skeletons';
 
 import { SuggestionsManagement } from '@/components/admin/SuggestionsManagement';
@@ -56,13 +57,14 @@ import {
   UserPlus,
   Gift,
   Star,
-  Trophy
+  Trophy,
+  Dices
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Otro'];
+const CATEGORIES = ['Política', 'Deportes', 'Tecnología', 'Economía', 'Entretenimiento', 'Lotería', 'Otro'];
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -73,6 +75,7 @@ export default function Admin() {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [lidomDialogOpen, setLidomDialogOpen] = useState(false);
+  const [lotteryDialogOpen, setLotteryDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newMarket, setNewMarket] = useState({
     title: '',
@@ -267,15 +270,32 @@ export default function Admin() {
     if (!marketToResolve || !resolveOption) return;
     setResolving(true);
     try {
+      const isLottery = marketToResolve.category === 'Lotería';
+      let rolloverBefore = 0;
+      if (isLottery) {
+        const { data: settings } = await supabase
+          .from('app_settings')
+          .select('lottery_rollover')
+          .eq('id', 'default')
+          .maybeSingle();
+        rolloverBefore = Number((settings as any)?.lottery_rollover ?? 0);
+      }
       const { data, error } = await supabase.rpc('resolve_market', {
         p_market_id: marketToResolve.id,
         p_winning_option: resolveOption,
       });
       if (error) throw error;
-      const result = data as { success: boolean; error?: string };
+      const result = data as { success: boolean; error?: string; rollover?: number };
       if (!result.success) throw new Error(result.error || 'Error al resolver el mercado');
       await logAction('resolve_market', 'market', marketToResolve.id, { winning_option: resolveOption, title: marketToResolve.title });
-      toast({ title: 'Mercado resuelto', description: `El mercado se ha resuelto como "${resolveOption}".` });
+      const rolloverAfter = Number(result.rollover ?? 0);
+      let resolveDesc = `El mercado se ha resuelto como "${resolveOption}".`;
+      if (isLottery && rolloverAfter > 0) {
+        resolveDesc = `Nadie acertó el ${resolveOption}. Pozo acumulado: $${rolloverAfter.toFixed(2)} para el próximo sorteo.`;
+      } else if (isLottery && rolloverBefore > 0) {
+        resolveDesc = `El mercado se ha resuelto como "${resolveOption}". Los ganadores se repartieron el pozo más $${rolloverBefore.toFixed(2)} acumulados.`;
+      }
+      toast({ title: 'Mercado resuelto', description: resolveDesc });
       setResolveDialogOpen(false);
       setMarketToResolve(null);
       setResolveOption(null);
@@ -493,6 +513,22 @@ export default function Admin() {
               </DialogHeader>
               <div className="overflow-y-auto flex-1 pr-2 pt-2">
                 <LidomQuickCreate onCreated={() => setLidomDialogOpen(false)} />
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={lotteryDialogOpen} onOpenChange={setLotteryDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="secondary" className="gap-2 w-full sm:w-auto">
+                <Dices className="h-4 w-4" />
+                Lotería diaria
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[85vh] flex flex-col max-w-[95vw] sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Crear Lotería diaria</DialogTitle>
+              </DialogHeader>
+              <div className="overflow-y-auto flex-1 pr-2 pt-2">
+                <LotteryQuickCreate onCreated={() => setLotteryDialogOpen(false)} />
               </div>
             </DialogContent>
           </Dialog>
@@ -752,16 +788,16 @@ export default function Admin() {
                   automáticamente las ganancias a los apostadores ganadores.
                 </p>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className={(marketToResolve.options?.length ?? 0) > 10 ? 'grid grid-cols-5 gap-2 max-h-[45vh] overflow-y-auto pr-1' : 'grid grid-cols-2 gap-3'}>
                   {marketToResolve.options && marketToResolve.options.length > 0 ? (
                     marketToResolve.options.map((option) => (
                       <Button
                         key={option.id}
                         variant={resolveOption === option.option_name ? 'default' : 'outline'}
-                        className="h-14 sm:h-16 flex-col gap-1 text-sm"
+                        className={(marketToResolve.options?.length ?? 0) > 10 ? 'h-11 text-sm' : 'h-14 sm:h-16 flex-col gap-1 text-sm'}
                         onClick={() => setResolveOption(option.option_name)}
                       >
-                        <CheckCircle className="h-5 w-5" />
+                        {(marketToResolve.options?.length ?? 0) <= 10 && <CheckCircle className="h-5 w-5" />}
                         <span>{option.option_name}</span>
                       </Button>
                     ))
