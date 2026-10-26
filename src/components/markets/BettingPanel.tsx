@@ -85,10 +85,14 @@ export function BettingPanel({ market }: BettingPanelProps) {
     setSelections((prev) => ({ ...prev, [num]: Math.round(((prev[num] ?? 0) + step) * 100) / 100 }));
   };
 
+  // Al subir/bajar el monto en la boleta, el "Monto por número" de arriba
+  // se alinea con el monto de abajo. Si el monto no coincide con ningún
+  // monto rápido, ningún botón queda en azul (se deselecciona solo).
   const adjustSelection = (num: string, delta: number) => {
+    const v = Math.round(((selections[num] ?? 0) + delta) * 100) / 100;
+    if (v >= 1) setSlipAmount(String(v));
     setSelections((prev) => {
       const next = { ...prev };
-      const v = Math.round(((next[num] ?? 0) + delta) * 100) / 100;
       if (v < 1) delete next[num];
       else next[num] = v;
       return next;
