@@ -66,45 +66,39 @@ export function BettingPanel({ market }: BettingPanelProps) {
   const hasBets = totalVolume > 0;
   const favoriteOption = (market as any).favorite_option as string | null;
   const favoriteProbability = (market as any).favorite_probability as number || 50;
-  // Lotería: tablero multi-selección (00-99)
+  // Lotería: UN SOLO monto para todos los números seleccionados.
+  // El monto de arriba, el del círculo del tablero y el de la boleta son
+  // el mismo valor: así las cantidades siempre corresponden.
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [selections, setSelections] = useState<Record<string, number>>({});
+  const [selectedNums, setSelectedNums] = useState<string[]>([]);
   const [slipAmount, setSlipAmount] = useState('10');
   const [placingAll, setPlacingAll] = useState(false);
-  const selectedNumbers = Object.keys(selections).sort();
-  const slipTotal = selectedNumbers.reduce((sum, n) => sum + selections[n], 0);
-  const slipPayout = selectedNumbers.reduce((sum, n) => sum + calculatePotentialPayout(selections[n], n, options), 0);
+  const amountNum = Math.round((parseFloat(slipAmount) || 0) * 100) / 100;
+  const selectedNumbers = [...selectedNums].sort();
+  const slipTotal = Math.round(amountNum * selectedNumbers.length * 100) / 100;
+  const slipPayout = selectedNumbers.reduce((sum, n) => sum + calculatePotentialPayout(amountNum, n, options), 0);
 
   const fmtMoney = (v: number) => (Number.isInteger(v) ? `$${v}` : `$${v.toFixed(2)}`);
 
-  // Tocar un número lo juega con el monto actual; tocarlo de nuevo le aumenta el monto.
+  // Tocar un número lo juega con el monto; tocarlo de nuevo lo quita.
   const handleBoardTap = (num: string) => {
-    const step = Math.round((parseFloat(slipAmount) || 0) * 100) / 100;
-    if (step < 1) return;
-    setSelections((prev) => ({ ...prev, [num]: Math.round(((prev[num] ?? 0) + step) * 100) / 100 }));
+    if (amountNum < 1) return;
+    setSelectedNums((prev) =>
+      prev.includes(num) ? prev.filter((n) => n !== num) : [...prev, num]
+    );
   };
 
-  // Al subir/bajar el monto en la boleta, el "Monto por número" de arriba
-  // se alinea con el monto de abajo. Si el monto no coincide con ningún
-  // monto rápido, ningún botón queda en azul (se deselecciona solo).
-  const adjustSelection = (num: string, delta: number) => {
-    const v = Math.round(((selections[num] ?? 0) + delta) * 100) / 100;
-    if (v >= 1) setSlipAmount(String(v));
-    setSelections((prev) => {
-      const next = { ...prev };
-      if (v < 1) delete next[num];
-      else next[num] = v;
-      return next;
-    });
+  // El monto es único para todos los números: subirlo o bajarlo aquí
+  // cambia el monto de arriba, el de los círculos y el de la boleta a la vez.
+  const adjustAmount = (delta: number) => {
+    const v = Math.round((amountNum + delta) * 100) / 100;
+    if (v < 1) return;
+    setSlipAmount(Number.isInteger(v) ? String(v) : v.toFixed(2));
   };
 
-  const removeSelection = (num: string) => {
-    setSelections((prev) => {
-      const next = { ...prev };
-      delete next[num];
-      return next;
-    });
+  const removeNumber = (num: string) => {
+    setSelectedNums((prev) => prev.filter((n) => n !== num));
   };
 
   // Juega todos los números de la boleta, uno por uno, con su propio monto.
@@ -119,7 +113,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
         p_user_id: user.id,
         p_market_id: market.id,
         p_option: num,
-        p_amount: selections[num],
+        p_amount: amountNum,
       });
       const result = data as { success: boolean; error?: string } | null;
       if (error || !result?.success) {
@@ -132,11 +126,7 @@ export function BettingPanel({ market }: BettingPanelProps) {
       queryClient.invalidateQueries({ queryKey: ['markets'] });
       queryClient.invalidateQueries({ queryKey: ['bets'] });
       refreshProfile();
-      setSelections((prev) => {
-        const next = { ...prev };
-        done.forEach((n) => delete next[n]);
-        return next;
-      });
+      setSelectedNums((prev) => prev.filter((n) => !done.includes(n)));
     }
     if (failed) {
       toast({
@@ -292,15 +282,14 @@ export function BettingPanel({ market }: BettingPanelProps) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Toca un número para jugarlo con este monto. Tócalo de nuevo para aumentarle el monto.
+                Toca un número para jugarlo con este monto. Tócalo de nuevo para quitarlo. El mismo monto aplica a todos tus números.
               </p>
             </div>
 
             {/* Tablero 10x10 */}
             <div className="grid grid-cols-10 gap-1.5 sm:gap-2">
               {options.map((option) => {
-                const amt = selections[option.option_name];
-                const isSelected = amt != null;
+                const isSelected = selectedNums.includes(option.option_name);
                 return (
                   <button
                     key={option.id}
@@ -310,43 +299,53 @@ export function BettingPanel({ market }: BettingPanelProps) {
                   >
                     <span className="text-xs sm:text-sm font-bold leading-none">{option.option_name}</span>
                     {isSelected && (
-                      <span className="mt-0.5 text-[8px] sm:text-[9px] leading-none opacity-90">{fmtMoney(amt)}</span>
+                      <span className="mt-0.5 text-[8px] sm:text-[9px] leading-none opacity-90">{fmtMoney(amountNum)}</span>
                     )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Boleta */}
+            {/* Boleta: un solo monto para todos los números */}
             {selectedNumbers.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Tus números ({selectedNumbers.length})</span>
-                  <button type="button" onClick={() => setSelections({})} className="text-xs text-muted-foreground underline">
+                  <button type="button" onClick={() => setSelectedNums([])} className="text-xs text-muted-foreground underline">
                     Limpiar
                   </button>
                 </div>
-                <div className="space-y-1.5">
+                <div className="flex flex-wrap gap-3">
                   {selectedNumbers.map((num) => (
-                    <div key={num} className="flex items-center gap-2 rounded-lg border px-2 py-1.5">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black text-xs font-bold text-white">{num}</span>
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => adjustSelection(num, -1)}>
-                          -
-                        </Button>
-                        <span className="min-w-[3.5rem] text-center text-sm font-semibold tabular-nums">${selections[num].toFixed(2)}</span>
-                        <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => adjustSelection(num, 1)}>
-                          +
-                        </Button>
-                      </div>
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        Gana ${calculatePotentialPayout(selections[num], num, options).toFixed(2)}
-                      </span>
-                      <button type="button" onClick={() => removeSelection(num)} className="text-muted-foreground hover:text-destructive" aria-label={`Quitar ${num}`}>
-                        <X className="h-4 w-4" />
+                    <div key={num} className="flex flex-col items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => removeNumber(num)}
+                        aria-label={`Quitar ${num}`}
+                        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black text-sm font-bold text-white"
+                      >
+                        {num}
+                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-muted text-muted-foreground ring-2 ring-background">
+                          <X className="h-3 w-3" />
+                        </span>
                       </button>
+                      <span className="text-[10px] leading-none text-muted-foreground">
+                        Gana ${calculatePotentialPayout(amountNum, num, options).toFixed(2)}
+                      </span>
                     </div>
                   ))}
+                </div>
+                <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                  <span className="text-sm text-muted-foreground">Monto por número</span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => adjustAmount(-1)}>
+                      -
+                    </Button>
+                    <span className="min-w-[4rem] text-center text-sm font-semibold tabular-nums">${amountNum.toFixed(2)}</span>
+                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => adjustAmount(1)}>
+                      +
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-1 rounded-lg bg-secondary p-3">
                   <div className="flex justify-between text-sm">

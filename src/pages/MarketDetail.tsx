@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronDown, Clock, TrendingUp, Users, ImageIcon, Info } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Clock, TrendingUp, Users, ImageIcon, Info, Dices } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -74,6 +74,18 @@ export default function MarketDetail() {
   const topPercentage = totalVolume > 0 
     ? (topOption?.total_amount || 0) / totalVolume * 100 
     : 0;
+  // Lotería: solo los números con apuestas reales, top 5.
+  const topPlayed = isLottery
+    ? [...options].filter((o) => o.total_amount > 0).sort((a, b) => b.total_amount - a.total_amount || a.option_name.localeCompare(b.option_name)).slice(0, 5)
+    : [];
+  const maxPlayed = topPlayed.length > 0 ? topPlayed[0].total_amount : 0;
+
+  // Baja suave hasta el tablero de apuestas (el visible: móvil o escritorio).
+  const scrollToBoard = () => {
+    const anchors = Array.from(document.querySelectorAll<HTMLElement>('.betting-panel-anchor'));
+    const visible = anchors.find((el) => el.offsetParent !== null) ?? anchors[0];
+    visible?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   
   const isExpired = new Date(market.closes_at) < new Date();
 
@@ -152,7 +164,7 @@ export default function MarketDetail() {
             </>)}
 
             {/* Mobile betting panel */}
-            <div className="lg:hidden">
+            <div className="betting-panel-anchor lg:hidden">
               <BettingPanel market={{ ...market, options: liveOpts.length > 0 ? liveOpts : market.options }} />
             </div>
 
@@ -165,36 +177,77 @@ export default function MarketDetail() {
                 <CardTitle className="text-base sm:text-lg">{isLottery ? 'Números más jugados' : 'Probabilidad actual'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 px-4 sm:px-6">
-                <div className="space-y-2">
-                  {displayOptions.map((option) => {
-                    const percentage = totalVolume > 0 
-                      ? (option.total_amount / totalVolume) * 100 
-                      : 100 / options.length;
-                    const isYes = option.option_name.toLowerCase() === 'sí' || option.option_name.toLowerCase() === 'yes';
-                    const isNo = option.option_name.toLowerCase() === 'no';
-                    
-                    return (
-                      <div key={option.id} className="space-y-1">
-                        <div className="flex justify-between text-sm font-medium">
-                          <span className={isYes ? 'text-yes' : isNo ? 'text-no' : ''}>
-                            {option.option_name}
-                          </span>
-                          <span className="font-bold">{percentage.toFixed(1)}%</span>
-                        </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-secondary">
-                          <div 
-                            className={`h-full transition-all duration-500 ${
-                              isYes ? 'bg-yes' : isNo ? 'bg-no' : 'bg-primary'
-                            }`}
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
+                {isLottery ? (
+                  topPlayed.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-6 text-center">
+                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black text-white">
+                        <Dices className="h-7 w-7" />
+                      </span>
+                      <p className="font-medium">Aún no hay apuestas en este sorteo</p>
+                      <p className="text-sm text-muted-foreground">Sé el primero en jugar un número.</p>
+                      <Button size="sm" className="mt-1" onClick={scrollToBoard}>
+                        Jugar un número
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-3">
+                        {topPlayed.map((option, i) => {
+                          const pct = totalVolume > 0 ? (option.total_amount / totalVolume) * 100 : 0;
+                          const barPct = maxPlayed > 0 ? Math.max(4, (option.total_amount / maxPlayed) * 100) : 0;
+                          return (
+                            <div key={option.id} className="flex items-center gap-3">
+                              <span className="w-5 shrink-0 text-center text-sm font-bold text-muted-foreground">{i + 1}</span>
+                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-sm font-bold text-white">
+                                {option.option_name}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-baseline justify-between gap-2 text-sm">
+                                  <span className="font-semibold tabular-nums">${option.total_amount.toLocaleString('es-ES')}</span>
+                                  <span className="text-xs text-muted-foreground">{pct.toFixed(1)}% del pozo</span>
+                                </div>
+                                <div className="mt-1 h-2 overflow-hidden rounded-full bg-secondary">
+                                  <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${barPct}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-                {isLottery && (
-                  <p className="text-xs text-muted-foreground pt-1">Mostrando los 10 números con más apuestas de 100. Todos los números están en el panel de predicción.</p>
+                      <p className="text-xs text-muted-foreground pt-1">
+                        Los {topPlayed.length} números con más apuestas de 100.
+                      </p>
+                    </>
+                  )
+                ) : (
+                  <div className="space-y-2">
+                    {displayOptions.map((option) => {
+                      const percentage = totalVolume > 0 
+                        ? (option.total_amount / totalVolume) * 100 
+                        : 100 / options.length;
+                      const isYes = option.option_name.toLowerCase() === 'sí' || option.option_name.toLowerCase() === 'yes';
+                      const isNo = option.option_name.toLowerCase() === 'no';
+                      
+                      return (
+                        <div key={option.id} className="space-y-1">
+                          <div className="flex justify-between text-sm font-medium">
+                            <span className={isYes ? 'text-yes' : isNo ? 'text-no' : ''}>
+                              {option.option_name}
+                            </span>
+                            <span className="font-bold">{percentage.toFixed(1)}%</span>
+                          </div>
+                          <div className="h-3 overflow-hidden rounded-full bg-secondary">
+                            <div 
+                              className={`h-full transition-all duration-500 ${
+                                isYes ? 'bg-yes' : isNo ? 'bg-no' : 'bg-primary'
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -226,7 +279,7 @@ export default function MarketDetail() {
                     <div className="text-center sm:text-left min-w-0">
                       <p className="text-xs text-muted-foreground">Líder</p>
                       <p className="font-display text-sm sm:text-xl font-bold truncate">
-                        {topOption?.option_name} ({topPercentage.toFixed(0)}%)
+                        {totalVolume > 0 ? `${topOption?.option_name} (${topPercentage.toFixed(0)}%)` : '—'}
                       </p>
                     </div>
                   </div>
@@ -345,7 +398,7 @@ export default function MarketDetail() {
 
           {/* Desktop sidebar */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-24">
+            <div className="betting-panel-anchor sticky top-24">
               <BettingPanel market={{ ...market, options: liveOpts.length > 0 ? liveOpts : market.options }} />
             </div>
           </div>
