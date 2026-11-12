@@ -5,7 +5,7 @@ export function BaseballScoreboard({ pk, compact = false }: { pk: number; compac
   const { data: game, isPending, isError, dataUpdatedAt } = useBaseballGame(pk);
   if (!game) return <p role="status" className="py-3 text-center text-xs text-muted-foreground">{isPending ? 'Cargando marcador…' : 'Marcador no disponible'}</p>;
   return (
-    <section aria-label="Marcador oficial MLB" className={compact ? 'mt-3 border-y py-3' : 'border-y px-4 py-4 sm:px-6'}>
+    <section aria-label="Marcador oficial MLB" aria-live="polite" className={compact ? 'mt-3 border-y py-3' : 'border-y px-4 py-4 sm:px-6'}>
       <div className="flex items-center justify-between gap-3 text-xs">
         <span className={game.state === 'Live' ? 'font-semibold text-destructive' : 'font-semibold text-muted-foreground'}>{baseballStatus(game)}</span>
         <span className="text-muted-foreground">MLB</span>
