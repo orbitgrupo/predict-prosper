@@ -335,6 +335,7 @@ export type Database = {
           description: string | null
           favorite_option: string | null
           favorite_probability: number | null
+          game_starts_at: string | null
           id: string
           image_url: string | null
           mlb_game_pk: number | null
@@ -354,6 +355,7 @@ export type Database = {
           description?: string | null
           favorite_option?: string | null
           favorite_probability?: number | null
+          game_starts_at?: string | null
           id?: string
           image_url?: string | null
           mlb_game_pk?: number | null
@@ -373,6 +375,7 @@ export type Database = {
           description?: string | null
           favorite_option?: string | null
           favorite_probability?: number | null
+          game_starts_at?: string | null
           id?: string
           image_url?: string | null
           mlb_game_pk?: number | null
@@ -786,6 +789,17 @@ export type Database = {
           p_withdrawal_id: string
         }
         Returns: Json
+      }
+      publish_baseball_game: {
+        Args: {
+          p_away: string
+          p_closes_at: string
+          p_game_pk: number
+          p_home: string
+          p_image_url?: string
+          p_starts_at: string
+        }
+        Returns: string
       }
       request_withdrawal: {
         Args: {

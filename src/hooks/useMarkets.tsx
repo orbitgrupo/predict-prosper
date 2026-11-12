@@ -27,6 +27,8 @@ export interface Market {
   allow_cashout: boolean;
   favorite_option: string | null;
   favorite_probability: number;
+  mlb_game_pk?: number | null;
+  game_starts_at?: string | null;
   options?: MarketOption[];
 }
 

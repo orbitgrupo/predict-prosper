@@ -3,6 +3,7 @@ import { TrendingUp } from 'lucide-react';
 import { Market } from '@/hooks/useMarkets';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { BaseballScoreboard } from './BaseballScoreboard';
 
 interface MarketCardProps {
   market: Market;
@@ -74,6 +75,8 @@ export function MarketCard({ market }: MarketCardProps) {
           </p>
         </div>
       </div>
+
+      {market.mlb_game_pk && <BaseballScoreboard pk={market.mlb_game_pk} compact />}
 
       {/* Outcome rows */}
       <div className="mt-4 space-y-3">
