@@ -1,11 +1,12 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, it as test } from 'node:test';
+import { strict as assert } from 'node:assert';
 import { baseballRefreshInterval } from './baseball';
 
 describe('Actualización del marcador oficial', () => {
   test('el partido en vivo actualiza cada 10 segundos', () => {
-    expect(baseballRefreshInterval('Live')).toBe(10_000);
+    assert.equal(baseballRefreshInterval('Live'), 10_000);
   });
   test('el resultado final detiene las consultas periódicas', () => {
-    expect(baseballRefreshInterval('Final')).toBe(false);
+    assert.equal(baseballRefreshInterval('Final'), false);
   });
 });
