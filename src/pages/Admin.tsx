@@ -18,6 +18,7 @@ import { DataManagement } from '@/components/admin/DataManagement';
 import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import { SupportChat } from '@/components/admin/SupportChat';
 import { PublishedMarkets } from '@/components/admin/PublishedMarkets';
+import { RealBaseballGames } from '@/components/admin/RealBaseballGames';
 import { LidomQuickCreate } from '@/components/admin/LidomQuickCreate';
 import { LotteryQuickCreate } from '@/components/admin/LotteryQuickCreate';
 import { ListSkeleton, PageSkeleton } from '@/components/skeletons';
@@ -618,6 +619,7 @@ export default function Admin() {
               <TabsTrigger value="support" className="text-xs sm:text-sm">Soporte</TabsTrigger>
               <TabsTrigger value="markets" className="text-xs sm:text-sm">Mercados</TabsTrigger>
               <TabsTrigger value="published" className="text-xs sm:text-sm">Publicados</TabsTrigger>
+              <TabsTrigger value="real-games" className="text-xs sm:text-sm">Partidos reales</TabsTrigger>
               <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Sugerencias</TabsTrigger>
               <TabsTrigger value="withdrawals" className="text-xs sm:text-sm">Retiros</TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm">Usuarios</TabsTrigger>
@@ -640,6 +642,10 @@ export default function Admin() {
 
           <TabsContent value="published" className="mt-4 sm:mt-6">
             <PublishedMarkets />
+          </TabsContent>
+
+          <TabsContent value="real-games" className="mt-4 sm:mt-6">
+            <RealBaseballGames />
           </TabsContent>
 
           <TabsContent value="markets" className="mt-4 sm:mt-6">
