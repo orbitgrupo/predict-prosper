@@ -1,6 +1,6 @@
 import { describe, it as test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { baseballRefreshInterval } from './baseball';
+import { baseballRefreshInterval } from '../src/lib/baseball';
 
 describe('Actualización del marcador oficial', () => {
   test('el partido en vivo actualiza cada 10 segundos', () => {
